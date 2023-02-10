@@ -303,6 +303,11 @@ clear
 		echo ""
 	fi
 	echo "*************************** TOP SCORES ALL TIME ***************************"
+	mapfile fishscorehistory < fishscorehistory.txt
+	IFS=$'\n'
+	fishscorehistory=( $(printf "%s\n" ${fishscorehistory[@]} | sort -rn | head -10) )  ## reverse sort
+	printf '%s\n' "${fishscorehistory[@]}"
+	echo ""
 	echo ""
 	echo ""
 	read -p "Press enter to exit"
