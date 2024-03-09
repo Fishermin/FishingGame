@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Derek's Fishing Game</h1>
+    <div id="output"></div>
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function runGame() {
+            document.getElementById('output').innerHTML = ".... Loading ....";
+            await sleep(2000);
+
+            // Simulate the game logic here
+            // ...
+
+            document.getElementById('output').innerHTML = "Welcome to Derek's Fishing Game. Please enter your name: ";
+            let name = prompt("Please enter your name:");
+            name = name ? name.toLowerCase() : "";
+            name = name.charAt(0).toUpperCase() + name.slice(1); // Capitalize the first letter
+
+            await sleep(2000);
+            document.getElementById('output').innerHTML = `Welcome, ${name}. You lose.`;
+        }
+
+        window.onload = runGame;
+    </script>
+</body>
+</html>
