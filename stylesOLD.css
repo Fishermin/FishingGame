@@ -1,0 +1,23 @@
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 50px;
+}
+
+#display {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+#buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    font-size: 1em;
+    cursor: pointer;
+}

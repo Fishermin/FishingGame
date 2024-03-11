@@ -11,6 +11,9 @@ function chooseOption(option) {
                 case 2:
                     updateDisplay("The water ripples, but nothing bites. Try again.");
                     break;
+                case 3:
+                    updateDisplay("A stray dog is hooked by your jig");
+                        break;
                 // Add more cases for other options
             }
             break;
