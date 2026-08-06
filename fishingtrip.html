@@ -939,13 +939,22 @@
 
       showScreen("action");
       el.continueBtn.classList.add("hidden");
-      el.actionTitle.textContent = "Casting…";
+      el.actionTitle.textContent = "Baiting up…";
       el.actionText.textContent = state.baitFlavor;
+      setScene("Ready the rod", "Read the setup — cast comes next.");
+      resetBobber();
+
+      // Give the player time to read bait dialogue before the cast starts.
+      // Lure text is longer, so hold a bit more.
+      const baitReadMs = bait === 5 ? 4500 : 3200;
+      await sleep(baitReadMs);
+
+      el.actionTitle.textContent = "Casting…";
+      el.actionText.textContent = "You send the line out over the water.";
       setScene("Line out", "The bobber settles on the calm water.");
 
-      resetBobber();
       el.bobber.classList.add("visible");
-      await sleep(700);
+      await sleep(900);
       el.bobber.classList.add("waiting");
       el.ripple.classList.add("active");
 
