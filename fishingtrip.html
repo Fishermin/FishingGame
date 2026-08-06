@@ -609,7 +609,8 @@
     const BAROMETER = ["Rising", "Steady", "Steady", "Falling"];
     const MOON = ["Crescent", "Crescent", "None", "Full"];
 
-    const HELPERS = ["Scott", "Derek", "Riley", "Evan", "Kade", "Ava", "Linda", "Joe", "Ethan", "Dennis", "Jack", "Amanda", "Clara"];
+    // Secondary fishing partner shown in cast narratives (not a rotating name list).
+    const HELPER_NAME = "Derek";
     const LURES = ["Original Rapala", "Jointed Rapala", "SuperDuper", "Swedish Pimple", "Spoon", "Lazy Ike", "RattleTrap", "Lindy-Rig", "Mepps Agilia", "Bucktail Jig", "Silver Minnow", "Daredevil", "Jig and Mr.Twister", "Whopper Plopper", "Hula Popper", "Spinnerbait", "Berkly Flickershad", "Topwater Frog", "Blade Bait", "Jigging Rap", "Husky Jerk", "Beetlespin", "Jawbreaker", "Tube Bait", "Buzzbait", "Chatter Bait", "Panther Martin", "Kastmaster", "Wally Diver"];
     const LURE_COLORS = ["pink and white", "Pink", "White", "Black and Green", "Chartreuse", "Black and Orange", "Silver", "Blue and Black", "Yellow", "Firetiger", "Purple", "Green", "White", "Glowing", "Red and White", "Lime", "Pumpkin", "Chrome", "Gold", "Glowing", "Rusty", "Lucky"];
     const CUT_BAIT = ["Shad Head", "Shad Tail", "Bloody Nugget", "Frozen Herring", "Frozen Sucker", "Garlic Chicken", "Ball of Crawlers"];
@@ -654,7 +655,7 @@
       bestFish: "None yet",
       selectedBait: null,
       baitFlavor: "",
-      helper: "",
+      helper: HELPER_NAME,
       busy: false,
       scoresReturnTo: "welcome",
     };
@@ -843,12 +844,6 @@
       el.conditionFactor.textContent = String(state.conditionFactor);
     }
 
-    function chooseHelper() {
-      let helper = pick(HELPERS);
-      while (helper.toLowerCase() === state.name.toLowerCase()) helper = pick(HELPERS);
-      state.helper = helper;
-    }
-
     function baitNarrative(choice) {
       switch (choice) {
         case 1:
@@ -937,7 +932,6 @@
       if (state.busy || state.selectedBait == null) return;
       state.busy = true;
       hideCatchBanner();
-      chooseHelper();
 
       const bait = state.selectedBait;
       state.baitFlavor = baitNarrative(bait);
@@ -1076,6 +1070,7 @@
 
       state.name = name;
       state.cheat = name === "Cheater";
+      state.helper = HELPER_NAME;
       state.turns = 10;
       state.castNumber = 1;
       state.totalScore = 0;
