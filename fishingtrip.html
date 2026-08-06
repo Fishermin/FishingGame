@@ -928,30 +928,63 @@
       el.ripple.className = "ripple";
     }
 
+    function readingPauseMs(text) {
+      // ~18 chars/sec reading pace, clamped for short/long lines.
+      return Math.min(8000, Math.max(3500, Math.round(String(text).length * 55)));
+    }
+
+    async function presentBaitDialogue(bait) {
+      showScreen("action");
+      el.continueBtn.classList.add("hidden");
+      resetBobber();
+
+      // Lure gets a staged reveal so the chosen lure name is easy to catch.
+      if (bait === 5) {
+        const lureLabel = `${pick(LURE_COLORS)} ${pick(LURES)}`;
+        state.baitFlavor = `You settle on a ${lureLabel} and prepare for a long cast.`;
+
+        el.actionTitle.textContent = "Tackle box…";
+        el.actionText.textContent = "Let's open the tackle box and see what looks lucky…";
+        setScene("Digging for luck", "Rummaging through the trays…");
+        addLog("Let's open the tackle box and see what looks lucky…", "note");
+        await sleep(2200);
+
+        el.actionText.textContent = "Hmm… still looking…";
+        await sleep(1800);
+
+        el.actionTitle.textContent = "Lure locked in";
+        el.actionText.textContent = state.baitFlavor;
+        setScene(lureLabel, "Your pick for this cast — take a second to read it.");
+        addLog(state.baitFlavor, "note");
+        await sleep(Math.max(6000, readingPauseMs(state.baitFlavor)));
+        return lureLabel;
+      }
+
+      state.baitFlavor = baitNarrative(bait);
+      addLog(state.baitFlavor, "note");
+      el.actionTitle.textContent = "Baiting up…";
+      el.actionText.textContent = state.baitFlavor;
+      setScene("Ready the rod", "Read the setup — cast comes next.");
+      await sleep(readingPauseMs(state.baitFlavor));
+      return null;
+    }
+
     async function runCast() {
       if (state.busy || state.selectedBait == null) return;
       state.busy = true;
       hideCatchBanner();
 
       const bait = state.selectedBait;
-      state.baitFlavor = baitNarrative(bait);
-      addLog(state.baitFlavor, "note");
-
-      showScreen("action");
-      el.continueBtn.classList.add("hidden");
-      el.actionTitle.textContent = "Baiting up…";
-      el.actionText.textContent = state.baitFlavor;
-      setScene("Ready the rod", "Read the setup — cast comes next.");
-      resetBobber();
-
-      // Give the player time to read bait dialogue before the cast starts.
-      // Lure text is longer, so hold a bit more.
-      const baitReadMs = bait === 5 ? 4500 : 3200;
-      await sleep(baitReadMs);
+      const lureLabel = await presentBaitDialogue(bait);
 
       el.actionTitle.textContent = "Casting…";
-      el.actionText.textContent = "You send the line out over the water.";
-      setScene("Line out", "The bobber settles on the calm water.");
+      el.actionText.textContent = lureLabel
+        ? `You cast the ${lureLabel}.`
+        : "You send the line out over the water.";
+      setScene(
+        "Line out",
+        lureLabel ? `Fishing a ${lureLabel}.` : "The bobber settles on the calm water."
+      );
 
       el.bobber.classList.add("visible");
       await sleep(900);
@@ -959,7 +992,9 @@
       el.ripple.classList.add("active");
 
       const waitMs = 800 + rand(2200);
-      el.actionText.textContent = "Waiting for a bite…";
+      el.actionText.textContent = lureLabel
+        ? `Waiting for a bite on the ${lureLabel}…`
+        : "Waiting for a bite…";
       await sleep(waitMs);
 
       el.bobber.classList.remove("waiting");
