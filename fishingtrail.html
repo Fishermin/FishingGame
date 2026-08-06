@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fishing Trail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --crt-bg: #050805;
+      --bezel: #2a2a28;
+      --bezel-dark: #141412;
+      --phosphor: #70f070;
+      --phosphor-dim: #3a9a3a;
+      --phosphor-bright: #b8ffb8;
+      --amber: #e6b35c;
+      --water: #1a5c8a;
+      --water-deep: #0d3a5c;
+      --grass: #2d6b2d;
+      --dirt: #8a6a3a;
+      --sky: #5a8ab8;
+      --wagon: #6b4423;
+      --alert: #e05050;
+      --pixel: 4px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #0a0a0a;
+      color: var(--phosphor);
+      font-family: "VT323", "Courier New", monospace;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      background:
+        radial-gradient(ellipse at center, #1a1a18 0%, #050505 70%);
+    }
+
+    .monitor {
+      width: min(920px, 100%);
+      background: linear-gradient(180deg, #3a3a36, var(--bezel) 12%, var(--bezel-dark));
+      border-radius: 18px;
+      padding: 18px 18px 28px;
+      box-shadow:
+        0 0 0 3px #111,
+        0 20px 50px rgba(0, 0, 0, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .screen {
+      position: relative;
+      background: var(--crt-bg);
+      border: 4px solid #111;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
+    }
+
+    .screen::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.15) 0px,
+          rgba(0, 0, 0, 0.15) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      z-index: 5;
+      mix-blend-mode: multiply;
+      animation: flicker 4.5s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 97%, 100% { opacity: 0.55; }
+      98% { opacity: 0.35; }
+      99% { opacity: 0.7; }
+    }
+
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 1rem;
+      justify-content: space-between;
+      padding: 0.45rem 0.65rem;
+      border-bottom: 2px solid var(--phosphor-dim);
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.55rem;
+      line-height: 1.6;
+      color: var(--phosphor-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-bar span b {
+      color: var(--amber);
+      font-weight: 400;
+    }
+
+    .gfx {
+      position: relative;
+      height: clamp(180px, 32vw, 260px);
+      image-rendering: pixelated;
+      border-bottom: 2px solid var(--phosphor-dim);
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--sky) 0 42%, var(--grass) 42% 58%, var(--water) 58% 82%, var(--water-deep) 82% 100%);
+    }
+
+    .gfx.night {
+      background: linear-gradient(180deg, #1a2438 0 42%, #1e3a1e 42% 58%, #143a52 58% 82%, #0a2233 82% 100%);
+    }
+
+    .gfx.storm {
+      background: linear-gradient(180deg, #4a5560 0 42%, #2a4a2a 42% 58%, #1a4058 58% 82%, #0d2840 82% 100%);
+    }
+
+    .pixel-scene {
+      position: absolute;
+      inset: 0;
+      image-rendering: pixelated;
+    }
+
+    /* Blocky landmark-style scene pieces */
+    .sun {
+      position: absolute;
+      top: 12%;
+      right: 14%;
+      width: 28px;
+      height: 28px;
+      background: #f0d060;
+      box-shadow: 0 0 0 4px #d4a820;
+    }
+
+    .bank {
+      position: absolute;
+      left: 0;
+      bottom: 38%;
+      width: 46%;
+      height: 14%;
+      background: var(--dirt);
+      box-shadow: 8px -8px 0 var(--grass);
+    }
+
+    .tree {
+      position: absolute;
+      bottom: 48%;
+      width: 12px;
+      height: 36px;
+      background: #4a3020;
+    }
+
+    .tree::before {
+      content: "";
+      position: absolute;
+      left: -14px;
+      top: -28px;
+      width: 40px;
+      height: 36px;
+      background: #1f6b1f;
+      box-shadow: 0 -10px 0 #228022, 8px -4px 0 #196819;
+    }
+
+    .tree.t1 { left: 8%; }
+    .tree.t2 { left: 22%; height: 28px; }
+    .tree.t2::before { top: -22px; width: 34px; left: -11px; }
+
+    .angler {
+      position: absolute;
+      left: 28%;
+      bottom: 46%;
+      width: 16px;
+      height: 28px;
+      background: #c4a574;
+      box-shadow:
+        0 -10px 0 #2b2b2b,
+        4px 8px 0 #3a4a6a,
+        -4px 8px 0 #3a4a6a,
+        18px -6px 0 2px #888;
+    }
+
+    .wagon {
+      position: absolute;
+      left: 6%;
+      bottom: 50%;
+      width: 54px;
+      height: 28px;
+      background: var(--wagon);
+      box-shadow:
+        0 -12px 0 8px #8b5a2b,
+        -8px 18px 0 6px #222,
+        40px 18px 0 6px #222,
+        58px 4px 0 2px #5a3a1a;
+    }
+
+    .bobber {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #e24a3b;
+      box-shadow: 0 -4px 0 #fff;
+      left: 62%;
+      top: 68%;
+      display: none;
+    }
+
+    .bobber.show { display: block; animation: bob 1.1s steps(2, end) infinite; }
+    .bobber.tug { animation: tug 0.25s steps(2, end) infinite; }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(4px); }
+    }
+
+    @keyframes tug {
+      0%, 100% { transform: translate(-2px, 4px); }
+      50% { transform: translate(2px, -2px); }
+    }
+
+    .ripple-line {
+      position: absolute;
+      left: 54%;
+      top: 72%;
+      width: 70px;
+      height: 2px;
+      background: rgba(184, 255, 184, 0.35);
+      display: none;
+    }
+
+    .ripple-line.show { display: block; animation: ripple 1s steps(3, end) infinite; }
+
+    @keyframes ripple {
+      0% { transform: scaleX(0.4); opacity: 0.8; }
+      100% { transform: scaleX(1.3); opacity: 0; }
+    }
+
+    .landmark-label {
+      position: absolute;
+      left: 50%;
+      top: 8%;
+      transform: translateX(-50%);
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.5rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.35rem 0.5rem;
+      white-space: nowrap;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .console {
+      min-height: 280px;
+      padding: 0.75rem 0.85rem 1rem;
+      font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+      line-height: 1.25;
+      color: var(--phosphor);
+    }
+
+    .title-block {
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .title-block h1 {
+      margin: 0 0 0.5rem;
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(0.7rem, 2.2vw, 1rem);
+      color: var(--phosphor-bright);
+      line-height: 1.5;
+      text-shadow: 0 0 8px rgba(112, 240, 112, 0.35);
+    }
+
+    .title-block .sub {
+      color: var(--amber);
+      font-size: 1.05em;
+    }
+
+    .output {
+      white-space: pre-wrap;
+      margin: 0 0 0.85rem;
+      min-height: 4.5em;
+    }
+
+    .output .good { color: var(--phosphor-bright); }
+    .output .bad { color: var(--alert); }
+    .output .note { color: var(--amber); }
+
+    .menu {
+      margin: 0.5rem 0 0.75rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    .menu li {
+      margin: 0.15rem 0;
+      padding-left: 0.25rem;
+    }
+
+    .menu li::before {
+      content: none;
+    }
+
+    .prompt-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .prompt-label {
+      color: var(--phosphor-bright);
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      background: #000;
+      border: 2px solid var(--phosphor-dim);
+      color: var(--phosphor-bright);
+      font: inherit;
+      font-size: 1.1em;
+      padding: 0.15rem 0.4rem;
+      width: min(220px, 100%);
+      caret-color: var(--phosphor);
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--phosphor);
+      box-shadow: 0 0 0 1px var(--phosphor);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.65rem;
+    }
+
+    button {
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.55rem;
+      line-height: 1.4;
+      padding: 0.65rem 0.75rem;
+      background: #000;
+      color: var(--phosphor);
+      border: 2px solid var(--phosphor-dim);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    button:hover,
+    button:focus {
+      color: var(--crt-bg);
+      background: var(--phosphor);
+      border-color: var(--phosphor-bright);
+      outline: none;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    button.primary:hover,
+    button.primary:focus {
+      background: var(--amber);
+      color: #000;
+    }
+
+    .blink {
+      animation: blink 1.1s steps(1, end) infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .hidden { display: none !important; }
+
+    .footer-links {
+      margin-top: 0.75rem;
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--phosphor-dim);
+    }
+
+    .footer-links a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover { text-decoration: underline; }
+
+    .brand-plate {
+      text-align: center;
+      margin-top: 10px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.45rem;
+      color: #888;
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 560px) {
+      .status-bar { font-size: 0.45rem; gap: 0.25rem 0.6rem; }
+      .console { min-height: 320px; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="monitor">
+    <div class="screen" id="screen">
+      <div class="status-bar" id="statusBar">
+        <span>Angler: <b id="stName">----</b></span>
+        <span>Score: <b id="stScore">0</b></span>
+        <span>Cast: <b id="stCast">--</b></span>
+        <span>Best: <b id="stBest">NONE</b></span>
+      </div>
+
+      <div class="gfx" id="gfx" aria-hidden="true">
+        <div class="pixel-scene">
+          <div class="sun" id="sun"></div>
+          <div class="wagon"></div>
+          <div class="tree t1"></div>
+          <div class="tree t2"></div>
+          <div class="bank"></div>
+          <div class="angler"></div>
+          <div class="bobber" id="bobber"></div>
+          <div class="ripple-line" id="ripple"></div>
+          <div class="landmark-label" id="landmark">Independence Landing</div>
+        </div>
+      </div>
+
+      <div class="console">
+        <div id="panelTitle" class="title-block">
+          <h1>The Fishing Trail</h1>
+          <div class="sub">A lakeside adventure · Apple IIGS style</div>
+        </div>
+
+        <div class="output" id="output" aria-live="polite"></div>
+
+        <ul class="menu hidden" id="menu"></ul>
+
+        <div class="prompt-row hidden" id="promptRow">
+          <span class="prompt-label" id="promptLabel">What is your choice?</span>
+          <input id="choiceInput" type="text" maxlength="24" autocomplete="off" />
+        </div>
+
+        <div class="btn-row" id="btnRow"></div>
+      </div>
+    </div>
+    <div class="brand-plate">FISHING TRAIL · HOMAGE TO 1980s MECC-STYLE TRAIL GAMES</div>
+    <div class="footer-links">
+      <a href="fishingtrip.html">Modern lakeside edition</a>
+      ·
+      <a href="index.html">Home</a>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "dereksFishingTrailScoresV1";
+    const HELPER_NAME = "Derek";
+
+    const SUN = ["Sunny", "Partly Cloudy", "Foggy", "Overcast"];
+    const PRECIP = ["None", "Drizzle", "Rain", "Down Pour"];
+    const WIND = ["Calm", "Light", "Moderate", "Windy", "Gusting"];
+    const BAROMETER = ["Rising", "Steady", "Steady", "Falling"];
+    const MOON = ["Crescent", "Crescent", "None", "Full"];
+
+    const LURES = ["Original Rapala", "Jointed Rapala", "SuperDuper", "Swedish Pimple", "Spoon", "Lazy Ike", "RattleTrap", "Lindy-Rig", "Mepps Agilia", "Bucktail Jig", "Silver Minnow", "Daredevil", "Jig and Mr.Twister", "Whopper Plopper", "Hula Popper", "Spinnerbait", "Berkly Flickershad", "Topwater Frog", "Blade Bait", "Jigging Rap", "Husky Jerk", "Beetlespin", "Jawbreaker", "Tube Bait", "Buzzbait", "Chatter Bait", "Panther Martin", "Kastmaster", "Wally Diver"];
+    const LURE_COLORS = ["pink and white", "Pink", "White", "Black and Green", "Chartreuse", "Black and Orange", "Silver", "Blue and Black", "Yellow", "Firetiger", "Purple", "Green", "White", "Glowing", "Red and White", "Lime", "Pumpkin", "Chrome", "Gold", "Glowing", "Rusty", "Lucky"];
+    const CUT_BAIT = ["Shad Head", "Shad Tail", "Bloody Nugget", "Frozen Herring", "Frozen Sucker", "Garlic Chicken", "Ball of Crawlers"];
+    const PETS = ["Rizzo", "Dixie", "Suzie", "Cooper", "a stray dog", "Wicket", "Henry", "Kezzie", "Rip"];
+    const BIRDS = ["duck", "goose", "eagle", "hawk", "owl", "pelican", "cormorant", "heron", "crane", "swan"];
+    const CRITTERS = ["bear", "otter", "beaver", "mink", "muskrat", "skunk", "racoon", "coyote", "bobcat", "lynx", "cougar", "wood chuck"];
+
+    const FISH = [
+      { name: "Bigmouth Buffalo", lengthFactor: 48, tier: 1 },
+      { name: "Carp", lengthFactor: 32, tier: 1 },
+      { name: "Bullhead", lengthFactor: 20, tier: 1 },
+      { name: "Sheepshead", lengthFactor: 32, tier: 1 },
+      { name: "Longnose Gar", lengthFactor: 40, tier: 1 },
+      { name: "Bluegill", lengthFactor: 13, tier: 1 },
+      { name: "Pike", lengthFactor: 55, tier: 1 },
+      { name: "Largemouth Bass", lengthFactor: 24, tier: 1 },
+      { name: "Crappie", lengthFactor: 18, tier: 1 },
+      { name: "Channel Catfish", lengthFactor: 40, tier: 1 },
+      { name: "Dogfish", lengthFactor: 40, tier: 1 },
+      { name: "Yellow Perch", lengthFactor: 18, tier: 2 },
+      { name: "Flathead Catfish", lengthFactor: 48, tier: 2 },
+      { name: "Eelpout", lengthFactor: 48, tier: 2 },
+      { name: "Smallmouth Bass", lengthFactor: 22, tier: 2 },
+      { name: "Sauger", lengthFactor: 25, tier: 2 },
+      { name: "Walleye", lengthFactor: 34, tier: 2 },
+      { name: "Musky", lengthFactor: 65, tier: 3 },
+      { name: "Lake Sturgeon", lengthFactor: 80, tier: 3 },
+      { name: "Blue Catfish", lengthFactor: 50, tier: 3 },
+    ];
+
+    const CUT_BAIT_BOOST = new Set(["Channel Catfish", "Flathead Catfish", "Blue Catfish", "Musky", "Lake Sturgeon", "Pike"]);
+
+    const LANDMARKS = [
+      "Independence Landing",
+      "Chimney Rock Cove",
+      "Fort Kearny Shore",
+      "Blue River Bank",
+      "Scott's Bluff Hole",
+      "South Pass Pond",
+      "Soda Springs Eddy",
+      "Fort Hall Flat",
+    ];
+
+    const state = {
+      phase: "title",
+      name: "",
+      cheat: false,
+      conditionFactor: 0,
+      conditions: null,
+      turns: 10,
+      castNumber: 1,
+      totalScore: 0,
+      bestScore: 0,
+      bestFish: "NONE",
+      helper: HELPER_NAME,
+      busy: false,
+      menuHandler: null,
+      landmark: LANDMARKS[0],
+    };
+
+    const el = {
+      output: document.getElementById("output"),
+      menu: document.getElementById("menu"),
+      promptRow: document.getElementById("promptRow"),
+      promptLabel: document.getElementById("promptLabel"),
+      choiceInput: document.getElementById("choiceInput"),
+      btnRow: document.getElementById("btnRow"),
+      panelTitle: document.getElementById("panelTitle"),
+      gfx: document.getElementById("gfx"),
+      bobber: document.getElementById("bobber"),
+      ripple: document.getElementById("ripple"),
+      landmark: document.getElementById("landmark"),
+      sun: document.getElementById("sun"),
+      stName: document.getElementById("stName"),
+      stScore: document.getElementById("stScore"),
+      stCast: document.getElementById("stCast"),
+      stBest: document.getElementById("stBest"),
+    };
+
+    function rand(n) { return Math.floor(Math.random() * n); }
+    function pick(arr) { return arr[rand(arr.length)]; }
+    function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+    function formatName(raw) {
+      const trimmed = (raw || "").trim().replace(/\s+/g, " ");
+      if (!trimmed) return "";
+      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+    }
+
+    function updateStatus() {
+      el.stName.textContent = state.name ? state.name.toUpperCase() : "----";
+      el.stScore.textContent = String(state.totalScore);
+      el.stCast.textContent = state.name
+        ? (state.turns > 0 ? `${state.castNumber}/${state.castNumber + state.turns - 1}` : "DONE")
+        : "--";
+      if (state.turns > 0 && state.name) {
+        el.stCast.textContent = `${state.castNumber} (${state.turns} LEFT)`;
+      }
+      el.stBest.textContent = state.bestFish === "NONE" ? "NONE" : state.bestFish.toUpperCase();
+    }
+
+    function setLandmark(name) {
+      state.landmark = name;
+      el.landmark.textContent = name;
+    }
+
+    function setWeatherGfx() {
+      el.gfx.classList.remove("night", "storm");
+      if (!state.conditions) return;
+      if (state.conditions.sun === "Foggy" || state.conditions.moon === "Full") {
+        el.gfx.classList.add("night");
+        el.sun.style.background = "#d0d8e0";
+        el.sun.style.boxShadow = "0 0 0 4px #9aa4b0";
+      } else if (state.conditions.precip !== "None" || state.conditions.wind === "Gusting") {
+        el.gfx.classList.add("storm");
+        el.sun.style.opacity = "0.35";
+      } else {
+        el.sun.style.opacity = "1";
+        el.sun.style.background = "#f0d060";
+        el.sun.style.boxShadow = "0 0 0 4px #d4a820";
+      }
+    }
+
+    function setBobber(mode) {
+      el.bobber.className = "bobber";
+      el.ripple.className = "ripple-line";
+      if (mode === "wait") {
+        el.bobber.classList.add("show");
+        el.ripple.classList.add("show");
+      } else if (mode === "tug") {
+        el.bobber.classList.add("show", "tug");
+        el.ripple.classList.add("show");
+      }
+    }
+
+    function clearUi() {
+      el.menu.classList.add("hidden");
+      el.menu.innerHTML = "";
+      el.promptRow.classList.add("hidden");
+      el.btnRow.innerHTML = "";
+      el.choiceInput.value = "";
+      state.menuHandler = null;
+    }
+
+    function showTitle(show) {
+      el.panelTitle.classList.toggle("hidden", !show);
+    }
+
+    function writeOutput(text, cls) {
+      if (cls) {
+        el.output.innerHTML = `<span class="${cls}">${escapeHtml(text)}</span>`;
+      } else {
+        el.output.textContent = text;
+      }
+    }
+
+    function appendOutput(text, cls) {
+      const span = document.createElement("span");
+      if (cls) span.className = cls;
+      span.textContent = (el.output.textContent ? "\n\n" : "") + text;
+      if (!el.output.textContent) {
+        el.output.textContent = "";
+      }
+      // Rebuild simply for trail readability
+      const current = el.output.textContent;
+      if (cls) {
+        el.output.innerHTML = `${escapeHtml(current)}${current ? "\n\n" : ""}<span class="${cls}">${escapeHtml(text)}</span>`;
+      } else {
+        el.output.textContent = current ? `${current}\n\n${text}` : text;
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function setMenu(options, prompt = "What is your choice?") {
+      el.menu.classList.remove("hidden");
+      el.menu.innerHTML = options
+        .map((opt, i) => `<li>${i + 1}. ${escapeHtml(opt.label)}</li>`)
+        .join("");
+      el.promptRow.classList.remove("hidden");
+      el.promptLabel.textContent = prompt;
+      el.choiceInput.focus();
+      state.menuHandler = (value) => {
+        const n = Number(String(value).trim());
+        if (!Number.isInteger(n) || n < 1 || n > options.length) {
+          writeOutput("That was not one of the choices. Try again.");
+          setMenu(options, prompt);
+          return;
+        }
+        options[n - 1].action();
+      };
+    }
+
+    function setButtons(buttons) {
+      el.btnRow.innerHTML = "";
+      buttons.forEach((b) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = b.label;
+        if (b.primary) btn.classList.add("primary");
+        btn.addEventListener("click", b.action);
+        el.btnRow.appendChild(btn);
+      });
+    }
+
+    function waitForContinue(label = "Press continue") {
+      return new Promise((resolve) => {
+        clearUi();
+        setButtons([{ label: label, primary: true, action: () => resolve() }]);
+      });
+    }
+
+    function loadScores() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveScore(score, name) {
+      if (score <= 0 || state.cheat) return;
+      const list = loadScores();
+      list.push({
+        score,
+        name,
+        when: new Date().toLocaleString(undefined, {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      });
+      list.sort((a, b) => b.score - a.score);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 10)));
+    }
+
+    function generateConditions() {
+      let sun = rand(4);
+      let precip = sun === 0 ? 0 : rand(4);
+      let wind = sun === 2 ? 0 : rand(4);
+      let barometer = rand(4);
+      let moon = rand(4);
+      let factor = (sun + precip + wind + barometer + moon) * 2;
+      let prediction;
+      if (factor <= 5) prediction = "At least if the fish don't bite, it's a nice day for fishing.";
+      else if (factor <= 9) prediction = "Maybe the fish will like these conditions.";
+      else if (factor <= 19) prediction = "I don't love the weather but I think the fish may.";
+      else prediction = "This weather stinks, but I heard the bite is hot. Let's fish.";
+
+      state.conditionFactor = factor;
+      state.conditions = {
+        sun: SUN[sun],
+        precip: PRECIP[precip],
+        wind: WIND[wind],
+        barometer: BAROMETER[barometer],
+        moon: MOON[moon],
+        prediction,
+      };
+      setWeatherGfx();
+    }
+
+    function sizeFromScore(catchscore) {
+      if (catchscore <= 10) return { size: "Tiny", bonus: 0 };
+      if (catchscore <= 30) return { size: "Small", bonus: 0 };
+      if (catchscore <= 50) return { size: "Standard", bonus: 0 };
+      if (catchscore <= 70) return { size: "Decent", bonus: 0 };
+      if (catchscore <= 80) return { size: "Beefy", bonus: 0 };
+      if (catchscore <= 87) return { size: "Big", bonus: 0 };
+      if (catchscore <= 92) return { size: "Huge", bonus: 5 };
+      if (catchscore <= 95) return { size: "Giant", bonus: 10 };
+      if (catchscore <= 98) return { size: "Mammoth", bonus: 15 };
+      return { size: "State Record", bonus: 20 };
+    }
+
+    function formatLength(totalInches) {
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      if (feet <= 0) return `${inches} inches`;
+      if (inches <= 0) return `${feet} feet`;
+      return `${feet} feet, ${inches} inches`;
+    }
+
+    function missMessage(fish, size) {
+      const bird = pick(BIRDS);
+      const critter = pick(CRITTERS);
+      const pet = pick(PETS);
+      const other = pick(FISH).name;
+      const other2 = pick(FISH).name;
+      const helper = state.helper;
+      return pick([
+        "But all you lift out of the water is a heavy log.",
+        "As you remove slack from your line, you realize you've snagged a rock. You break your line while trying to remove it.",
+        `An immense pelican plunges from the sky to grab your ${fish}.`,
+        `Your phone is knocked into the water when ${helper} reaches for your fish with the net.`,
+        `You turn to notice a ${critter} rummaging through your bait cooler. You drop your pole in horror.`,
+        `A ${bird} flies over ${helper} and drops a huge poop on their head. You lose the fish laughing.`,
+        `A low flying ${bird} hits your line and breaks the fish off.`,
+        `An eager ${pet} leaps through your line chasing a ${bird}. Your line breaks.`,
+        "A beaver surfaces, slaps its tail, and your line snaps.",
+        `A drunken pontooner runs over your line and the ${fish} is gone.`,
+        "A birdsnest fills your reel. You cut the wrong line.",
+        "A massive snapping turtle appears by shore. Lure lost.",
+        `${helper} knocks the ${size} ${fish} off the hook with the net.`,
+        `${helper} has cast over your line.`,
+        `The reel handle falls off. The ${fish} escapes.`,
+        `A sizeable ${fish} leaps and throws the hook.`,
+        "Your line wraps in a tree and breaks.",
+        "You forgot to remove the hook protector from the store.",
+        "Your line ends on a far-shore branch and breaks.",
+        `SNAP. The legends about the huge ${fish} here are true.`,
+        "You fight hard, but land only a mass of weeds.",
+        "A wasp nest falls. You run for the wagon.",
+        `${helper} falls in. You break off to help.`,
+        `${pet} bolts after a ${critter}. You ditch the pole.`,
+        `${pet} jumps in after your ${fish}. Line breaks.`,
+        `A small ${other} is stolen by a huge ${other2}.`,
+        `A hungry ${critter} eyes your catch. You drop the rod and run!`,
+      ]);
+    }
+
+    async function baitNarrative(choice) {
+      switch (choice) {
+        case 1:
+          return { text: "You thread on a juicy crawler and eye ripples 30 feet from shore.", label: "WORMS" };
+        case 2: {
+          const color = pick(LURE_COLORS);
+          return { text: `You add a lively fathead to a ${color} jig.`, label: `${color.toUpperCase()} JIG` };
+        }
+        case 3:
+          return { text: "You pry a wriggling leech from the icy bait bin for your slip bobber.", label: "LEECH" };
+        case 4: {
+          const cut = pick(CUT_BAIT);
+          return { text: `You tie a Carolina rig and hook a ${cut}.`, label: cut.toUpperCase() };
+        }
+        case 5: {
+          writeOutput("You open the tackle box and dig for something lucky...");
+          setLandmark("Tackle Box");
+          await sleep(2200);
+          writeOutput("Hmm...");
+          await sleep(1800);
+          const color = pick(LURE_COLORS);
+          const lure = pick(LURES);
+          const label = `${color} ${lure}`;
+          return {
+            text: `You settle on a ${label} and prepare for a long cast.`,
+            label: label.toUpperCase(),
+          };
+        }
+        default:
+          return { text: `${HELPER_NAME} hands you a spare lure.`, label: "SPARE LURE" };
+      }
+    }
+
+    function showTitleScreen() {
+      state.phase = "title";
+      state.name = "";
+      state.totalScore = 0;
+      state.bestScore = 0;
+      state.bestFish = "NONE";
+      state.turns = 10;
+      state.castNumber = 1;
+      state.busy = false;
+      setBobber("off");
+      setLandmark("Independence Landing");
+      el.gfx.classList.remove("night", "storm");
+      el.sun.style.opacity = "1";
+      updateStatus();
+      showTitle(true);
+      clearUi();
+      writeOutput(
+        "Many anglers have traveled these banks.\n\n" +
+        "You must fish for food and glory.\n" +
+        "You will get 10 casts.\n\n" +
+        "Each fish is scored by size and rarity.\n\n" +
+        "What will you do?"
+      );
+      setMenu([
+        { label: "Travel the trail (start fishing)", action: askName },
+        { label: "Check the high score ledger", action: showScores },
+        { label: "Learn about this trek", action: showHelp },
+      ]);
+    }
+
+    function showHelp() {
+      showTitle(false);
+      writeOutput(
+        "THE FISHING TRAIL\n\n" +
+        "An alternate edition of Derek's Fishing Game,\n" +
+        "styled after 1980s trail games on the Apple IIGS.\n\n" +
+        "Numbered menus guide your trip.\n" +
+        "Derek is your fishing partner.\n" +
+        "Bullhead or Sheepshead earn a free cast.\n" +
+        "Cut bait can mean bigger fish — or no fish."
+      );
+      clearUi();
+      setButtons([{ label: "Back to trailhead", primary: true, action: showTitleScreen }]);
+    }
+
+    function showScores() {
+      showTitle(false);
+      const list = loadScores();
+      let text = "TOP SCORES ALL TIME\n\n";
+      if (!list.length) {
+        text += "No scores yet. The fish are winning.";
+      } else {
+        text += list
+          .map((row, i) => `${String(i + 1).padStart(2, " ")}. ${String(row.score).padStart(4, " ")}  ${row.name}  ${row.when}`)
+          .join("\n");
+      }
+      writeOutput(text);
+      clearUi();
+      setButtons([{ label: "Back", primary: true, action: showTitleScreen }]);
+    }
+
+    function askName() {
+      showTitle(false);
+      clearUi();
+      writeOutput("What is the first name of the wagon leader / angler?");
+      el.promptRow.classList.remove("hidden");
+      el.promptLabel.textContent = "Name:";
+      el.choiceInput.focus();
+      state.menuHandler = (value) => {
+        const name = formatName(value);
+        if (!name) {
+          writeOutput("Please enter a name, pioneer.");
+          askName();
+          return;
+        }
+        beginTrip(name);
+      };
+    }
+
+    async function beginTrip(name) {
+      state.name = name;
+      state.cheat = name === "Cheater";
+      state.helper = HELPER_NAME;
+      state.turns = 10;
+      state.castNumber = 1;
+      state.totalScore = 0;
+      state.bestScore = 0;
+      state.bestFish = "NONE";
+      state.busy = false;
+      updateStatus();
+      generateConditions();
+      setLandmark(pick(LANDMARKS));
+
+      clearUi();
+      const c = state.conditions;
+      let intro = state.cheat
+        ? "Cheat mode enabled, you slimeball.\n\n"
+        : `Welcome, ${state.name}.\n\n`;
+      intro +=
+        `You arrive at ${state.landmark}.\n\n` +
+        "TODAY'S CONDITIONS\n" +
+        `  Sun:        ${c.sun}\n` +
+        `  Precip:     ${c.precip}\n` +
+        `  Wind:       ${c.wind}\n` +
+        `  Barometer:  ${c.barometer}\n` +
+        `  Moon:       ${c.moon}\n` +
+        `  Bite factor:${state.conditionFactor}\n\n` +
+        `Derek's prediction:\n${c.prediction}`;
+      writeOutput(intro);
+      await waitForContinue("Continue on the trail");
+      baitMenu();
+    }
+
+    function baitMenu() {
+      if (state.turns <= 0) {
+        endTrip();
+        return;
+      }
+      state.phase = "bait";
+      setBobber("off");
+      updateStatus();
+      showTitle(false);
+      clearUi();
+      writeOutput(
+        `Cast ${state.castNumber} — ${state.turns} remaining\n` +
+        `Landmark: ${state.landmark}\n` +
+        `Partner: ${state.helper}\n\n` +
+        "You may choose your bait:"
+      );
+      setMenu([
+        { label: "Worms", action: () => runCast(1) },
+        { label: "Minnow", action: () => runCast(2) },
+        { label: "Leech", action: () => runCast(3) },
+        { label: "Cut bait (fewer bites, bigger fish)", action: () => runCast(4) },
+        { label: "Try a lure", action: () => runCast(5) },
+      ], "What is your choice?");
+    }
+
+    async function runCast(bait) {
+      if (state.busy) return;
+      state.busy = true;
+      clearUi();
+      showTitle(false);
+
+      const setup = await baitNarrative(bait);
+      writeOutput(setup.text, "note");
+      setLandmark(setup.label);
+      // Hold so the bait/lure line is readable
+      const hold = bait === 5 ? 6500 : Math.min(7000, Math.max(3500, setup.text.length * 55));
+      setButtons([{ label: "Cast now", primary: true, action: () => {} }]);
+      // Auto-continue after read pause, button optional accelerator
+      let skipped = false;
+      const skipPromise = new Promise((resolve) => {
+        el.btnRow.innerHTML = "";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "primary";
+        btn.textContent = "Cast now";
+        btn.addEventListener("click", () => { skipped = true; resolve(); });
+        el.btnRow.appendChild(btn);
+      });
+      await Promise.race([sleep(hold), skipPromise]);
+      clearUi();
+
+      writeOutput(`You cast the ${setup.label.toLowerCase()}...`);
+      setBobber("wait");
+      setLandmark(state.landmark === setup.label ? setup.label : state.landmark);
+      el.landmark.textContent = setup.label;
+      await sleep(1200);
+
+      writeOutput(`Waiting for a bite on the ${setup.label.toLowerCase()}...`);
+      await sleep(900 + rand(1800));
+
+      setBobber("tug");
+      writeOutput("Something's pulling!\nYou start reeling... adjusting the drag...");
+      await sleep(1400);
+
+      const fish = pick(FISH);
+      let catchscore = rand(100) + 1;
+      let { size, bonus } = sizeFromScore(catchscore);
+      let inches = Math.floor((catchscore * fish.lengthFactor) / 100);
+      let cutBaitFail = false;
+      if (bait === 4) {
+        if (CUT_BAIT_BOOST.has(fish.name)) inches = Math.floor(inches * 1.4);
+        else cutBaitFail = true;
+      }
+
+      let fishBiteOn = rand(100) + 1 + state.conditionFactor;
+      if (state.cheat) fishBiteOn = 100;
+      if (cutBaitFail) fishBiteOn = 0;
+      const hooked = fishBiteOn > 60;
+
+      if (hooked) {
+        let fishscore = catchscore * fish.tier + (bonus || 0);
+        let text =
+          `${state.helper} reaches with the net and scoops...\n\n` +
+          `a ${size} ${fish.name}!\n\n` +
+          `Congrats ${state.name}!\n\n` +
+          `Length: ${formatLength(inches)}\n` +
+          `Tier:   ${fish.tier}\n` +
+          `Points: ${fishscore}`;
+        if (fish.name === "Bullhead" || fish.name === "Sheepshead") {
+          state.turns += 1;
+          text += `\n\nFREE CAST unlocked for catching a ${fish.name}!`;
+        }
+        writeOutput(text, "good");
+        setLandmark(`${size} ${fish.name}`.toUpperCase());
+        state.totalScore += fishscore;
+        if (fishscore > state.bestScore) {
+          state.bestScore = fishscore;
+          state.bestFish = `${size} ${fish.name}`;
+        }
+      } else {
+        const miss = missMessage(fish.name, size);
+        writeOutput(`Not this time.\n\n${miss}`, "bad");
+        setBobber("off");
+        setLandmark("LINE WENT SLACK");
+      }
+
+      state.turns -= 1;
+      state.castNumber += 1;
+      updateStatus();
+      state.busy = false;
+
+      await waitForContinue(state.turns > 0 ? "Next cast" : "See final score");
+      if (state.turns > 0) {
+        setLandmark(pick(LANDMARKS));
+        baitMenu();
+      } else {
+        endTrip();
+      }
+    }
+
+    async function endTrip() {
+      state.phase = "end";
+      setBobber("off");
+      setLandmark("Trail's End");
+      updateStatus();
+      clearUi();
+      let text =
+        "==============================\n" +
+        "         TRIP COMPLETE\n" +
+        "==============================\n\n" +
+        `Angler: ${state.name}\n` +
+        `Final score: ${state.totalScore}\n` +
+        `Best fish: ${state.bestFish}\n\n`;
+      if (state.cheat) {
+        text += "Cheaters never win. Your score has been flushed.";
+      } else if (state.totalScore > 0) {
+        saveScore(state.totalScore, state.name);
+        text += "Your score was carved into the ledger.";
+      } else {
+        text += "No points. The river claims another wagon.";
+      }
+      writeOutput(text);
+      setButtons([
+        { label: "Fish again", primary: true, action: () => beginTrip(state.name === "Cheater" ? "Pioneer" : state.name) },
+        { label: "High scores", action: showScores },
+        { label: "Trailhead", action: showTitleScreen },
+      ]);
+    }
+
+    el.choiceInput.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || !state.menuHandler) return;
+      const value = el.choiceInput.value;
+      const handler = state.menuHandler;
+      el.choiceInput.value = "";
+      handler(value);
+    });
+
+    // Seed a small ledger if empty
+    (function seed() {
+      if (loadScores().length) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([
+        { score: 264, name: "Clara", when: "02/01/1985, 07:50 PM" },
+        { score: 167, name: "Ava", when: "02/02/1985, 11:44 AM" },
+        { score: 68, name: "Amanda", when: "02/01/1985, 07:36 PM" },
+      ]));
+    })();
+
+    showTitleScreen();
+  </script>
+</body>
+</html>
