@@ -1,22 +1,1161 @@
-<section class="layout" style="background-color: rgb(169, 151, 124);">
-    <div class="header">1 - This is the header
-        <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Fishing Game</title>
-    </div>
-    <div class="leftSide" style="background-color:rgb(136, 158, 237);">Options:
-        <div id="buttons">
-            <button onclick="chooseOption(1)">Option 1</button>
-            <button onclick="chooseOption(2)">Option 2</button>
-            <button onclick="chooseOption(3)">Option 3</button>
-            <button onclick="chooseOption(4)">Option 4</button>
-            <button onclick="chooseOption(5)">Option 5</button>
-            <button onclick="chooseOption(6)">Option 6</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Derek's Fishing Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --sky: #7eb6d9;
+      --water-deep: #16384a;
+      --water: #1f5a72;
+      --forest: #2a4a38;
+      --mist: rgba(240, 248, 255, 0.55);
+      --wood: #6b4f2c;
+      --wood-light: #c4a574;
+      --foam: #e8f2f6;
+      --ink: #12232c;
+      --accent: #d4a017;
+      --success: #3d7a55;
+      --danger: #8b3a2f;
+      --panel: rgba(18, 35, 44, 0.78);
+      --panel-soft: rgba(232, 242, 246, 0.92);
+      --shadow: 0 18px 50px rgba(8, 20, 28, 0.35);
+      --radius: 14px;
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Figtree", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--foam);
+      font-family: var(--font-body);
+      background: var(--water-deep);
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(14, 32, 42, 0.35) 0%, rgba(14, 32, 42, 0.55) 45%, rgba(10, 24, 32, 0.82) 100%),
+        url("images/Back1.png") center / cover no-repeat fixed;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 40% at 50% 70%, rgba(255, 255, 255, 0.08), transparent 60%),
+        linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.04) 50%, transparent 60%);
+      animation: shimmer 12s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      left: -10%;
+      right: -10%;
+      bottom: 18%;
+      height: 18%;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent, var(--mist), transparent);
+      filter: blur(10px);
+      animation: mistDrift 18s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { opacity: 0.35; transform: translateX(0); }
+      50% { opacity: 0.7; transform: translateX(2%); }
+    }
+
+    @keyframes mistDrift {
+      from { transform: translateX(-4%) translateY(0); opacity: 0.35; }
+      to { transform: translateX(4%) translateY(-8px); opacity: 0.65; }
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bobberDrop {
+      0% { transform: translate(-50%, -120px) scale(0.6); opacity: 0; }
+      55% { transform: translate(-50%, 8px) scale(1.05); opacity: 1; }
+      75% { transform: translate(-50%, -4px) scale(0.98); }
+      100% { transform: translate(-50%, 0) scale(1); }
+    }
+
+    @keyframes bobberWait {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, 5px); }
+    }
+
+    @keyframes tug {
+      0%, 100% { transform: translate(-50%, 0) rotate(0deg); }
+      25% { transform: translate(-48%, 10px) rotate(-8deg); }
+      50% { transform: translate(-52%, -2px) rotate(6deg); }
+      75% { transform: translate(-50%, 8px) rotate(-4deg); }
+    }
+
+    @keyframes scorePop {
+      0% { transform: scale(0.85); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1100px, calc(100% - 1.5rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 2.5rem;
+      animation: riseIn 0.7s ease-out;
+    }
+
+    .brand-bar {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .brand span {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--wood-light);
+      margin-bottom: 0.2rem;
+    }
+
+    .stats {
+      display: flex;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid rgba(232, 242, 246, 0.12);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.85rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: 1.35fr 0.9fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 860px) {
+      .stage { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(232, 242, 246, 0.14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 1.25rem 1.35rem;
+    }
+
+    .panel h2, .panel h3 {
+      font-family: var(--font-display);
+      margin: 0 0 0.65rem;
+      font-weight: 700;
+    }
+
+    .panel p, .log p {
+      margin: 0 0 0.75rem;
+      line-height: 1.5;
+      color: rgba(232, 242, 246, 0.92);
+    }
+
+    .muted { color: rgba(232, 242, 246, 0.7); font-size: 0.92rem; }
+
+    .scene {
+      position: relative;
+      min-height: 340px;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(126, 182, 217, 0.25), rgba(22, 56, 74, 0.15)),
+        url("images/Back1.png") center 40% / cover no-repeat;
+      border: 1px solid rgba(232, 242, 246, 0.2);
+      box-shadow: var(--shadow);
+    }
+
+    .scene-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.1rem;
+      background: linear-gradient(180deg, transparent 35%, rgba(10, 24, 32, 0.72) 100%);
+    }
+
+    .scene-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      margin: 0 0 0.35rem;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+    }
+
+    .bobber {
+      position: absolute;
+      left: 58%;
+      top: 62%;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff 0 18%, #e24a3b 19% 55%, #fff 56% 100%);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.35), 0 8px 16px rgba(0,0,0,0.35);
+      display: none;
+      z-index: 2;
+    }
+
+    .bobber.visible { display: block; animation: bobberDrop 0.7s ease-out forwards; }
+    .bobber.waiting { animation: bobberWait 1.4s ease-in-out infinite; }
+    .bobber.tugging { animation: tug 0.35s ease-in-out infinite; }
+
+    .ripple {
+      position: absolute;
+      left: 58%;
+      top: 62%;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(232, 242, 246, 0.55);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ripple.active {
+      animation: rippleOut 1.6s ease-out infinite;
+    }
+
+    @keyframes rippleOut {
+      0% { width: 12px; height: 12px; opacity: 0.7; }
+      100% { width: 90px; height: 40px; opacity: 0; }
+    }
+
+    .controls { display: grid; gap: 0.85rem; }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--wood-light);
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid rgba(232, 242, 246, 0.22);
+      background: rgba(8, 20, 28, 0.45);
+      color: var(--foam);
+      border-radius: 10px;
+      padding: 0.8rem 0.95rem;
+      font: inherit;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.25);
+    }
+
+    .bait-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+    }
+
+    .bait-btn, .btn {
+      appearance: none;
+      border: 1px solid rgba(232, 242, 246, 0.18);
+      background: rgba(232, 242, 246, 0.08);
+      color: var(--foam);
+      border-radius: 10px;
+      padding: 0.75rem 0.85rem;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      text-align: left;
+    }
+
+    .bait-btn small {
+      display: block;
+      font-weight: 400;
+      font-size: 0.78rem;
+      color: rgba(232, 242, 246, 0.7);
+      margin-top: 0.2rem;
+    }
+
+    .bait-btn:hover, .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(232, 242, 246, 0.14);
+      border-color: rgba(212, 160, 23, 0.55);
+    }
+
+    .bait-btn:disabled, .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .bait-btn.selected {
+      border-color: var(--accent);
+      background: rgba(212, 160, 23, 0.18);
+    }
+
+    .btn {
+      text-align: center;
+      background: linear-gradient(180deg, #e0b33a, #b8860b);
+      color: #1a1408;
+      border: none;
+      font-weight: 700;
+    }
+
+    .btn:hover { background: linear-gradient(180deg, #efc354, #c99514); }
+
+    .btn.secondary {
+      background: rgba(232, 242, 246, 0.1);
+      color: var(--foam);
+      border: 1px solid rgba(232, 242, 246, 0.2);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-row .btn { flex: 1; min-width: 120px; }
+
+    .log {
+      max-height: 280px;
+      overflow: auto;
+      display: grid;
+      gap: 0.55rem;
+      padding-right: 0.25rem;
+    }
+
+    .log-entry {
+      padding: 0.7rem 0.8rem;
+      border-radius: 10px;
+      background: rgba(8, 20, 28, 0.4);
+      border-left: 3px solid rgba(232, 242, 246, 0.25);
+      animation: riseIn 0.35s ease-out;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .log-entry.good { border-left-color: var(--success); }
+    .log-entry.bad { border-left-color: var(--danger); }
+    .log-entry.note { border-left-color: var(--accent); }
+
+    .conditions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      margin: 0.75rem 0 1rem;
+    }
+
+    .chip {
+      background: rgba(8, 20, 28, 0.4);
+      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.88rem;
+    }
+
+    .chip b {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--wood-light);
+      margin-bottom: 0.15rem;
+      font-weight: 600;
+    }
+
+    .scoreboard {
+      margin-top: 1rem;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .score-table th,
+    .score-table td {
+      text-align: left;
+      padding: 0.45rem 0.35rem;
+      border-bottom: 1px solid rgba(232, 242, 246, 0.12);
+    }
+
+    .score-table th {
+      color: var(--wood-light);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .catch-banner {
+      display: none;
+      margin-top: 0.85rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: rgba(61, 122, 85, 0.28);
+      border: 1px solid rgba(61, 122, 85, 0.55);
+      animation: scorePop 0.45s ease-out;
+    }
+
+    .catch-banner.show { display: block; }
+
+    .catch-banner strong {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .hidden { display: none !important; }
+
+    .footer-note {
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: rgba(232, 242, 246, 0.65);
+      text-align: center;
+    }
+
+    .species-ref {
+      font-size: 0.82rem;
+      color: rgba(232, 242, 246, 0.72);
+      columns: 2;
+      gap: 1rem;
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    @media (max-width: 560px) {
+      .bait-grid { grid-template-columns: 1fr; }
+      .conditions { grid-template-columns: 1fr; }
+      .species-ref { columns: 1; }
+      .scene { min-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="brand-bar">
+      <h1 class="brand"><span>Lakeside Trip</span>Derek's Fishing Game</h1>
+      <div class="stats hidden" id="hud">
+        <div class="stat">Angler: <strong id="hudName">—</strong></div>
+        <div class="stat">Score: <strong id="hudScore">0</strong></div>
+        <div class="stat">Cast: <strong id="hudCast">1 / 10</strong></div>
+        <div class="stat">Best: <strong id="hudBest">None yet</strong></div>
+      </div>
+    </header>
+
+    <div class="stage">
+      <section class="scene" aria-live="polite">
+        <div class="bobber" id="bobber" aria-hidden="true"></div>
+        <div class="ripple" id="ripple" aria-hidden="true"></div>
+        <div class="scene-overlay">
+          <h2 class="scene-title" id="sceneTitle">Dawn on the lake</h2>
+          <p class="muted" id="sceneSub">Enter your name and check the weather before your first cast.</p>
+          <div class="catch-banner" id="catchBanner"></div>
         </div>
+      </section>
+
+      <aside class="controls">
+        <!-- Welcome -->
+        <section class="panel" id="screenWelcome">
+          <h2>Welcome, angler</h2>
+          <p class="muted">You'll get 10 casts. Each fish is scored by size and rarity. Beat the weather — and the odd pelican.</p>
+          <div class="field">
+            <label for="nameInput">Your name</label>
+            <input id="nameInput" type="text" maxlength="24" placeholder="e.g. Riley" autocomplete="nickname" />
+          </div>
+          <div class="btn-row" style="margin-top: 0.85rem;">
+            <button class="btn" id="startBtn" type="button">Start trip</button>
+            <button class="btn secondary" id="showScoresBtn" type="button">Top scores</button>
+          </div>
+        </section>
+
+        <!-- Conditions -->
+        <section class="panel hidden" id="screenConditions">
+          <h2>Today's conditions</h2>
+          <div class="conditions" id="conditionChips"></div>
+          <p id="predictionText" class="note"></p>
+          <p class="muted">Condition factor: <strong id="conditionFactor">0</strong> — higher means more bites.</p>
+          <button class="btn" id="beginFishingBtn" type="button">Get fishing</button>
+        </section>
+
+        <!-- Bait -->
+        <section class="panel hidden" id="screenBait">
+          <h2>Pick your bait</h2>
+          <p class="muted" id="castIntro">Cast 1 of 10 — choose carefully.</p>
+          <div class="bait-grid" id="baitGrid">
+            <button class="bait-btn" data-bait="1" type="button">Worms<small>Juicy crawler, reliable bite</small></button>
+            <button class="bait-btn" data-bait="2" type="button">Minnow<small>Fathead on a colored jig</small></button>
+            <button class="bait-btn" data-bait="3" type="button">Leech<small>Under a slip bobber</small></button>
+            <button class="bait-btn" data-bait="4" type="button">Cut bait<small>Fewer bites, bigger fish</small></button>
+            <button class="bait-btn" data-bait="5" type="button">Lure<small>Dig through the tackle box</small></button>
+          </div>
+          <button class="btn" id="castBtn" type="button" style="margin-top: 0.85rem; width: 100%;" disabled>Cast</button>
+        </section>
+
+        <!-- Waiting / result advance -->
+        <section class="panel hidden" id="screenAction">
+          <h2 id="actionTitle">Casting…</h2>
+          <p id="actionText" class="muted">Watch the bobber.</p>
+          <button class="btn hidden" id="continueBtn" type="button" style="width: 100%;">Continue</button>
+        </section>
+
+        <!-- End -->
+        <section class="panel hidden" id="screenEnd">
+          <h2>Trip complete</h2>
+          <p id="endSummary"></p>
+          <p class="muted" id="endBest"></p>
+          <div class="btn-row">
+            <button class="btn" id="playAgainBtn" type="button">Fish again</button>
+            <button class="btn secondary" id="endScoresBtn" type="button">Top scores</button>
+          </div>
+        </section>
+
+        <!-- Scores -->
+        <section class="panel hidden" id="screenScores">
+          <h2>Top scores</h2>
+          <p class="muted">Saved on this device (browser local storage).</p>
+          <div class="scoreboard">
+            <table class="score-table">
+              <thead>
+                <tr><th>Score</th><th>Angler</th><th>When</th></tr>
+              </thead>
+              <tbody id="scoreBody"></tbody>
+            </table>
+          </div>
+          <button class="btn secondary" id="backFromScoresBtn" type="button" style="margin-top: 0.85rem; width: 100%;">Back</button>
+        </section>
+      </aside>
     </div>
-    <div class="body">This is the Center <Section></Section> 
-        <img src="images/Back1.png" class="unselected" /></div>
-    <div class="rightSide" style="background-color:rgb(122, 174, 131);">4- this is the right hand pane</div>
-    <div class="footer" style="background-color:rgb(192, 172, 178);">5- this is the footer</div>
-  </section>
+
+    <section class="panel" style="margin-top: 1rem;">
+      <h3>Trip log</h3>
+      <div class="log" id="log" aria-live="polite"></div>
+    </section>
+
+    <details class="panel" style="margin-top: 1rem;">
+      <summary style="cursor: pointer; font-family: var(--font-display); font-size: 1.1rem;">Fish classes &amp; tiers</summary>
+      <p class="muted" style="margin-top: 0.75rem;">Tier 1 ×1 · Tier 2 ×2 · Tier 3 ×3</p>
+      <ul class="species-ref">
+        <li>Bigmouth Buffalo, Carp, Bullhead, Sheepshead, Longnose Gar, Bluegill, Pike, Largemouth Bass, Crappie, Channel Catfish, Dogfish — Tier 1</li>
+        <li>Yellow Perch, Flathead Catfish, Eelpout, Smallmouth Bass, Sauger, Walleye — Tier 2</li>
+        <li>Musky, Lake Sturgeon, Blue Catfish — Tier 3</li>
+      </ul>
+      <p class="muted">Bullhead or Sheepshead unlock a free extra cast. Cut bait favors big cats, musky, sturgeon, and pike — but often fails on other species.</p>
+    </details>
+
+    <p class="footer-note">Web port of Derek's bash fishing game · High scores stay in your browser</p>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "dereksFishingScoresV1";
+
+    const SUN = ["Sunny", "Partly Cloudy", "Foggy", "Overcast"];
+    const PRECIP = ["None", "Drizzle", "Rain", "Down Pour"];
+    const WIND = ["Calm", "Light", "Moderate", "Windy", "Gusting"];
+    const BAROMETER = ["Rising", "Steady", "Steady", "Falling"];
+    const MOON = ["Crescent", "Crescent", "None", "Full"];
+
+    const HELPERS = ["Scott", "Derek", "Riley", "Evan", "Kade", "Ava", "Linda", "Joe", "Ethan", "Dennis", "Jack", "Amanda", "Clara"];
+    const LURES = ["Original Rapala", "Jointed Rapala", "SuperDuper", "Swedish Pimple", "Spoon", "Lazy Ike", "RattleTrap", "Lindy-Rig", "Mepps Agilia", "Bucktail Jig", "Silver Minnow", "Daredevil", "Jig and Mr.Twister", "Whopper Plopper", "Hula Popper", "Spinnerbait", "Berkly Flickershad", "Topwater Frog", "Blade Bait", "Jigging Rap", "Husky Jerk", "Beetlespin", "Jawbreaker", "Tube Bait", "Buzzbait", "Chatter Bait", "Panther Martin", "Kastmaster", "Wally Diver"];
+    const LURE_COLORS = ["pink and white", "Pink", "White", "Black and Green", "Chartreuse", "Black and Orange", "Silver", "Blue and Black", "Yellow", "Firetiger", "Purple", "Green", "White", "Glowing", "Red and White", "Lime", "Pumpkin", "Chrome", "Gold", "Glowing", "Rusty", "Lucky"];
+    const CUT_BAIT = ["Shad Head", "Shad Tail", "Bloody Nugget", "Frozen Herring", "Frozen Sucker", "Garlic Chicken", "Ball of Crawlers"];
+    const PETS = ["Rizzo", "Dixie", "Suzie", "Cooper", "a stray dog", "Wicket", "Henry", "Kezzie", "Rip"];
+    const BIRDS = ["duck", "goose", "eagle", "hawk", "owl", "pelican", "cormorant", "heron", "crane", "swan"];
+    const CRITTERS = ["bear", "otter", "beaver", "mink", "muskrat", "skunk", "racoon", "coyote", "bobcat", "lynx", "cougar", "wood chuck"];
+
+    const FISH = [
+      { name: "Bigmouth Buffalo", lengthFactor: 48, tier: 1 },
+      { name: "Carp", lengthFactor: 32, tier: 1 },
+      { name: "Bullhead", lengthFactor: 20, tier: 1 },
+      { name: "Sheepshead", lengthFactor: 32, tier: 1 },
+      { name: "Longnose Gar", lengthFactor: 40, tier: 1 },
+      { name: "Bluegill", lengthFactor: 13, tier: 1 },
+      { name: "Pike", lengthFactor: 55, tier: 1 },
+      { name: "Largemouth Bass", lengthFactor: 24, tier: 1 },
+      { name: "Crappie", lengthFactor: 18, tier: 1 },
+      { name: "Channel Catfish", lengthFactor: 40, tier: 1 },
+      { name: "Dogfish", lengthFactor: 40, tier: 1 },
+      { name: "Yellow Perch", lengthFactor: 18, tier: 2 },
+      { name: "Flathead Catfish", lengthFactor: 48, tier: 2 },
+      { name: "Eelpout", lengthFactor: 48, tier: 2 },
+      { name: "Smallmouth Bass", lengthFactor: 22, tier: 2 },
+      { name: "Sauger", lengthFactor: 25, tier: 2 },
+      { name: "Walleye", lengthFactor: 34, tier: 2 },
+      { name: "Musky", lengthFactor: 65, tier: 3 },
+      { name: "Lake Sturgeon", lengthFactor: 80, tier: 3 },
+      { name: "Blue Catfish", lengthFactor: 50, tier: 3 },
+    ];
+
+    const CUT_BAIT_BOOST = new Set(["Channel Catfish", "Flathead Catfish", "Blue Catfish", "Musky", "Lake Sturgeon", "Pike"]);
+
+    const state = {
+      name: "",
+      cheat: false,
+      conditionFactor: 0,
+      conditions: null,
+      turns: 10,
+      castNumber: 1,
+      totalScore: 0,
+      bestScore: 0,
+      bestFish: "None yet",
+      selectedBait: null,
+      baitFlavor: "",
+      helper: "",
+      busy: false,
+      scoresReturnTo: "welcome",
+    };
+
+    const el = {
+      hud: document.getElementById("hud"),
+      hudName: document.getElementById("hudName"),
+      hudScore: document.getElementById("hudScore"),
+      hudCast: document.getElementById("hudCast"),
+      hudBest: document.getElementById("hudBest"),
+      sceneTitle: document.getElementById("sceneTitle"),
+      sceneSub: document.getElementById("sceneSub"),
+      catchBanner: document.getElementById("catchBanner"),
+      bobber: document.getElementById("bobber"),
+      ripple: document.getElementById("ripple"),
+      log: document.getElementById("log"),
+      nameInput: document.getElementById("nameInput"),
+      castIntro: document.getElementById("castIntro"),
+      castBtn: document.getElementById("castBtn"),
+      actionTitle: document.getElementById("actionTitle"),
+      actionText: document.getElementById("actionText"),
+      continueBtn: document.getElementById("continueBtn"),
+      conditionChips: document.getElementById("conditionChips"),
+      predictionText: document.getElementById("predictionText"),
+      conditionFactor: document.getElementById("conditionFactor"),
+      endSummary: document.getElementById("endSummary"),
+      endBest: document.getElementById("endBest"),
+      scoreBody: document.getElementById("scoreBody"),
+      screens: {
+        welcome: document.getElementById("screenWelcome"),
+        conditions: document.getElementById("screenConditions"),
+        bait: document.getElementById("screenBait"),
+        action: document.getElementById("screenAction"),
+        end: document.getElementById("screenEnd"),
+        scores: document.getElementById("screenScores"),
+      },
+    };
+
+    function rand(n) {
+      return Math.floor(Math.random() * n);
+    }
+
+    function pick(arr) {
+      return arr[rand(arr.length)];
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function formatName(raw) {
+      const trimmed = (raw || "").trim().replace(/\s+/g, " ");
+      if (!trimmed) return "";
+      return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+    }
+
+    function showScreen(name) {
+      Object.entries(el.screens).forEach(([key, node]) => {
+        node.classList.toggle("hidden", key !== name);
+      });
+    }
+
+    function updateHud() {
+      el.hud.classList.toggle("hidden", !state.name);
+      el.hudName.textContent = state.name || "—";
+      el.hudScore.textContent = String(state.totalScore);
+      el.hudCast.textContent = state.turns > 0
+        ? `#${state.castNumber} · ${state.turns} left`
+        : "Done";
+      if (state.bestFish === "None yet") {
+        el.hudBest.textContent = "None yet";
+      } else {
+        const match = state.bestFish.match(/^Fish:\s*(.+)\s+Size:\s*(.+)\s+Points:\s*(\d+)/);
+        el.hudBest.textContent = match ? `${match[2]} ${match[1]}` : state.bestFish;
+      }
+    }
+
+    function setScene(title, sub) {
+      el.sceneTitle.textContent = title;
+      el.sceneSub.textContent = sub;
+    }
+
+    function hideCatchBanner() {
+      el.catchBanner.classList.remove("show");
+      el.catchBanner.innerHTML = "";
+    }
+
+    function showCatchBanner(html) {
+      el.catchBanner.innerHTML = html;
+      el.catchBanner.classList.add("show");
+    }
+
+    function addLog(message, kind = "note") {
+      const entry = document.createElement("div");
+      entry.className = `log-entry ${kind}`;
+      entry.textContent = message;
+      el.log.prepend(entry);
+    }
+
+    function loadScores() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveScore(score, name) {
+      if (score <= 0 || state.cheat) return;
+      const list = loadScores();
+      list.push({
+        score,
+        name,
+        when: new Date().toLocaleString(undefined, {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      });
+      list.sort((a, b) => b.score - a.score);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 10)));
+    }
+
+    function renderScores() {
+      const list = loadScores();
+      el.scoreBody.innerHTML = "";
+      if (!list.length) {
+        el.scoreBody.innerHTML = `<tr><td colspan="3">No scores yet — go catch something.</td></tr>`;
+        return;
+      }
+      list.forEach((row) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.score}</td><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.when)}</td>`;
+        el.scoreBody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function generateConditions() {
+      let sun = rand(4);
+      let precip = sun === 0 ? 0 : rand(4);
+      let wind = sun === 2 ? 0 : rand(4);
+      let barometer = rand(4);
+      let moon = rand(4);
+      let factor = (sun + precip + wind + barometer + moon) * 2;
+
+      let prediction;
+      if (factor <= 5) prediction = "At least if the fish don't bite, it's a nice day for fishing.";
+      else if (factor <= 9) prediction = "Maybe the fish will like these conditions.";
+      else if (factor <= 19) prediction = "I don't love the weather but I think the fish may.";
+      else prediction = "This weather stinks, but I heard the bite is hot. Let's fish.";
+
+      state.conditionFactor = factor;
+      state.conditions = {
+        sun: SUN[sun],
+        precip: PRECIP[precip],
+        wind: WIND[wind],
+        barometer: BAROMETER[barometer],
+        moon: MOON[moon],
+        prediction,
+      };
+    }
+
+    function renderConditions() {
+      const c = state.conditions;
+      el.conditionChips.innerHTML = `
+        <div class="chip"><b>Sun</b>${c.sun}</div>
+        <div class="chip"><b>Precip</b>${c.precip}</div>
+        <div class="chip"><b>Wind</b>${c.wind}</div>
+        <div class="chip"><b>Barometer</b>${c.barometer}</div>
+        <div class="chip"><b>Moon</b>${c.moon}</div>
+        <div class="chip"><b>Bite outlook</b>${state.conditionFactor}</div>
+      `;
+      el.predictionText.textContent = `Derek's prediction: ${c.prediction}`;
+      el.conditionFactor.textContent = String(state.conditionFactor);
+    }
+
+    function chooseHelper() {
+      let helper = pick(HELPERS);
+      while (helper.toLowerCase() === state.name.toLowerCase()) helper = pick(HELPERS);
+      state.helper = helper;
+    }
+
+    function baitNarrative(choice) {
+      switch (choice) {
+        case 1:
+          return "You thread on a juicy crawler and eye some ripples 30 feet from shore.";
+        case 2:
+          return `You add a lively fathead to a ${pick(LURE_COLORS)} jig and swing your rod behind you.`;
+        case 3:
+          return "You pry a wriggling leech from the icy bait bin, and add it to a hook below your slip bobber.";
+        case 4:
+          return `You tie on a Carolina rig, complete with a 6oz weight, and shove a large circle hook through a ${pick(CUT_BAIT)}.`;
+        case 5:
+          return `After digging through your tackle a while, you settle on a ${pick(LURE_COLORS)} ${pick(LURES)} and prepare for a long cast.`;
+        default:
+          return `${state.helper} suggests you try a ${pick(LURE_COLORS)} ${pick(LURES)}, so you tie it on.`;
+      }
+    }
+
+    function sizeFromScore(catchscore) {
+      if (catchscore <= 10) return { size: "Tiny", bonus: 0 };
+      if (catchscore <= 30) return { size: "Small", bonus: 0 };
+      if (catchscore <= 50) return { size: "Standard", bonus: 0 };
+      if (catchscore <= 70) return { size: "Decent", bonus: 0 };
+      if (catchscore <= 80) return { size: "Beefy", bonus: 0 };
+      if (catchscore <= 87) return { size: "Big", bonus: 0 };
+      if (catchscore <= 92) return { size: "Huge", bonus: 5 };
+      if (catchscore <= 95) return { size: "Giant", bonus: 10 };
+      if (catchscore <= 98) return { size: "Mammoth", bonus: 15 };
+      return { size: "State Record", bonus: 20 };
+    }
+
+    function formatLength(totalInches) {
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      const inchLabel = inches === 1 ? "inch" : "inches";
+      const footLabel = feet === 1 ? "foot" : "feet";
+      if (feet <= 0) return `${inches} ${inchLabel}`;
+      if (inches <= 0) return `${feet} ${footLabel}`;
+      return `${feet} ${footLabel}, ${inches} ${inchLabel}`;
+    }
+
+    function missMessage(fish, size) {
+      const bird = pick(BIRDS);
+      const critter = pick(CRITTERS);
+      const pet = pick(PETS);
+      const other = pick(FISH).name;
+      const other2 = pick(FISH).name;
+      const helper = state.helper;
+      const options = [
+        "But all you lift out of the water is a heavy log.",
+        "As you remove slack from your line, you realize you've snagged a rock. You break your line while trying to remove it.",
+        `An immense pelican plunges from the sky to grab your ${fish}.`,
+        `Your phone is knocked into the water when ${helper} reaches for your fish with the net. Your focus shifts to the descending device.`,
+        `You turn to notice a ${critter} rummaging through your bait cooler. You drop your pole in horror.`,
+        `A ${bird} flies over your fishing partner ${helper}, and drops a huge poop on their head. You drop your pole in laughter and lose the fish.`,
+        `A low flying ${bird} doesn't notice your line and flies into it, breaking your fish off immediately.`,
+        `An eager ${pet} leaps into the water and through your line, chasing a nearby ${bird}. Your line breaks.`,
+        "A beaver suddenly surfaces, slaps its tail, swims off, and your line breaks violently.",
+        `A ${fish} leaps far from shore, just before a drunken pontooner runs over your line and breaks it off.`,
+        "You start reeling only to notice a massive birdsnest in your reel. As you try to free it, you cut the wrong line and the fish swims off.",
+        "You get your catch next to shore only to notice a massive snapping turtle. You free the turtle, but your lure is lost.",
+        `${helper} reaches out with the net and scoops… but the feeble attempt only knocks the ${size} ${fish} off the hook.`,
+        `Your eyes follow your taut line only to realize that ${helper} has cast over it.`,
+        `And the handle falls off your reel. You try to pull the ${fish} in by hand but without success.`,
+        `A sizeable ${fish} leaps from the water and throws your hook.`,
+        "Your line gets wrapped in the tree next to you and you're unable to remove it. Your line breaks.",
+        `A massive ${fish} flops off your hook next to shore. You inspect your hook to realize you forgot to remove the hook protector from the store.`,
+        "Your eyes follow your line all the way to a tree branch on the far shore. You bounce and pull your line, until it breaks.",
+        `But your line continues to pull as you tighten the drag until… SNAP. It's gone. The legends about the huge ${fish} at this spot are true.`,
+        "You pull, fighting an immense force, but it is just a huge mass of weeds.",
+        "A wasp nest falls from the tree next to you, and you are suddenly attacked by a swarm of hornets and have no choice but to run to the truck.",
+        `${helper} falls in the water while trying to help with the net. You have no choice but to break off your line and help instead.`,
+        `Suddenly ${pet} bolts, chasing a ${critter} out of a bush nearby. You ditch your pole to give chase. ${pet}, get your butt back here!`,
+        `You hear a loud splash. ${pet} has jumped in after your ${fish}. Thankfully, your line breaks before they reach it.`,
+        `You fight a small ${other} all the way to shore, but a huge ${other2} grabs it before you can retrieve it, and snaps your line.`,
+        `A huge ${fish} leaps from the water, but a hungry ${critter} emerges from the bushes and eyes your catch. You drop your rod and run!`,
+      ];
+      return pick(options);
+    }
+
+    function resetBobber() {
+      el.bobber.className = "bobber";
+      el.ripple.className = "ripple";
+    }
+
+    async function runCast() {
+      if (state.busy || state.selectedBait == null) return;
+      state.busy = true;
+      hideCatchBanner();
+      chooseHelper();
+
+      const bait = state.selectedBait;
+      state.baitFlavor = baitNarrative(bait);
+      addLog(state.baitFlavor, "note");
+
+      showScreen("action");
+      el.continueBtn.classList.add("hidden");
+      el.actionTitle.textContent = "Casting…";
+      el.actionText.textContent = state.baitFlavor;
+      setScene("Line out", "The bobber settles on the calm water.");
+
+      resetBobber();
+      el.bobber.classList.add("visible");
+      await sleep(700);
+      el.bobber.classList.add("waiting");
+      el.ripple.classList.add("active");
+
+      const waitMs = 800 + rand(2200);
+      el.actionText.textContent = "Waiting for a bite…";
+      await sleep(waitMs);
+
+      el.bobber.classList.remove("waiting");
+      el.bobber.classList.add("tugging");
+      el.actionTitle.textContent = "Something's on!";
+      el.actionText.textContent = "You start reeling… adjusting the drag…";
+      setScene("Fight on", `${state.helper} reaches for the net.`);
+      await sleep(1200);
+
+      const fish = pick(FISH);
+      let catchscore = rand(100) + 1;
+      let { size, bonus } = sizeFromScore(catchscore);
+
+      let inches = Math.floor((catchscore * fish.lengthFactor) / 100);
+      let cutBaitFail = false;
+      if (bait === 4) {
+        if (CUT_BAIT_BOOST.has(fish.name)) {
+          inches = Math.floor(inches * 1.4);
+        } else {
+          cutBaitFail = true;
+        }
+      }
+
+      let fishBiteOn = rand(100) + 1 + state.conditionFactor;
+      if (state.cheat) fishBiteOn = 100;
+      if (cutBaitFail) fishBiteOn = 0;
+
+      const hooked = fishBiteOn > 60;
+
+      if (hooked) {
+        let fishscore = catchscore * fish.tier;
+        if (bonus > 0) fishscore += bonus;
+
+        el.actionTitle.textContent = "Fish on the bank!";
+        el.actionText.textContent = `${state.helper} scoops a ${size} ${fish.name}! Congrats, ${state.name}!`;
+        setScene(`${size} ${fish.name}`, `${formatLength(inches)} · ${fishscore} points`);
+        showCatchBanner(`<strong>${size} ${fish.name}</strong>${formatLength(inches)} · Tier ${fish.tier} · ${fishscore} pts`);
+
+        addLog(`Caught a ${size} ${fish.name} (${formatLength(inches)}) for ${fishscore} points.`, "good");
+
+        if (fish.name === "Bullhead" || fish.name === "Sheepshead") {
+          state.turns += 1;
+          addLog(`Bull and Mutton sponsored FREE CAST unlocked for catching a ${fish.name}!`, "note");
+          el.actionText.textContent += ` Free cast unlocked for your ${fish.name}.`;
+        }
+
+        state.totalScore += fishscore;
+        if (fishscore > state.bestScore) {
+          state.bestScore = fishscore;
+          state.bestFish = `Fish: ${fish.name} Size: ${size} Points: ${fishscore}`;
+          addLog("New best fish of the trip!", "note");
+        }
+      } else {
+        const miss = missMessage(fish.name, size);
+        el.actionTitle.textContent = "Not this time";
+        el.actionText.textContent = miss;
+        setScene("Line went slack", "Shake it off — bait up again.");
+        addLog(miss, "bad");
+        resetBobber();
+      }
+
+      state.turns -= 1;
+      state.castNumber += 1;
+      updateHud();
+
+      el.continueBtn.classList.remove("hidden");
+      el.continueBtn.textContent = state.turns > 0 ? "Next cast" : "See final score";
+      state.busy = false;
+
+      el.continueBtn.onclick = () => {
+        resetBobber();
+        hideCatchBanner();
+        if (state.turns > 0) {
+          prepareBaitScreen();
+        } else {
+          endTrip();
+        }
+      };
+    }
+
+    function prepareBaitScreen() {
+      state.selectedBait = null;
+      document.querySelectorAll(".bait-btn").forEach((btn) => btn.classList.remove("selected"));
+      el.castBtn.disabled = true;
+      el.castIntro.textContent = `Cast ${state.castNumber} — ${state.turns} remaining. Choose your bait.`;
+      setScene("Ready to cast", "Pick bait, then send it.");
+      showScreen("bait");
+      updateHud();
+    }
+
+    function endTrip() {
+      showScreen("end");
+      setScene("That's a wrap", "The truck is packed. Time for the scoreboard.");
+      el.endSummary.textContent = `${state.name} finished with ${state.totalScore} points.`;
+      el.endBest.textContent = state.bestFish === "None yet"
+        ? "Best fish: none landed this trip."
+        : `Best fish: ${state.bestFish}`;
+
+      if (state.cheat) {
+        addLog("Cheaters never win. Your score has been flushed.", "bad");
+      } else if (state.totalScore > 0) {
+        saveScore(state.totalScore, state.name);
+        addLog(`Score ${state.totalScore} saved to local top scores.`, "note");
+      } else {
+        addLog("No points this trip — the fish won today.", "note");
+      }
+      updateHud();
+    }
+
+    function startTrip() {
+      const name = formatName(el.nameInput.value);
+      if (!name) {
+        el.nameInput.focus();
+        addLog("Enter a name to start fishing.", "bad");
+        return;
+      }
+
+      state.name = name;
+      state.cheat = name === "Cheater";
+      state.turns = 10;
+      state.castNumber = 1;
+      state.totalScore = 0;
+      state.bestScore = 0;
+      state.bestFish = "None yet";
+      state.selectedBait = null;
+      state.busy = false;
+      el.log.innerHTML = "";
+      hideCatchBanner();
+      resetBobber();
+
+      if (state.cheat) addLog("Cheat mode enabled, you slimeball.", "note");
+      else addLog(`Welcome, ${state.name}.`, "note");
+
+      generateConditions();
+      renderConditions();
+      updateHud();
+      setScene("Weather check", "Derek sizes up the day.");
+      showScreen("conditions");
+      addLog(`Conditions locked in. Factor ${state.conditionFactor}. ${state.conditions.prediction}`, "note");
+    }
+
+    function resetToWelcome() {
+      state.name = "";
+      el.hud.classList.add("hidden");
+      el.nameInput.value = "";
+      hideCatchBanner();
+      resetBobber();
+      setScene("Dawn on the lake", "Enter your name and check the weather before your first cast.");
+      showScreen("welcome");
+    }
+
+    // Events
+    document.getElementById("startBtn").addEventListener("click", startTrip);
+    el.nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") startTrip();
+    });
+
+    document.getElementById("beginFishingBtn").addEventListener("click", prepareBaitScreen);
+
+    document.getElementById("baitGrid").addEventListener("click", (e) => {
+      const btn = e.target.closest(".bait-btn");
+      if (!btn || state.busy) return;
+      state.selectedBait = Number(btn.dataset.bait);
+      document.querySelectorAll(".bait-btn").forEach((b) => b.classList.toggle("selected", b === btn));
+      el.castBtn.disabled = false;
+    });
+
+    el.castBtn.addEventListener("click", runCast);
+
+    document.getElementById("playAgainBtn").addEventListener("click", () => {
+      const previous = state.name === "Cheater" ? "" : state.name;
+      resetToWelcome();
+      el.nameInput.value = previous;
+      if (previous) startTrip();
+    });
+
+    function openScores(from) {
+      state.scoresReturnTo = from;
+      renderScores();
+      showScreen("scores");
+    }
+
+    document.getElementById("showScoresBtn").addEventListener("click", () => openScores("welcome"));
+    document.getElementById("endScoresBtn").addEventListener("click", () => openScores("end"));
+    document.getElementById("backFromScoresBtn").addEventListener("click", () => {
+      showScreen(state.scoresReturnTo);
+    });
+
+    // Seed a couple of demo scores only if empty, matching the spirit of the old history file
+    (function seedIfEmpty() {
+      const existing = loadScores();
+      if (existing.length) return;
+      const seed = [
+        { score: 264, name: "Clara", when: "02/01/2023, 07:50 PM" },
+        { score: 167, name: "Ava", when: "02/02/2023, 11:44 AM" },
+        { score: 68, name: "Amanda", when: "02/01/2023, 07:36 PM" },
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+    })();
+  </script>
+</body>
+</html>
