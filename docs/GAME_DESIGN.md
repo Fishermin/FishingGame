@@ -305,6 +305,10 @@ crossing that you cannot take until the landing is repaired.
 - Dam Keepers
 - Ski-boat / pontooner NPC
 - Warden's kid vs retired fly angler (keep vs release)
+- **Maeve** — Irish-American "mobster" lady in a sharp coat. She will
+  square up for a fishing hole. She is not after the fish. She wants the
+  pretty rocks on that stretch of bank. Her dog **Pudding** is the friendliest
+  animal on the watershed and will sit on your shoes during the argument.
 - The Snag Crew
 - **Ruby II** — an old fishing boat that looks like nothing special and
   fishes like it knows every hole
@@ -428,6 +432,11 @@ Each should be one sitting, one reward:
   turtle instead of stealing the lure.
 - **The Night Bite** — stay out after the town closes. Unlocks Night
   encounters on waters that were Sun-only.
+- **This Bank Is Spoken For** — Maeve tries to run you off a gravel hole
+  on Englehorn Creek (she can later turn up on other rocky banks). It plays
+  like a short spot fight. Midway you notice she has no rod: she is picking
+  cobbles. Pudding has already chosen you. Payoff: she shares the bank and
+  gives you a **lucky cobble** (held item; Stone fish like that stretch).
 
 ### 8.10 River monsters (legendaries)
 

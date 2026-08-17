@@ -15,6 +15,7 @@ is skipped, the tool or skill does not exist yet.
 | Elysian dockhand tackle box | — | Landing net | — |
 | Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | Dock cooler (4) | Drag Control |
 | Englehorn old-timer | LeSeuer Creek wand | — | Read the Seam |
+| Maeve's cobble pile (Englehorn gravel hole) | Lucky cobble (held) | — | — |
 | Hook Protector side arc | — | — | Check the Knot |
 | Landing repair | Rowboat | Boat livewell (6) | Crawler Finder |
 | Field Guide 12 | — | Holding pond | — |

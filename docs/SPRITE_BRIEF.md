@@ -154,7 +154,7 @@ Same shapes. Swap the color ramp per water.
 | --- | --- | --- | --- |
 | 0 | Valleybrook Pond | Pond green, fairway, sand | Flag, clubhouse, cattails |
 | 1 | Elysian Reservoir | Warm gold-green, pasture | Sheep, dock, ski-boat wake, spilled tackle box |
-| 2 | Englehorn Creek | Clear riffle, gravel | Stepping stones, undercut bank, fly-shop hut |
+| 2 | Englehorn Creek | Clear riffle, gravel | Stepping stones, undercut bank, fly-shop hut, Maeve’s cobble pile |
 | 3 | Cougar Slough | Tea-brown night, cypress | Lanterns, knees, stained water |
 | 4 | Granite Falls Rapids | Granite gray, cold foam | Tailwater, flood stain, wrecked Dam Store, repaired hut |
 | 5 | Rapidan Bend | Wide river, barge rust | Barges, spillway, logjam, repaired landing |
@@ -206,6 +206,8 @@ One idle + 4-dir walk is enough.
 | Hook Protector (green angler who never catches) | Bankside |
 | Warden’s kid (keep everything) | Catch-and-keep arc |
 | Retired fly angler (keep nothing) | Catch-and-keep arc |
+| **Maeve** (Irish mobster lady, sharp coat, gold chain; she wants the rocks, not the fish) | Englehorn Creek gravel, later other rocky banks |
+| **Pudding** (her dog — round, soft, instantly your friend) | Always beside Maeve |
 
 ### Villains
 
@@ -257,6 +259,10 @@ cougar (Cougar Slough signage / rare overworld), woodchuck, jackalope,
 Rizzo, Dixie, Suzie, Cooper, stray dog, Wicket, Henry, Kezzie, Rip.
 
 These can share 2–3 dog/cat bodies with recolors and a unique collar/mark.
+
+**Pudding** is not a recolor. Draw her as her own dog: round, soft, maybe a
+little bow or a too-fancy collar that Maeve picked. Wagging. While Maeve
+squares up, Pudding is already sitting on the player’s shoes.
 
 ---
 
@@ -335,6 +341,7 @@ lucky.
 - Pelican-tax hat
 - Zippy’s cache / map scraps
 - Spilled tackle box (quest prop)
+- Lucky cobble (Maeve’s pocket rock; held item)
 
 ### Vessels (also overworld; see C)
 
@@ -460,6 +467,8 @@ assets/
   sprites/npc-catch.png
   sprites/npc-zippy.png
   sprites/npc-groundskeeper.png
+  sprites/npc-maeve.png
+  sprites/npc-pudding.png
   sprites/npc-*.png
   sprites/ruby-ii.png
   fish/001-bluegill.png        # 48×48 strip: idleA, idleB, lunge
@@ -484,10 +493,10 @@ Rough unique drawings if silhouettes are reused smartly:
 | --- | --- | --- |
 | Tiles (one set) | ~40–80 tiles | × 8 palettes, not × 8 redraws |
 | Player | 1 body | Optional recolors |
-| Named NPCs | ~20 | Share walk cycles |
+| Named NPCs | ~22 | Share walk cycles |
 | Snag Crew | 2–3 | |
 | Boats / houses | 5 | Ruby II, rowboat, ski boat, barge, fish house |
-| Wildlife / pets / gags | ~25–40 | Recolor pets; sheep herd |
+| Wildlife / pets / gags | ~25–40 | Recolor pets; sheep herd; **Pudding is unique** |
 | Kit / items / pins | ~40 | Lure *shapes* ~8, then color swaps |
 | Type + weather UI | ~15 | |
 | Battle / menu chrome | ~15 sheets | |

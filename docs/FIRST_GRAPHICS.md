@@ -40,7 +40,8 @@ game). We can shrink them later. Draw the pond picture on **256 × 224**.
 
 ## The first 10 jobs
 
-Do them in this order. Stop after number 10. That is enough for now.
+Do them in this order. Jobs **1–10** make hole 9 look like a game. Jobs
+**11–13** are extra people (and a dog) we also want drawn soon.
 
 ### 1. You (the kid who fishes)
 
@@ -155,16 +156,49 @@ If you want extra credit (still first batch): a long thin **red bar** for
 the fishing line (when it empties, the line snaps) and a **green bar** for
 the fish getting tired.
 
+### 11. Maeve (the rock lady)
+
+A grown-up lady who talks like a movie mobster. Fancy **dark coat**, maybe a
+**gold chain**, hands on her hips. She looks like she is about to say
+“you’re in my office” — but her office is a fishing hole.
+
+She is **not** a monster and she does **not** have a gun. She is funny-tough.
+She wants **your spot** because the **rocks** there are the prettiest, not
+because she wants to fish. (You can give her empty hands, or a little rock
+in her fingers. No fishing rod.)
+
+Draw her standing, facing **down** and **left** at least. Walking is extra.
+
+**Look for:** coat, chain, maybe sunglasses on her head, a scowl that is
+trying too hard. You should know it is Maeve from across the creek.
+
+### 12. Pudding (her surprisingly nice dog)
+
+Maeve’s dog. The friendliest dog in the whole game. Round, soft, big eyes,
+tail always wagging. Maybe a **bow** or a too-fancy collar that Maeve bought.
+
+The joke: Maeve is mad about the rocks. **Pudding already likes you.** Draw
+one picture of Pudding sitting, one of Pudding walking, and if you want, one
+of Pudding **sitting on someone’s shoes** (the happiest picture).
+
+Pudding is her own dog. Do not just recolor a different dog.
+
+### 13. A tiny pile of pretty rocks
+
+A little heap of creek cobbles (gray, tan, one shiny one). Maeve’s treasure.
+Same size as the other item icons.
+
 ---
 
 ## What “done” looks like
 
 - Edges are **crispy**. No blurry halo.
 - You can tell who is who from far away (gold cap = Catch, worms = Zippy,
-  uniform = groundskeeper).
+  uniform = groundskeeper, fancy coat = Maeve, round waggy dog = Pudding).
 - Bluegill looks like a real sunfish, not a shark and not a cartoon cat.
 - Files are **PNG**.
 - You did **not** draw a bucket of kept fish. In this game you snap a
   picture and put the fish back.
 
-When these ten are in, we can ask for more fish and more places. Not before.
+When 1–10 are in, hole 9 can look real. 11–13 can come right after. More
+fish and more places wait until then.
