@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valleybrook Pond — Catch and Craft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <canvas id="game" width="256" height="224" aria-label="Valleybrook Pond"></canvas>
+    <p class="hint">Arrows move · Z confirm / talk / fish · X cancel · Enter menu</p>
+    <label class="name-wrap hidden" id="nameWrap" for="nameEntry">
+      <span>What do they call you?</span>
+      <input id="nameEntry" type="text" maxlength="12" placeholder="Your name" autocomplete="nickname" />
+    </label>
+    <p class="hint"><a href="../index.html">Catch and Craft home</a></p>
+  </div>
+  <script src="quest.js"></script>
+</body>
+</html>

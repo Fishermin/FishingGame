@@ -9,12 +9,12 @@ fi
 IFS=$'\n'
 fishscorehistory=( $(printf "%s\n" ${fishscorehistory[@]} | sort -rn | head -10) )  ## reverse sort
 clear
-echo "  ____                _    _       _____ _     _     _                ____                       "
-echo " |  _ \  ___ _ __ ___| | _( )___  |  ___(_)___| |__ (_)_ __   __ _   / ___| __ _ _ __ ___   ___  "
-echo " | | | |/ _ \ '__/ _ \ |/ /// __| | |_  | / __| '_ \| | '_ \ / _' | | |  _ /  ' | '_ ' _ \ / _ \ "
-echo " | |_| |  __/ | |  __/   <  \__ \ |  _| | \__ \ | | | | | | | (_| | | |_| | (_| | | | | | |  __/ "
-echo " |____/ \___|_|  \___|_|\_\ |___/ |_|   |_|___/_| |_|_|_| |_|\__, |  \____|\__,_|_| |_| |_|\___| "
-echo "_________________________________________________________________________________________________"
+echo "  ____      _       _                       _    ____            __ _   "
+echo " / ___|__ _| |_ ___| |__     __ _ _ __   __| |  / ___|_ __ __ _ / _| |_ "
+echo "| |   / _\` | __/ __| '_ \\   / _\` | '_ \\ / _\` | | |   | '__/ _\` | |_| __|"
+echo "| |__| (_| | || (__| | | | | (_| | | | | (_| | | |___| | | (_| |  _| |_ "
+echo " \\____\\__,_|\\__\\___|_| |_|  \\__,_|_| |_|\\__,_|  \\____|_|  \\__,_|_|  \\__|"
+echo "________________________________________________________________________"
 echo ""
 echo " TOP 10 Scores all time:"
 echo ""
@@ -22,7 +22,7 @@ echo " Score, Angler, Day/time"
 echo ""
 printf '%s\n' "${fishscorehistory[@]}"
 echo ""
-echo "Welcome to Derek's Fishing Game. Please enter your name: "
+echo "Welcome to Catch and Craft. Please enter your name: "
 read name
 name=${name,,}
 name=${name^}
@@ -65,7 +65,7 @@ echo "Precip: ${PrecipConditionList[$PrecipConditionNumber]}"
 echo "Wind: ${WindConditionList[$WindConditionNumber]}"
 echo "Barometer: ${BarometerConditionList[$BarometerConditionNumber]} "
 echo ""
-echo "Derek's Prediction:"
+echo "Zippy's Prediction:"
 case $ConditionFactor in
                 [0-5])
                         echo "At least if the fish don't bite, it's a nice day for fishing."
@@ -131,7 +131,7 @@ while [ $turns -gt 0 ]; do
 	echo "5) Try a Lure"
 	echo "************************************************************************"
 	echo ""
-	helperlist=("Scott" "Derek" "Riley" "Evan" "Kade" "Ava" "Linda" "Joe" "Ethan" "Dennis" "Jack" "Amanda" "Clara")
+	helperlist=("Scott" "Zippy" "Riley" "Evan" "Kade" "Ava" "Linda" "Joe" "Ethan" "Dennis" "Jack" "Amanda" "Clara")
 	helper=${helperlist[RANDOM%${#helperlist[@]}]}
 	while [ "$name" == "$helper" ]
 	do

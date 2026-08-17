@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "super": 1.6,
+  "resist": 0.6,
+  "neutral": 1.0,
+  "order": ["Fang", "Sun", "Stone", "Swift", "Weed", "Night", "Scale", "Cold"],
+  "chart": {
+    "Fang":  {"Sun": 1.6, "Swift": 0.6, "Weed": 1.6, "Night": 0.6, "Scale": 0.6},
+    "Sun":   {"Fang": 0.6, "Stone": 1.6, "Night": 1.6, "Cold": 0.6},
+    "Stone": {"Swift": 1.6, "Weed": 0.6, "Scale": 1.6, "Cold": 1.6},
+    "Swift": {"Fang": 1.6, "Stone": 0.6, "Weed": 1.6, "Cold": 0.6},
+    "Weed":  {"Fang": 0.6, "Sun": 1.6, "Stone": 1.6, "Swift": 0.6},
+    "Night": {"Fang": 1.6, "Sun": 0.6, "Scale": 1.6, "Cold": 1.6},
+    "Scale": {"Fang": 1.6, "Stone": 0.6, "Weed": 1.6, "Night": 0.6},
+    "Cold":  {"Sun": 1.6, "Stone": 0.6, "Swift": 1.6, "Night": 0.6}
+  }
+}

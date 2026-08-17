@@ -2,14 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=fishingtrip.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Derek's Fishing Game</title>
-  <link rel="canonical" href="fishingtrip.html" />
-  <script>location.replace("fishingtrip.html");</script>
+  <title>Catch and Craft</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #101810;
+      color: #e8f0d8;
+      font-family: "Press Start 2P", monospace;
+    }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+    }
+    main {
+      width: min(640px, 100%);
+      image-rendering: pixelated;
+    }
+    h1 {
+      font-size: 14px;
+      line-height: 1.8;
+      margin: 0 0 8px;
+      color: #f0e0a0;
+    }
+    p { font-size: 8px; line-height: 1.9; margin: 0 0 12px; color: #b8c8a8; }
+    nav { display: grid; gap: 8px; margin-top: 18px; }
+    a {
+      display: block;
+      padding: 12px;
+      background: #203018;
+      color: #f8f0d8;
+      text-decoration: none;
+      border: 4px solid #405838;
+      font-size: 8px;
+      line-height: 1.6;
+    }
+    a:hover, a:focus { border-color: #f0e0a0; color: #fff; }
+    a strong { display: block; color: #9adcff; margin-bottom: 6px; font-size: 10px; }
+    .site { margin-top: 18px; font-size: 8px; color: #6a8a68; }
+    .site a { display: inline; padding: 0; border: 0; background: none; color: #c4a35a; }
+  </style>
 </head>
 <body>
-  <p>Redirecting to <a href="fishingtrip.html">Derek's Fishing Game</a>…</p>
-  <p><a href="fishingtrail.html">Or play the 1980s Trail edition</a></p>
+  <main>
+    <h1>Catch and Craft</h1>
+    <p>Ol Catch N. Kraft’s Fishing Quest. Name your angler. Catch already thinks hole 9 is his. Zippy has the bait.</p>
+    <nav>
+      <a href="quest/index.html">
+        <strong>Valleybrook Pond</strong>
+        Sneak onto hole 9. Hide from the groundskeeper. Learn to fish.
+      </a>
+      <a href="fishingtrip.html">
+        <strong>Quick Trip</strong>
+        10 casts on the lake. Arcade scoring.
+      </a>
+      <a href="fishingtrail.html">
+        <strong>The Fishing Trail</strong>
+        1980s trail-game edition.
+      </a>
+    </nav>
+    <p class="site">Home: <a href="https://catchandcraft.cc">catchandcraft.cc</a></p>
+  </main>
 </body>
 </html>
