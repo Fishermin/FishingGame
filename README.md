@@ -30,7 +30,8 @@ Read the plan:
 1. [Game design document](docs/GAME_DESIGN.md)
 2. [Field guide roster](docs/field-guide.md)
 3. [Progression map](docs/progression.md)
-4. [Starter dex data](data/fish-dex.json)
+4. [Sprite brief](docs/SPRITE_BRIEF.md) — pixel-art inventory for a graphic designer
+5. [Starter dex data](data/fish-dex.json)
 
 Play the [Valleybrook Pond](quest/index.html) slice (Phase 1). The trip games
 stay as Quick Trip and The Fishing Trail.

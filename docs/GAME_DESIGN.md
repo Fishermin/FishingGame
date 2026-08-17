@@ -548,6 +548,8 @@ the trip game's humor in jingles (a sad tuba when Zippy nets the air).
 and fish sprites in batches of 10. Silhouettes before full color. A fish
 with a strong silhouette and two frames beats a painted illustration.
 
+Designer inventory (what to commission, sizes, batches): [`SPRITE_BRIEF.md`](SPRITE_BRIEF.md).
+
 ---
 
 ## 11. Technical plan
