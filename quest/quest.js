@@ -341,6 +341,7 @@
     if (!nameWrap) return;
     nameWrap.classList.add("hidden");
     if (nameEntry) nameEntry.blur();
+    fitCanvas();
   }
 
   function showNameEntry() {
@@ -351,6 +352,7 @@
       nameEntry.value = "";
       setTimeout(() => nameEntry.focus(), 0);
     }
+    fitCanvas();
   }
 
   function confirmName() {
@@ -638,10 +640,35 @@
     keeperDwell = 0;
     showDialog([
       "You are in the cattails on the LEFT side of the screen.",
-      "Press the UP ARROW. Stay on the left. Do not walk on the grass.",
-      "The man in the trees is ZIPPY. Press Z when you reach him.",
+      "Press UP (arrow or D-pad). Stay on the left. Do not walk on the grass.",
+      "The man in the trees is ZIPPY. Press Z or A when you reach him.",
       "He has worms and a camera. Then you fish. One photo gets you in.",
     ]);
+  }
+
+  function pressKey(name) {
+    if (mode === "name") {
+      if (name === "ok" || name === "start") confirmName();
+      if (name === "cancel") {
+        hideNameEntry();
+        mode = "title";
+      }
+      return;
+    }
+    if (name === "start") {
+      if (mode === "play") {
+        openMenu();
+        return;
+      }
+      name = "ok";
+    }
+    if (!keys[name]) just[name] = true;
+    keys[name] = true;
+  }
+
+  function releaseKey(name) {
+    if (name === "start") name = "ok";
+    keys[name] = false;
   }
 
   window.addEventListener("keydown", (e) => {
@@ -672,8 +699,7 @@
     const k = map[e.key];
     if (!k) return;
     e.preventDefault();
-    if (!keys[k]) just[k] = true;
-    keys[k] = true;
+    pressKey(k === "menu" ? "start" : k);
   });
   window.addEventListener("keyup", (e) => {
     const map = {
@@ -683,7 +709,7 @@
       x: "cancel", X: "cancel", Shift: "cancel",
     };
     const k = map[e.key];
-    if (k) keys[k] = false;
+    if (k) releaseKey(k);
   });
 
   function consume(k) {
@@ -774,12 +800,63 @@
   }
 
   function fitCanvas() {
-    const s = Math.max(2, Math.floor(Math.min((window.innerWidth - 32) / WIDTH, (window.innerHeight - 80) / HEIGHT)));
+    const extraEls = [
+      document.querySelector(".hint-keys"),
+      document.querySelector(".hint-touch"),
+      document.querySelector(".home-link"),
+      document.getElementById("pad"),
+      nameWrap
+    ];
+    let extra = 20;
+    extraEls.forEach((el) => {
+      if (!el || el.classList.contains("hidden")) return;
+      const st = window.getComputedStyle(el);
+      if (st.display === "none") return;
+      extra += el.getBoundingClientRect().height + 8;
+    });
+    const availW = Math.max(160, window.innerWidth - 16);
+    const availH = Math.max(112, (window.visualViewport ? window.visualViewport.height : window.innerHeight) - extra);
+    const s = Math.max(1, Math.floor(Math.min(availW / WIDTH, availH / HEIGHT)));
     canvas.style.width = WIDTH * s + "px";
     canvas.style.height = HEIGHT * s + "px";
   }
   window.addEventListener("resize", fitCanvas);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", fitCanvas);
+  window.addEventListener("load", fitCanvas);
   fitCanvas();
+
+  function bindPad() {
+    const pad = document.getElementById("pad");
+    if (!pad) return;
+    pad.querySelectorAll("[data-btn]").forEach((btn) => {
+      const name = btn.getAttribute("data-btn");
+      const down = (e) => {
+        e.preventDefault();
+        btn.classList.add("held");
+        pressKey(name);
+        if (e.pointerId != null && btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
+      };
+      const up = (e) => {
+        if (e) e.preventDefault();
+        btn.classList.remove("held");
+        releaseKey(name);
+      };
+      btn.addEventListener("pointerdown", down);
+      btn.addEventListener("pointerup", up);
+      btn.addEventListener("pointercancel", up);
+      btn.addEventListener("lostpointercapture", up);
+    });
+    pad.addEventListener("contextmenu", (e) => e.preventDefault());
+  }
+  bindPad();
+
+  const nameOk = document.getElementById("nameOk");
+  if (nameOk) {
+    nameOk.addEventListener("click", (e) => {
+      e.preventDefault();
+      confirmName();
+    });
+  }
 
   function px(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -1023,13 +1100,13 @@
     }
     drawBox(8, HEIGHT - 88, WIDTH - 16, 80);
     wrapText(INTRO_PAGES[introIndex] || "", 16, HEIGHT - 80, 26, "#203018");
-    text("Press Z", WIDTH - 78, HEIGHT - 18, "#405838", 8);
+    text("Z or A", WIDTH - 70, HEIGHT - 18, "#405838", 8);
   }
 
   function drawHelp() {
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
-    wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
+    wrapText("Arrows or D-pad move. Z or A talks, fishes, confirms. X or B backs out. Enter or START opens your pack.", 16, 32, 26, "#203018");
     wrapText("1. Press UP. Stay on the left reeds. Talk to Zippy with Z.", 16, 72, 26, "#203018");
     wrapText("2. Press DOWN to the bank. Press Z to fish.", 16, 112, 26, "#203018");
     wrapText("3. REEL once, then SNAP. The fish goes back. The photo is proof.", 16, 152, 26, "#203018");

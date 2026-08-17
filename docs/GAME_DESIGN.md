@@ -610,8 +610,9 @@ data/           fish-dex.json, moves.json (later)
 **Save data:** Field Guide album, kit loadout, pins, skills,
 story flags, clock, conservation score. Version the save from day one.
 
-**Input:** arrows + Z/X (A/B), Enter. On-screen buttons only if they do
-not break the 16-bit layout.
+**Input:** arrows / WASD + Z/X (A/B), Enter. On phones, an on-screen D-pad
+and A/B/START sit **under** the 256×224 canvas so the pixel layout stays
+intact. Name field uses 16px type so iOS does not zoom.
 
 **Performance:** 60 fps at 4× scale on a laptop. No webGL filters.
 

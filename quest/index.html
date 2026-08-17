@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c140c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <title>Valleybrook Pond — Catch and Craft</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,12 +15,31 @@
 <body>
   <div class="wrap">
     <canvas id="game" width="256" height="224" aria-label="Valleybrook Pond"></canvas>
-    <p class="hint">Arrow keys move · Z talks and fishes · X back · Enter menu</p>
+    <p class="hint hint-keys">Arrow keys move · Z talks and fishes · X back · Enter menu</p>
+    <p class="hint hint-touch">D-pad moves · A talks and fishes · B back · START menu</p>
     <label class="name-wrap hidden" id="nameWrap" for="nameEntry">
       <span>What do they call you?</span>
-      <input id="nameEntry" type="text" maxlength="12" placeholder="Your name" autocomplete="nickname" />
+      <span class="name-row">
+        <input id="nameEntry" type="text" maxlength="12" placeholder="Your name" autocomplete="nickname" enterkeyhint="done" />
+        <button type="button" id="nameOk" class="name-ok">OK</button>
+      </span>
     </label>
-    <p class="hint"><a href="../index.html">Catch and Craft home</a></p>
+    <div id="pad" class="pad" aria-label="Touch controls">
+      <div class="dpad">
+        <button type="button" class="dir" data-btn="up" aria-label="Up">▲</button>
+        <button type="button" class="dir" data-btn="left" aria-label="Left">◀</button>
+        <button type="button" class="dir" data-btn="right" aria-label="Right">▶</button>
+        <button type="button" class="dir" data-btn="down" aria-label="Down">▼</button>
+      </div>
+      <div class="actions">
+        <button type="button" class="face start" data-btn="start" aria-label="Start menu">START</button>
+        <div class="ab">
+          <button type="button" class="face b" data-btn="cancel" aria-label="B, back">B</button>
+          <button type="button" class="face a" data-btn="ok" aria-label="A, confirm">A</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint home-link"><a href="../index.html">Catch and Craft home</a></p>
   </div>
   <script src="quest.js"></script>
 </body>
