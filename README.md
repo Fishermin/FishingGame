@@ -21,8 +21,8 @@ A planned 16-bit RPG. You name your angler. **Catch** starts as a rival on
 the bank and can become a friend. Zippy sells the best bait. Ruby II looks
 like a junker and fishes like a legend.
 
-- Turn-based battles and a Field Guide of 79 freshwater species
-- Club pins instead of gym badges, nets instead of balls
+- Turn-based battles on the line (rod, bait, net, camera — not a pet fish)
+- Club pins instead of gym badges. Pictures or it never happened.
 - Tools and skills earned from story arcs, not from a full shop
 
 Read the plan:

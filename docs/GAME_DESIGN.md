@@ -18,10 +18,12 @@ site is [catchandcraft.cc](https://catchandcraft.cc).
 ## 1. Pitch
 
 You pick your identity and sneak onto the watershed with a warped spinning
-rod and a coffee-can livewell. The clubs run a circuit the way old Pokemon
-leagues ran gyms. Wild fish are fought and captured. **Catch** is already
-on the water: at first he wants the holes to himself, then — if you keep
-showing up — he stops treating you like a problem.
+rod, a hand net, and a pocket camera. The clubs run a circuit the way old
+Pokemon leagues ran gyms. Wild fish are fought on the line with your gear,
+photographed for the Field Guide, and released. **Pictures or it never
+happened** — that is how you get into a club. **Catch** is already on the
+water: at first he wants the holes to himself, then — if you keep showing
+up — he stops treating you like a problem.
 
 **Working title:** Ol Catch N. Kraft's Fishing Quest
 **Genre:** 16-bit overworld RPG + turn-based battles + collection
@@ -39,13 +41,13 @@ The mapping is:
 | --- | --- |
 | Towns, routes, water tiles | Landings, creeks, lakes, backwaters |
 | Wild encounter | Cast into a water tile |
-| Trainer battle | Rival / club angler livewell duel |
+| Trainer battle | Club photo check / derby; later, gear contests |
 | Gym | Regional fishing club + its water |
 | Badge | Club pin + a permit that opens new water |
-| Pokedex | Field Guide |
-| Party of 6 | Livewell of 6 |
-| PC boxes | Holding pond at home camp |
-| Pokeballs | Nets (catch rate + fish size gates) |
+| Pokedex | Field Guide (a photo album) |
+| Party of 6 | Loadout: rod, line, bait, net, camera |
+| PC boxes | Extra album pages / holding-pond stories |
+| Pokeballs | Nets land the fish; the camera is the capture |
 | HMs | Angler skills earned from scenes |
 | Team Rocket | The Snag Crew (illegal netters) |
 | Legendaries | River monsters tied to story |
@@ -54,7 +56,9 @@ The mapping is:
 
 ## 2. Design pillars
 
-1. **Hook, fight, keep.** Every wild fish is a battle. Landing it is a capture.
+1. **Hook, fight, snap, release.** Every wild fish is a battle on your
+   line. Landing it is a photograph. The fish goes back. The picture is
+   the proof the clubs will stamp.
 2. **Freshwater first.** A large North American inland roster, starting from
    the 20 species already in the trip game and growing to 70+ catchable fish.
 3. **Story is the map.** New water, tools, and skills come from arcs, not from
@@ -92,21 +96,23 @@ Do not replace the trip games. Link them from the title screen as
 ## 4. Player fantasy and core loop
 
 You walk a pixel-art watershed. At any water's edge you can cast. A bite
-opens a battle screen. You fight with the fish already in your livewell.
-When the wild fish's stamina is low, you throw a net. Caught fish go into
-the livewell or the Field Guide / holding pond.
+opens a battle screen. You fight with your **kit** — rod, line, bait, net,
+and camera — not with a pet fish. When the wild fish's stamina is low, you
+net it, take the picture, and slip it back. The Field Guide is an album.
+Clubs will not stamp a story. They stamp a photo.
 
 Between casts you talk to people, take on arcs, and travel to the next
 club water. Clubs are story dungeons: a unique habitat, a warden, a
-required permit, and a duel against the club champion.
+required permit, and a champion who wants to see your book.
 
 ```
 Camp → walk the bank → cast
-        → battle
-        → fish battle
-        → livewell / Field Guide update
+        → bite (gear vs wild fish)
+        → REEL / SLACK / SNAP / RUN
+        → photograph + release
+        → Field Guide album update
         → town talk / story beat
-        → club duel vs rival angler
+        → club wants the picture
         → pin + permit + a tool or skill
         → new region
 ```
@@ -118,51 +124,72 @@ piece of kit. Empty grinding loops are a design bug.
 
 ## 5. Combat — Pokemon-shaped, fishing-flavored
 
-### 5.1 Two battle contexts, one ruleset
+### 5.1 You vs the fish, using gear
 
-Both use the same turn-based engine and the same fish stats.
+Wild battles use the same turn-based chrome. The fighter on your side is
+**not a fish**. It is your loadout. Each piece of kit adds to a small set
+of angler stats. Better rods, line, bait, nets, and cameras are earned
+from story, the same way skills are.
 
-**Wild hook battle.** You vs a wild fish. Winning by KO is allowed, but
-capture needs a net while the fish still has stamina. KO with no net is a
-lost specimen (it sinks away). This makes nets matter.
+**Wild hook battle.** You vs a wild fish. REEL wears it down. SLACK
+protects the line. SNAP photographs it once it is tired enough for your
+net. The fish is always released. KO with no photo is a lost specimen
+(it sinks away, no proof).
 
-**Livewell duel.** A rival angler sends fish from their livewell. You send
-yours. Standard 1v1 with switches. No capturing the opponent's fish.
-Win the match, not the specimen.
+**Club check.** The local club's entry requirement is photographic proof
+of a fish from their water. "Pictures or it never happened." A livewell
+full of fish does not get you in. An album page does.
+
+Rival contests later (Sioux Valley Open, Catch's dares) are gear contests
+and photo ledgers, not livewell duels. You do not send a Golden Shiner
+out to fight a Bluegill.
 
 Boss fish (club legends, river monsters) are wild battles with unique
-move sets and a scripted capture or release ending.
+move sets and a scripted photo or release ending.
 
 ### 5.2 Screen layout (16-bit)
 
 SNES Pokemon battle chrome, fishing-skinned:
 
 - Top: habitat background (pond dawn, stained slough, rapids, ice hole)
-- Wild / foe fish sprite facing left, name, level, stamina bar
-- Player fish sprite facing right, name, level, stamina + XP bar
+- Wild fish sprite facing left, name, stamina bar
+- Player kit facing the water: rod name, LINE bar (if the line hits 0,
+  break-off)
 - Bottom text box: 2×2 commands
 
-Commands: `FIGHT` · `LIVEWELL` · `NET` · `RUN`
+Commands: `REEL` · `SLACK` · `SNAP` · `RUN`
 
-Fight opens the four moves on the active fish. Net is grayed out in duels.
-Run is easier in wild battles if your fish's Dart is higher; club duels
-forbid it.
+SNAP is grayed until the fish is tired enough for the current net, or
+until the tutorial tells you to press it. Run is easier if the fish's
+Dart is high; club photo-checks forbid it.
 
 ### 5.3 Stats
 
-Each fish has six battle stats plus a hidden catch stat:
+**Fish** keep six battle stats plus Slip:
 
 | Stat | Role |
 | --- | --- |
-| Stamina | Hit points |
-| Pull | Physical attack (strikes, shakes) |
-| Hold | Physical defense |
+| Stamina | Hit points. Wear this down before SNAP. |
+| Pull | How hard it thrashes your line |
+| Hold | How well it resists REEL |
 | Dart | Speed / turn order / run chance |
-| Wile | Special attack (silt, flash, scent) |
-| Grit | Special defense |
-| Slip | Hidden. Lowers catch rate. Gar and eels are high Slip. |
+| Wile | Dirty tricks (weeds, silt, jumps) |
+| Grit | Resist those tricks |
+| Slip | Hidden. Lowers photo chance. Gar and eels are high Slip. |
 
-Levels 1–50 for normal play, 50–70 postgame. Wild levels follow the region.
+**Kit** is five slots. Each item contributes numbers. The fight uses the
+sum, not a pet fish's stats.
+
+| Slot | What it adds | Start kit (Valleybrook) |
+| --- | --- | --- |
+| Rod | Drag (REEL power), backbone (line HP) | Warped spinning rod |
+| Line | Tensile (line HP), stealth | 6 lb |
+| Bait | Hook, type attract | Worms (Zippy) |
+| Net | Scoop (SNAP chance), size cap | Hand net |
+| Camera | Proof (SNAP chance). No camera, no album page. | Pocket camera (Zippy) |
+
+Levels 1–50 still apply to wild fish. Kit upgrades are story beats, not
+XP on a shiner.
 
 ### 5.4 Types
 
@@ -211,28 +238,31 @@ Families:
 Signature examples: Musky gets *Figure-Eight*. Sturgeon gets *River Plate*.
 Bluegill gets *Nest Guard*. Burbot gets *Eelpout Stare*.
 
-### 5.6 Capture math
+### 5.6 Capture math — photograph, then release
 
-On the NET command, catch chance is roughly:
+On the SNAP command, photo chance is roughly:
 
 ```
-chance = netPower * (1 - stamina% * 0.7) * (1 - slip)
-          * anglerSkill * baitMatch
+chance = camera.proof * net.scoop * (1 - stamina% * 0.7) * (1 - slip)
+          * baitMatch
           * sizeGate
 ```
 
-`sizeGate` is 0 if the fish's length class exceeds the current net/livewell.
-A coffee-can livewell cannot hold a lake sturgeon. That is a story beat,
-not a tooltip buried in a shop.
+`sizeGate` is 0 if the fish's length class exceeds the current net.
+A hand net cannot land a lake sturgeon. That is a story beat, not a
+tooltip buried in a shop.
 
-Failed nets play miss lines from the trip game (pelican, pontoon, snapping
-turtle, Zippy knocks it off with the net, a sheep in the pasture, a
-jackalope on the bank). Three failures in one battle and the fish breaks
-off.
+A successful SNAP always:
 
-Catch-and-release is always offered after a successful land. Release still
-fills the Field Guide and can award a conservation token used in Tragedy
-at the Dam Store.
+1. Writes a Field Guide page (the photograph)
+2. Releases the fish where it was caught
+
+There is no keep-in-the-can prompt. The album is the livewell. Clubs
+ask to see the book, not the bucket.
+
+Failed snaps play miss lines from the trip game (pelican, pontoon, Zippy
+knocks the net, a sheep in the pasture). Three failures in one battle
+and the fish breaks off.
 
 ---
 
@@ -241,18 +271,14 @@ at the Dam Store.
 Target: **74 regular species + 5 river monsters = 79**. All freshwater.
 Midwest core first (the current 20), then the rest of the inland map.
 
-Starter pool (the player chooses one; Catch takes a type-advantage
-neighbor and treats it like a dare):
+Starter pool is **kit**, not a pet fish. The opening loadout is the warped
+rod, 6 lb line, hand net, worms, and Zippy's pocket camera. Catch's dare
+at Valleybrook is "get a better picture than mine," not a type-advantage
+shiner.
 
-| Starter | Type | Why |
-| --- | --- | --- |
-| Bluegill | Sun | The fish everyone actually starts with |
-| Bullhead | Night / Stone | Joke fish of the trip game, secretly tough |
-| Largemouth Bass | Fang / Weed | The poster fish |
-
-Catch takes the starter that beats yours and treats it like a dare. The
-dare starts at Valleybrook Pond. At the Sioux Valley Open he shows up with
-a Musky he "definitely meant to catch."
+The first photo the tutorial wants is a **Bluegill**. Bullhead and
+Largemouth remain early pond fish. At the Sioux Valley Open, Catch shows
+up talking about a Musky he "definitely meant to catch."
 
 Rarity bands: Common, Uncommon, Rare, Trophy, Legend. Trophy fish are
 regional; Legends are story-locked.
@@ -330,11 +356,12 @@ one leaves a tool, a skill, a fish, or a permanent map change.
 1. **The Warped Rod.** Inherit the rod. Name yourself. Sneak onto
    Valleybrook Golf Course. Catch is already on hole 9 and does not want
    company. The groundskeeper patrols the fairway. Zippy sells bait from
-   the trees. Learn Keep Still, Drop a Line, and The Net — and, if you
+   the trees.    Learn Keep Still, Drop a Line, and The Snapshot — and, if you
    share the cattails long enough, Catch stops telling you to scram.
 2. **Sioux Valley Open.** First club event. The water is a pond in a farm
-   pasture, full of sheep. Catch is the livewell rival if friendship is still
-   thin; if it has grown, he is a reluctant partner who still wants to win.
+   pasture, full of sheep. Catch is the photo rival if friendship is still
+   thin; if it has grown, he is a reluctant partner who still wants the
+   better picture. The club stamps albums, not buckets.
    A ski boat still shows up as a hazard on the nearby reservoir. Payoff:
    reservoir pin, Elysian Model 202 baitcaster, Drag Control.
 3. **Search for Zippy's Treasure.** Zippy is a mysterious bait shop owner
@@ -422,8 +449,8 @@ Each should be one sitting, one reward:
 - **Hook Protector** — a green angler never catches. Teach them. Earn
   **Check the Knot** (critical hits can no longer snap your own line).
 - **Bull & Mutton** — catch a Bullhead and a Sheepshead in the same day,
-  recreate the free-cast joke as a real extra livewell swap in the next
-  duel.
+  recreate the free-cast joke as a real extra SNAP attempt on the next
+  fish.
 - **Snapping Turtle Stone** — a stone-type tutor move, after you free a
   turtle instead of stealing the lure.
 - **The Night Bite** — stay out after the town closes. Unlocks Night
@@ -451,24 +478,23 @@ how you play is earned.
 
 ### 9.1 Tools (equipment slots)
 
-Slots: Rod, Reel, Line, Net, Vessel, Livewell, Held lure.
+Slots: Rod, Line, Bait, Net, Camera, Vessel, Held lure.
 
 | Tool | How you get it | What it changes |
 | --- | --- | --- |
-| Warped spinning rod | Opening | Short casts, pond + creek only |
-| Elysian Model 202 baitcaster | Beat the Sioux Valley Open | Reservoir distance, heavier lures |
+| Warped spinning rod | Opening | Drag + backbone for pond fish |
+| Elysian Model 202 baitcaster | Beat the Sioux Valley Open | Reservoir distance, heavier drag |
 | LeSeuer Creek wand | Help the Englehorn fly kid *before* you own a fly rod | Accuracy in current tiles |
 | Model 67 Fly rod | Granite Falls Rapids warden, after you repair the hut | Fly water encounters |
 | Rapidan Bend rod | The Journey of Ruby II | Size gate for sturgeon / blue cat |
 | Boot Lake Ice rod | Ice Moon Derby | Frozen tiles become fishable |
-| Hand net | Start | Small fish only |
+| 6 lb line | Opening | Tensile for panfish; musky will snap it |
+| Hand net | Opening | Small fish only |
 | Landing net | Elysian dockhand, after you return a spilled tackle box | Medium size gate |
 | Rubber trophy net | Horseshoe Chain club | Large size gate, gentler Slip penalty |
-| Conservation net | Stop the Snag Crew | Best catch rate, release prompt |
-| Coffee-can livewell | Start | 3 fish, tiny size cap |
-| Dock cooler | Reservoir pin | 4 fish |
-| Boat livewell | Repair the landing | 6 fish, standard party |
-| Holding pond | Home camp, after 12 Field Guide entries | Storage boxes |
+| Conservation net | Stop the Snag Crew | Best SNAP rate, still releases |
+| Pocket camera | Zippy, Valleybrook | Proof. No camera, no album page |
+| Club Polaroid | First club pin | Better proof, night shots |
 | Rowboat | Landing repair arc | Cross cuts; reach the Lost Swedish Pimple |
 | Fish house | Ice pin | Horseshoe Chain winter hub |
 
@@ -484,7 +510,7 @@ the overworld or as a battle passive.
 | --- | --- | --- |
 | Keep Still | Hide from the Valleybrook groundskeeper | Cattails break his line of sight |
 | Drop a Line | First successful cast at hole 9 | Unlocks fishing on a water tile |
-| The Net | First fish landed | NET command is understood, not grayed |
+| The Snapshot | First fish photographed at hole 9 | SNAP command is understood, not grayed |
 | Read the Seam | Englehorn Creek old-timer | See hidden current encounter tiles |
 | Set the Hook | First club loss at the Sioux Valley Open, then a rematch lesson | +catch on the turn after a crit |
 | Drag Control | Elysian ski-boat rescue | Wild fish with high Pull no longer auto-snap |
@@ -510,9 +536,9 @@ You cannot skip the scene and buy the skill.
   once you are friends. Zippy may appear with bait and still knock a fish
   off the net, because of course
 
-XP goes to fish. Reputation goes to the angler and gates which NPCs will
-talk. Reputation is earned by finishing arcs, not by grinding the same
-weed bed.
+XP goes to the album (species pages) and to kit mastery later. Reputation
+goes to the angler and gates which NPCs will talk. Clubs stamp photos,
+not hearsay.
 
 ---
 
@@ -581,7 +607,7 @@ docs/           this design
 data/           fish-dex.json, moves.json (later)
 ```
 
-**Save data:** Field Guide bits, livewell, holding pond, pins, skills,
+**Save data:** Field Guide album, kit loadout, pins, skills,
 story flags, clock, conservation score. Version the save from day one.
 
 **Input:** arrows + Z/X (A/B), Enter. On-screen buttons only if they do
@@ -605,15 +631,16 @@ Documents and a starter dex.
 Valleybrook Pond at Valleybrook Golf Course is playable at `quest/index.html`.
 Name your angler. Catch is already on hole 9 and starts unfriendly.
 
-One screen of Valleybrook Pond. Walk, hide from the groundskeeper, deal
-with Catch, buy bait from Zippy, battle, net a Bluegill, save. **Exit test:**
-a stranger understands FIGHT / NET / LIVEWELL, can avoid the groundskeeper,
-and can tell the player apart from Catch.
+One screen of Valleybrook Pond. Walk, talk to Zippy, cast with your kit,
+photograph a Bluegill, release it, save. **Exit test:** a stranger
+understands REEL / SLACK / SNAP, has a photo in the album, and can tell
+the player apart from Catch.
 
-### Phase 2 — Livewell duels + Field Guide UI
+### Phase 2 — Album UI + Catch's dare
 
-Catch rematch as a 2v2 duel if friendship is still thin. Field Guide pages
-for whatever you caught. Holding pond at the camp shack. Starter choice.
+Catch wants a better picture than yours. Field Guide pages for whatever
+you photographed. No livewell party. Kit screen shows rod, line, bait,
+net, camera stats.
 
 ### Phase 3 — Elysian Reservoir
 
@@ -673,10 +700,10 @@ changing the code.
 
 | Question | Default |
 | --- | --- |
-| Fish vs fish, or angler vs fish on the line? | Fish vs fish for all battles; nets are the capture verb |
-| Permadeath of caught fish? | No. Release is a choice. KO in a duel sends them to the livewell fainted |
-| Starter | Bluegill / Bullhead / Largemouth |
-| Livewell size | 3 → 4 → 6 |
+| Fish vs fish, or angler vs fish on the line? | Angler + kit vs fish. SNAP is the capture verb. Always release. |
+| Permadeath of caught fish? | No. Every successful SNAP releases the fish. The photo stays. |
+| Starter | Warped rod, 6 lb, hand net, worms, pocket camera |
+| Album | One page per species (plus later trophy shots) |
 | Level cap | 50 story, 70 postgame |
 | Engine | Phaser 3, static files on catchandcraft.cc |
 | Player identity | Chosen at the start. Catch is an NPC rival-to-friend |
