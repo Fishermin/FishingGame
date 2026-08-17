@@ -162,10 +162,9 @@ A grown-up lady who talks like a movie mobster. Fancy **dark coat**, maybe a
 **gold chain**, hands on her hips. She looks like she is about to say
 “you’re in my office” — but her office is a fishing hole.
 
-She is **not** a monster and she does **not** have a gun. She is funny-tough.
-She wants **your spot** because the **rocks** there are the prettiest, not
-because she wants to fish. (You can give her empty hands, or a little rock
-in her fingers. No fishing rod.)
+She is funny-tough, like a movie boss, not a scary crime picture. She wants
+**your spot** because the **rocks** there are the prettiest, not because she
+wants to fish. Empty hands, or a little rock in her fingers. No fishing rod.
 
 Draw her standing, facing **down** and **left** at least. Walking is extra.
 
