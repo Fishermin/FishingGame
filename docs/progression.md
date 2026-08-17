@@ -9,22 +9,22 @@ is skipped, the tool or skill does not exist yet.
 | --- | --- | --- | --- |
 | Game start | Warped spinning rod, 6 lb line | Hand net, coffee-can (3) | — |
 | Starter caught | — | — | — |
-| First Derek loss + lesson | — | — | Set the Hook |
-| Milltown dockhand tackle box | — | Landing net | — |
-| Milltown club pin | Baitcaster | Dock cooler (4) | Drag Control |
-| Cedar old-timer | Creek wand | — | Read the Seam |
+| First Ol Catch N. Kraft loss + lesson | — | — | Set the Hook |
+| Elysian dockhand tackle box | — | Landing net | — |
+| Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | Dock cooler (4) | Drag Control |
+| Englehorn old-timer | LeSeuer Creek wand | — | Read the Seam |
 | Hook Protector side arc | — | — | Check the Knot |
-| Landing repair | Rowboat | Boat livewell (6) | Walk the Gunwale |
+| Landing repair | Rowboat | Boat livewell (6) | Crawler Finder |
 | Field Guide 12 | — | Holding pond | — |
-| Stainwater lantern walk | — | — | Night Eyes |
+| Cougar Slough lantern walk | — | — | Night Eyes |
 | Snag Crew exposed | — | Conservation net | Cut the Mesh |
-| Granite hut repaired | Fly rod | — | Fly Presentation |
-| Pollution vote (clean) | — | — | Read Stain |
-| Dam Keepers | Heavy river rod | — | — |
-| Northwoods club pin | — | Rubber trophy net | — |
-| Ice Moon Derby | Ice rod, ice house | — | Jig in the Dark |
+| Granite Falls hut repaired | Model 67 Fly rod | — | Fly Presentation |
+| Tragedy at the Dam Store (clean vote) | — | — | Read Stain |
+| The Journey of Ruby II | Rapidan Bend rod | — | — |
+| Horseshoe Chain club pin | — | Rubber trophy net | — |
+| Ice Moon Derby | Boot Lake Ice rod, fish house | — | Jig in the Dark |
 | Conservation path | — | Honor Net | Honor Release |
-| Harbor cup | — | — | Derek boats with you |
+| Mystery of Heron Lake / circuit cup | — | — | Ol Catch N. Kraft boats with you |
 
 ## Size gates (cannot catch until gear exists)
 
@@ -33,7 +33,7 @@ is skipped, the tool or skill does not exist yet.
 | Pan | Bluegill, shiners, darters | Hand net |
 | Sport | Bass, perch, trout, pike under 30 in | Landing net + cooler |
 | Trophy | Musky, big cat, drum | Trophy net + boat livewell |
-| River giant | Lake sturgeon, alligator gar, monsters | Heavy rod + trophy net |
+| River giant | Lake sturgeon, alligator gar, monsters | Rapidan Bend rod + trophy net |
 
 A failed size gate is a scripted break-off, not a silent RNG miss.
 

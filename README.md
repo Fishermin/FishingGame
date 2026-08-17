@@ -12,11 +12,11 @@ Enter a name, check the weather, pick bait, and fish. High scores stay in
 the browser. Derek is your partner. Catch a Bullhead or Sheepshead for a
 free cast.
 
-## Next: Derek's Fishing Quest
+## Next: Ol Catch N. Kraft's Fishing Quest
 
 A planned 16-bit RPG built on this game's fish, jokes, and weather:
 
-- Turn-based battles and a Field Guide of 70+ freshwater species
+- Turn-based battles and a Field Guide of 79 freshwater species
 - Club pins instead of gym badges, nets instead of balls
 - Tools and skills earned from story arcs, not from a full shop
 
@@ -27,4 +27,6 @@ Read the plan:
 3. [Progression map](docs/progression.md)
 4. [Starter dex data](data/fish-dex.json)
 
-The trip games stay. Quest is a new `quest/` game once Phase 1 starts.
+The trip games stay as Quick Trip and The Fishing Trail. Quest is a new
+`quest/` game once Phase 1 starts. The Quest build is static files, so it
+can live on GitHub Pages now and move to Apache later.

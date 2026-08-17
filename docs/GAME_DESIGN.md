@@ -1,4 +1,4 @@
-# Derek's Fishing Quest — Game Design Document
+# Ol Catch N. Kraft's Fishing Quest — Game Design Document
 
 A plan for turning Derek's Fishing Game from a 10-cast score trip into a
 Pokemon-style freshwater RPG: explore a watershed, battle fish, capture a
@@ -6,8 +6,9 @@ field guide's worth of species, and earn gear by living through the story.
 
 This document is the build contract. Existing trip modes
 (`fishingtrip.html`, `fishingtrail.html`, `DereksGame.sh`) stay playable as
-arcade side modes. The new campaign is a separate game that reuses their
-tone, fish names, weather, bait jokes, and Derek.
+arcade side modes (Quick Trip and The Fishing Trail). The new campaign is a
+separate game that reuses their tone, fish names, weather, and bait jokes.
+The Quest rival and later boat partner is **Ol Catch N. Kraft**.
 
 ---
 
@@ -20,9 +21,9 @@ with the champions in their livewells. Permits, rods, and skills are not
 purchased from a full catalog — they are the natural result of the situations
 you get into.
 
-**Working title:** Derek's Fishing Quest
+**Working title:** Ol Catch N. Kraft's Fishing Quest
 **Genre:** 16-bit overworld RPG + turn-based battles + collection
-**Platform:** Browser (GitHub Pages), keyboard + gamepad, later touch
+**Platform:** Browser (GitHub Pages now; the same static build later on Apache)
 **Look:** Super Nintendo / Game Boy Color era pixel art, not modern UI
 **Tone:** Midwest lakeside humor from the current game, plus a real story
 
@@ -40,7 +41,7 @@ The mapping is:
 | Party of 6 | Livewell of 6 |
 | PC boxes | Holding pond at home camp |
 | Pokeballs | Nets (catch rate + fish size gates) |
-| HMs | Angler skills earned from scenarios |
+| HMs | Angler skills earned from scenes |
 | Team Rocket | The Snag Crew (illegal netters) |
 | Legendaries | River monsters tied to story |
 
@@ -55,9 +56,9 @@ The mapping is:
    grinding a shop.
 4. **Readable 16-bit.** SNES-era sprites, tilemaps, and battle chrome. If it
    would not fit on a 1994 cartridge box, cut it.
-5. **The trip game's soul.** Weather, bait theater, Derek, ridiculous miss
-   lines, Bullhead/Sheepshead luck — they belong in the RPG, not only in the
-   arcade modes.
+5. **The trip game's soul.** Weather, bait theater, Ol Catch N. Kraft,
+   ridiculous miss lines, Bullhead/Sheepshead luck — they belong in the RPG,
+   not only in the arcade modes.
 
 ---
 
@@ -68,7 +69,7 @@ The repo already has a complete arcade loop:
 - 10 casts, weather factor, bait/lure choice, size tiers, point score
 - Twenty freshwater species with length factors and rarity tiers
 - A modern lakeside edition and a 1980s Trail edition
-- Local high scores, Derek as partner, cut-bait risk/reward
+- Local high scores, Derek as partner in those trip modes, cut-bait risk/reward
 
 **Reuse as systems, not as the whole game:**
 
@@ -96,8 +97,8 @@ required permit, and a duel against the club champion.
 
 ```
 Camp → walk the bank → cast
-        → HOOK BATTLE vs wild fish
-        → net capture or it breaks off
+        → battle
+        → fish battle
         → livewell / Field Guide update
         → town talk / story beat
         → club duel vs rival angler
@@ -117,8 +118,8 @@ piece of kit. Empty grinding loops are a design bug.
 Both use the same turn-based engine and the same fish stats.
 
 **Wild hook battle.** You vs a wild fish. Winning by KO is allowed, but
-capture requires a net throw while the fish still has stamina. KO with no
-net is a lost specimen (it sinks away). This makes nets matter.
+capture needs a net while the fish still has stamina. KO with no net is a
+lost specimen (it sinks away). This makes nets matter.
 
 **Livewell duel.** A rival angler sends fish from their livewell. You send
 yours. Standard 1v1 with switches. No capturing the opponent's fish.
@@ -220,18 +221,18 @@ A coffee-can livewell cannot hold a lake sturgeon. That is a story beat,
 not a tooltip buried in a shop.
 
 Failed nets play miss lines from the trip game (pelican, pontoon, snapping
-turtle, Derek knocks it off with the net). Three failures in one battle and
-the fish breaks off.
+turtle, Ol Catch N. Kraft knocks it off with the net, a jackalope on the
+bank). Three failures in one battle and the fish breaks off.
 
 Catch-and-release is always offered after a successful land. Release still
-fills the Field Guide and can award a conservation token used in the
-pollution arc.
+fills the Field Guide and can award a conservation token used in Tragedy
+at the Dam Store.
 
 ---
 
 ## 6. Field Guide — the freshwater roster
 
-Target: **72 regular species + 5 river monsters = 77**. All freshwater.
+Target: **74 regular species + 5 river monsters = 79**. All freshwater.
 Midwest core first (the current 20), then the rest of the inland map.
 
 Starter pool (player chooses one, rival takes a type-advantage neighbor):
@@ -242,8 +243,8 @@ Starter pool (player chooses one, rival takes a type-advantage neighbor):
 | Bullhead | Night / Stone | Joke fish of the trip game, secretly tough |
 | Largemouth Bass | Fang / Weed | The poster fish |
 
-Derek always starts with the one that beats yours, then later shows up
-with a Musky he "definitely meant to catch."
+Ol Catch N. Kraft always starts with the one that beats yours, then later
+shows up with a Musky he "definitely meant to catch."
 
 Rarity bands: Common, Uncommon, Rare, Trophy, Legend. Trophy fish are
 regional; Legends are story-locked.
@@ -267,18 +268,41 @@ region. Each water is a "gym town" plus routes.
 
 | # | Water | Habitat | Club champion theme | Permit you earn |
 | --- | --- | --- | --- | --- |
-| 0 | Home Camp / Cattail Pond | Weedy farm pond | Tutorial with Derek | Shore license |
-| 1 | Milltown Reservoir | Warm reservoir | Bass club, docks, ski boats | Reservoir pin |
-| 2 | Cedar Creek | Clear stream | Smallmouth and current | Creek walk pin |
-| 3 | Stainwater Slough | Backwater, cypress, night | Catfish club, lanterns | Night permit |
-| 4 | Granite Rapids | Cold tailwater | Fly shop wardens | Fly water pin |
-| 5 | Big River Bend | Wide river, barges | Drum, buffalo, sturgeon | Big-river pin |
-| 6 | Northwoods Chain | Lakes, weeds, ice | Musky club, then freeze-up | Ice house pin |
+| 0 | Home Camp / Cattail Pond | Weedy farm pond | Tutorial with Ol Catch N. Kraft | Shore license |
+| 1 | Elysian Reservoir | Warm reservoir | Bass club, docks, ski boats | Reservoir pin |
+| 2 | Englehorn Creek | Clear stream | Smallmouth and current | Creek walk pin |
+| 3 | Cougar Slough | Backwater, cypress, night | Catfish club, lanterns | Night permit |
+| 4 | Granite Falls Rapids | Cold tailwater | Fly shop wardens | Fly water pin |
+| 5 | Rapidan Bend | Wide river, barges | Drum, buffalo, sturgeon | Big-river pin |
+| 6 | Horseshoe Chain | Lakes, weeds, ice | Musky club, then freeze-up | Ice house pin |
 | 7 | Harbor of Champions | Mixed Great Lakes mouth | All types, gauntlet | Circuit cup |
 
 Overworld scale: SNES 16×16 tiles, 256×224 camera, pixel-perfect integer
 scale. Towns are small. Routes are banks, bridges, cuts, and one boat
 crossing that you cannot take until the landing is repaired.
+
+### Cast
+
+- You (junior angler)
+- Ol Catch N. Kraft (rival, later boat partner)
+- Club champions / wardens
+- Elysian dockhand
+- Englehorn Creek old-timer
+- Englehorn fly kid
+- Granite Falls Rapids warden
+- Dam Keepers
+- Ski-boat / pontooner NPC
+- Warden's kid vs retired fly angler (keep vs release)
+- The Snag Crew
+- Paper mill / dump (pollution vote in Tragedy at the Dam Store)
+
+Pets reused from the trip game: Rizzo, Dixie, Suzie, Cooper, a stray dog,
+Wicket, Henry, Kezzie, Rip.
+
+Birds: duck, goose, eagle, hawk, owl, pelican, cormorant, heron, crane, swan.
+
+Critters: bear, otter, beaver, mink, muskrat, skunk, raccoon, coyote, bobcat,
+lynx, cougar (Cougar Slough), woodchuck, jackalope.
 
 ---
 
@@ -287,16 +311,21 @@ crossing that you cannot take until the landing is repaired.
 The main spine is the River Circuit. Side arcs are not fetch quests; each
 one leaves a tool, a skill, a fish, or a permanent map change.
 
-### 8.1 Main spine — The Circuit
+### 8.1 Main spine
 
-1. **The Warped Rod.** Inherit the rod. Catch the starter. Derek races you
-   to the pond and loses on purpose, then does not.
-2. **Milltown Open.** First club. Learn livewell duels. A ski boat (the
-   trip game's pontooner) becomes a recurring hazard NPC.
-3. **Pins and Permits.** Each club win is a pin *and* a legal reason to
-   enter the next water. Wardens actually check.
-4. **Harbor Gauntlet.** Four club champions plus Derek. End of the first
-   loop, not the end of the game.
+1. **The Warped Rod.** Inherit the rod. Catch the starter. Ol Catch N. Kraft
+   races you to the pond and loses on purpose, then does not.
+2. **Sioux Valley Open.** First club, at Elysian Reservoir. Learn livewell
+   duels. A ski boat (the trip game's pontooner) becomes a recurring hazard
+   NPC. Payoff: reservoir pin, Elysian Model 202 baitcaster, Drag Control.
+3. **Search for Zippy's Treasure.** Zippy is a local legend whose cache of
+   tackle is mapped in scraps across the clubs. Following the clues is how
+   you collect pins, permits, and named lures, and how the watershed opens.
+   Payoff: Zippy's cache and the route toward Heron Lake.
+4. **Mystery of Heron Lake.** End of the first loop, not the end of the
+   game. Fish and a club champion go missing at Heron Lake. You run a
+   gauntlet of champions plus Ol Catch N. Kraft while the mystery resolves.
+   Payoff: Circuit cup. Ol Catch N. Kraft will boat with you after this.
 
 ### 8.2 Villain arc — The Snag Crew
 
@@ -308,41 +337,44 @@ the **Cut the Mesh** skill (escape from overworld snare tiles).
 This is the Team Rocket analog, written as a fishing crime, not a cartoon
 mafia.
 
-### 8.3 The river is sick
+### 8.3 Tragedy at the Dam Store
 
-A paper mill (or old dump) upstream turns Granite Rapids milky. Cold-water
-fish vanish from the table. You sample water, ferry evidence, and a club
-vote follows. Payoff: **Read Stain** skill (see polluted tiles) and the
-return of brook trout to the encounter table. Optional bad ending if you
-side with the mill for cheap gear — those lures work, but the Field Guide
-in that water stays broken.
+The bait shop at the dam floods when a gate fails (and a mill or old dump
+upstream is part of why). Granite Falls Rapids turns milky. Cold-water fish
+vanish from the table. You sample water, ferry evidence, and a club vote
+follows. Payoff: **Read Stain** skill (see polluted tiles) and the return of
+brook trout to the encounter table. Optional bad ending if you side with
+the mill for cheap gear — those lures work, but the Field Guide in that
+water stays broken.
 
-### 8.4 Derek's fish that got away
+### 8.4 Ol Catch N. Kraft's fish that got away
 
-Derek will not talk about a jump at dusk on the Northwoods Chain. The arc
-unlocks after club 6. Payoff: the river monster **Old Copper** (Fang/Weed
-musky) and Derek as a postgame partner who can sit in the overworld boat.
+Ol Catch N. Kraft will not talk about a jump at dusk on the Horseshoe
+Chain. The arc unlocks after club 6. Payoff: the river monster **Old Copper**
+(Fang/Weed musky) and Ol Catch N. Kraft as a postgame partner who can sit
+in the overworld boat.
 
-### 8.5 Lost lure of Milltown
+### 8.5 The Lost Swedish Pimple
 
-A named Rapala in a tree, visible from the first visit, unreachable until
-you have **Walk the Gunwale** (boat skill). Payoff: a held item that boosts
-Swift moves, plus a Field Guide page on the original lure colors from the
-trip game.
+A Swedish Pimple in a tree off an Elysian point, visible from the first
+visit, unreachable until you have the **rowboat**. Payoff: a held item that
+boosts Swift moves, plus a Field Guide page on the original lure colors
+from the trip game.
 
 ### 8.6 Ice Moon Derby
 
-Northwoods freezes. You cannot fish open water. The ice house pin is
-earned by surviving a night event (whiteout, stove, a burbot under the
-hole). Payoff: ice rod, **Jig in the Dark** skill, Cold-type encounter
-table, and the monster **Ice-Eye**.
+The Horseshoe Chain freezes. You cannot fish open water. The ice house pin
+is earned by surviving a night event (whiteout, stove, a burbot under the
+hole). Payoff: **Boot Lake Ice rod**, **fish house**, **Jig in the Dark**
+skill, Cold-type encounter table, and the monster **Ice-Eye**.
 
-### 8.7 The Dam Keepers
+### 8.7 The Journey of Ruby II
 
-Big River Bend will not let you below the dam without a keeper's blessing.
-You run messages, then a choice: help blast a logjam (opens sturgeon
-spawning tiles) or leave it (protects a rare redhorse). Either way you get
-the **Heavy Rod** and a different Legend path.
+Ruby II is a boat that needs to run Rapidan Bend. Dam Keepers will not let
+you below the dam without a blessing. You crew the journey, then a choice:
+help blast a logjam (opens sturgeon spawning tiles) or leave it (protects
+a rare redhorse / Pallid Sturgeon path). Either way you get the **Rapidan
+Bend rod** and a different Legend path.
 
 ### 8.8 Catch and keep
 
@@ -376,10 +408,10 @@ Story-locked, one per late water. Not random shiny chases.
 | Name | Water | Types | How you meet them |
 | --- | --- | --- | --- |
 | Cattail King | Pond, postgame | Fang / Weed | Record largemouth after Field Guide 20 |
-| Redfin Widow | Granite Rapids | Cold / Swift | After the river is cleaned |
-| The Dam Ghost | Big River | Scale / Stone | Albino sturgeon under the spillway |
-| Old Copper | Northwoods | Fang / Weed | Derek's dusk jump |
-| Ice-Eye | Frozen chain | Cold / Night | Ice Moon Derby hole |
+| Redfin Widow | Granite Falls Rapids | Cold / Swift | After Tragedy at the Dam Store is cleaned |
+| The Dam Ghost | Rapidan Bend | Scale / Stone | Albino sturgeon under the spillway |
+| Old Copper | Horseshoe Chain | Fang / Weed | Ol Catch N. Kraft's dusk jump |
+| Ice-Eye | Frozen chain / Boot Lake | Cold / Night | Ice Moon Derby hole |
 
 ---
 
@@ -396,21 +428,21 @@ Slots: Rod, Reel, Line, Net, Vessel, Livewell, Held lure.
 | Tool | How you get it | What it changes |
 | --- | --- | --- |
 | Warped spinning rod | Opening | Short casts, pond + creek only |
-| Milltown baitcaster | Beat bass club | Reservoir distance, heavier lures |
-| Creek wand | Help the Cedar fly kid *before* you own a fly rod | Accuracy in current tiles |
-| Fly rod | Granite Rapids warden, after you repair the hut | Fly water encounters |
-| Heavy river rod | Dam Keepers | Size gate for sturgeon / blue cat |
-| Ice rod | Ice Moon Derby | Frozen tiles become fishable |
+| Elysian Model 202 baitcaster | Beat the Sioux Valley Open | Reservoir distance, heavier lures |
+| LeSeuer Creek wand | Help the Englehorn fly kid *before* you own a fly rod | Accuracy in current tiles |
+| Model 67 Fly rod | Granite Falls Rapids warden, after you repair the hut | Fly water encounters |
+| Rapidan Bend rod | The Journey of Ruby II | Size gate for sturgeon / blue cat |
+| Boot Lake Ice rod | Ice Moon Derby | Frozen tiles become fishable |
 | Hand net | Start | Small fish only |
-| Landing net | Milltown dockhand, after you return a spilled tackle box | Medium size gate |
-| Rubber trophy net | Northwoods club | Large size gate, gentler Slip penalty |
+| Landing net | Elysian dockhand, after you return a spilled tackle box | Medium size gate |
+| Rubber trophy net | Horseshoe Chain club | Large size gate, gentler Slip penalty |
 | Conservation net | Stop the Snag Crew | Best catch rate, release prompt |
 | Coffee-can livewell | Start | 3 fish, tiny size cap |
 | Dock cooler | Reservoir pin | 4 fish |
 | Boat livewell | Repair the landing | 6 fish, standard party |
 | Holding pond | Home camp, after 12 Field Guide entries | Storage boxes |
-| Rowboat | Landing repair arc | Cross cuts, gunwale skill |
-| Ice house | Ice pin | Northwoods winter hub |
+| Rowboat | Landing repair arc | Cross cuts; reach the Lost Swedish Pimple |
+| Fish house | Ice pin | Horseshoe Chain winter hub |
 
 Line ratings are a soft size gate: 6 lb on a musky is a story loss, not a
 soft lock, if you have not earned heavier gear.
@@ -422,14 +454,14 @@ the overworld or as a battle passive.
 
 | Skill | Earned from | Use |
 | --- | --- | --- |
-| Read the Seam | Cedar Creek old-timer | See hidden current encounter tiles |
-| Set the Hook | First club loss to Derek, then a rematch lesson | +catch on the turn after a crit |
-| Drag Control | Milltown ski-boat rescue | Wild fish with high Pull no longer auto-snap |
-| Night Eyes | Stainwater lantern walk | Towns and banks stay walkable after dark |
-| Fly Presentation | Granite hut | Required to even hook some Cold/Swift fish |
-| Walk the Gunwale | First boat trip | Reach island trees / lost lure |
+| Read the Seam | Englehorn Creek old-timer | See hidden current encounter tiles |
+| Set the Hook | First club loss to Ol Catch N. Kraft, then a rematch lesson | +catch on the turn after a crit |
+| Drag Control | Elysian ski-boat rescue | Wild fish with high Pull no longer auto-snap |
+| Night Eyes | Cougar Slough lantern walk | Towns and banks stay walkable after dark |
+| Fly Presentation | Granite Falls hut | Required to even hook some Cold/Swift fish |
+| Crawler Finder | Landing repair (worms under the boards, and after rain) | Find nightcrawlers on the overworld; free worm bait |
 | Cut the Mesh | Snag Crew | Clear net traps on the map |
-| Read Stain | Pollution arc | Polluted water is visible and avoidable |
+| Read Stain | Tragedy at the Dam Store | Polluted water is visible and avoidable |
 | Jig in the Dark | Ice Moon | Ice-hole battles, Cold table |
 | Check the Knot | Hook Protector arc | Stops self-crit line snaps |
 | Honor Release | Conservation path | Extra Field Guide XP on release |
@@ -441,10 +473,10 @@ You cannot skip the scene and buy the skill.
 - **Club pins** — story keys
 - **Permits** — warden checks
 - **Field Guide pages** — completion ribbons, not just a %, unlock postgame
-- **Conservation tokens** — currency for the pollution vote and Honor Net
+- **Conservation tokens** — currency for the Dam Store vote and Honor Net
 - **Named lures** — held items with histories from the existing lure list
-- **Derek** — later, a guest in the boat who can net for you once per wild
-  battle (and still knock one off, because of course)
+- **Ol Catch N. Kraft** — later, a guest in the boat who can net for you
+  once per wild battle (and still knock one off, because of course)
 
 XP goes to fish. Reputation goes to the angler and gates which NPCs will
 talk. Reputation is earned by finishing arcs, not by grinding the same
@@ -478,7 +510,8 @@ Rules:
 
 **Audio:** Square/triangle/noise chiptune. A bank theme, a wild battle
 sting, a club duel theme, a night slough theme, a quiet ice theme. Keep
-the trip game's humor in jingles (a sad tuba when Derek nets the air).
+the trip game's humor in jingles (a sad tuba when Ol Catch N. Kraft nets
+the air).
 
 **Scope control:** One tileset, one player sprite, eight habitat palettes,
 and fish sprites in batches of 10. Silhouettes before full color. A fish
@@ -488,7 +521,8 @@ with a strong silhouette and two frames beats a painted illustration.
 
 ## 11. Technical plan
 
-Stay on GitHub Pages. No account server required for v1.
+Ship as static HTML, JS, and assets. No account server required for v1.
+GitHub Pages hosts the first build; the same files can move to Apache later.
 
 **Recommended stack**
 
@@ -537,19 +571,20 @@ Documents and a starter dex. No quest code yet.
 ### Phase 1 — Vertical slice
 
 One screen of Cattail Pond. Walk, face water, cast, one wild battle,
-catch a Bluegill, talk to Derek, save. 8 fish max. Placeholder tiles are
-fine if the silhouette reads. **Exit test:** a stranger understands
+catch a Bluegill, talk to Ol Catch N. Kraft, save. 8 fish max. Placeholder
+tiles are fine if the silhouette reads. **Exit test:** a stranger understands
 FIGHT / NET / LIVEWELL without a manual.
 
 ### Phase 2 — Livewell duels + Field Guide UI
 
-Derek rematch as a 2v2 duel. Field Guide pages for whatever you caught.
-Holding pond at the camp shack. Starter choice.
+Ol Catch N. Kraft rematch as a 2v2 duel. Field Guide pages for whatever you
+caught. Holding pond at the camp shack. Starter choice.
 
-### Phase 3 — Milltown Reservoir
+### Phase 3 — Elysian Reservoir
 
-First real map, first club, baitcaster, landing net, ski-boat NPC,
-weather affecting tables. Link Quick Trip from the title screen.
+First real map, Sioux Valley Open, Model 202 baitcaster, landing net,
+ski-boat NPC, weather affecting tables. Link Quick Trip from the title
+screen.
 
 ### Phase 4 — Types, moves, and the first 30 fish
 
@@ -558,18 +593,19 @@ original 20 trip-game species plus 10 more.
 
 ### Phase 5 — Circuit waters 2–4
 
-Cedar Creek, Stainwater Slough, Granite Rapids. Skills: Read the Seam,
-Night Eyes, Fly Presentation. Snag Crew intro. Pollution arc start.
+Englehorn Creek, Cougar Slough, Granite Falls Rapids. Skills: Read the Seam,
+Night Eyes, Fly Presentation. Snag Crew intro. Tragedy at the Dam Store
+begins. Search for Zippy's Treasure continues.
 
 ### Phase 6 — Circuit waters 5–7 and the Harbor
 
-Big River, Northwoods, ice, gauntlet. Heavy rod, boat, ice house. Derek's
-fish that got away. Five river monsters as optional at this point if the
-slice is stable; otherwise stubs.
+Rapidan Bend, Horseshoe Chain, ice, Mystery of Heron Lake. Rapidan Bend
+rod, boat, fish house. Ol Catch N. Kraft's fish that got away. Five river
+monsters as optional at this point if the slice is stable; otherwise stubs.
 
 ### Phase 7 — Full dex and remaining arcs
 
-72 species, all bankside side arcs, conservation ending variants,
+79 species, all bankside side arcs, conservation ending variants,
 chiptune pass, sprite pass, derby-as-postgame using the old scoring math.
 
 ### Phase 8 — Polish
@@ -606,8 +642,8 @@ changing the code.
 | Starter | Bluegill / Bullhead / Largemouth |
 | Livewell size | 3 → 4 → 6 |
 | Level cap | 50 story, 70 postgame |
-| Engine | Phaser 3 on GitHub Pages |
-| Derek | Rival + later boat partner, never a silent oak in a lab |
+| Engine | Phaser 3, static host (GitHub Pages now, Apache later) |
+| Ol Catch N. Kraft | Rival + later boat partner, never a silent oak in a lab |
 
 ---
 
