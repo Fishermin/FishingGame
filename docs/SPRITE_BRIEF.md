@@ -9,6 +9,9 @@ Share this file as-is. Sizes and look are locked in
 [`field-guide.md`](field-guide.md). Gear unlocks live in
 [`progression.md`](progression.md).
 
+**First batch only, in plain Procreate language:**
+[`FIRST_GRAPHICS.md`](FIRST_GRAPHICS.md).
+
 ---
 
 ## Art spec (give this to the artist first)
