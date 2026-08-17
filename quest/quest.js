@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const SAVE_KEY = "catchAndCraftQuestV1";
+  const SAVE_KEY = "catchAndCraftQuestV2";
   const TILE = 16;
   const COLS = 16;
   const ROWS = 14;
@@ -36,12 +36,12 @@
   const MAP_ROWS = [
     "TTTTTTTTTTTTTTTT",
     "TZCCCCCCCCCCCCCT",
-    "T,,..........,,T",
-    "T..............T",
-    "T....ssss......T",
-    "T..............T",
-    "T,,..........,,T",
-    "hhbb........bbhh",
+    "Th,..........,hT",
+    "Th............hT",
+    "Th...ssss.....hT",
+    "Th............hT",
+    "Th,..........,hT",
+    "hhbbbbbbbbbbbbhh",
     "hbbwwwwwwwwwwbbh",
     "TwwwwwwwwwwwwwwT",
     "TwwwwwwwwwwwwwwT",
@@ -63,6 +63,8 @@
   let tick = 0;
   let walkLock = 0;
   let keeperTimer = 0;
+  let keeperDwell = 0;
+  let introIndex = 0;
   let dialog = [];
   let dialogPage = 0;
   let flash = 0;
@@ -82,16 +84,24 @@
     metCatch: false,
     catchBond: 0,
     catchFlags: { spotted: false, fish: false, zippy: false },
+    cleared: false,
     player: { c: 1, r: 7, facing: "down" },
-    keeper: { c: 4, r: 4, facing: "right", pathI: 0 },
+    keeper: { c: 8, r: 3, facing: "right", pathI: 1 },
     catchNpc: { c: 14, r: 7, facing: "left" },
   };
 
+  const KEEPER_STEP = 50;
+  const KEEPER_DWELL = 48;
+  const INTRO_PAGES = [
+    "A package hits the porch at dawn. No note. Just a warped spinning rod and a coffee-can.",
+    "The fishing clubs own the watershed. Empty can, they will not even look at you. You need a fish.",
+    "Closest water is Valleybrook Pond: hole 9, a golf-course hazard. Golfers hate anglers. The bluegill do not.",
+  ];
   const KEEPER_PATH = [
-    { c: 2, r: 3 },
-    { c: 13, r: 3 },
-    { c: 13, r: 6 },
-    { c: 2, r: 6 },
+    { c: 4, r: 3 },
+    { c: 11, r: 3 },
+    { c: 11, r: 5 },
+    { c: 4, r: 5 },
   ];
 
   function tileAt(c, r) {
@@ -108,18 +118,14 @@
     return tileAt(c, r) === "h";
   }
 
-  function fishable(c, r, facing) {
-    const dc = facing === "left" ? -1 : facing === "right" ? 1 : 0;
-    const dr = facing === "up" ? -1 : facing === "down" ? 1 : 0;
-    if (tileAt(c, r) === "b" && (tileAt(c + dc, r + dr) === "w" || tileAt(c, r) === "b")) {
-      return tileAt(c + dc, r + dr) === "w" || neighborsWater(c, r);
+  function fishable(c, r) {
+    if (tileAt(c, r) !== "b") return false;
+    for (let dr = -2; dr <= 2; dr++) {
+      for (let dc = -2; dc <= 2; dc++) {
+        if (tileAt(c + dc, r + dr) === "w") return true;
+      }
     }
-    return neighborsWater(c, r) && tileAt(c, r) === "b";
-  }
-
-  function neighborsWater(c, r) {
-    return ["w"].includes(tileAt(c + 1, r)) || ["w"].includes(tileAt(c - 1, r)) ||
-      ["w"].includes(tileAt(c, r + 1)) || ["w"].includes(tileAt(c, r - 1));
+    return false;
   }
 
   function formatName(raw) {
@@ -156,15 +162,11 @@
     return Math.max(Math.abs(a.c - b.c), Math.abs(a.r - b.r));
   }
 
-  function keeperSeesPlayer() {
-    const p = game.player;
-    const k = game.keeper;
-    if (hiddenAt(p.c, p.r)) return false;
-    const dist = chebyshev(p, k);
-    if (dist > 4) return false;
-    const t = tileAt(p.c, p.r);
-    if (t === "T" || t === "C") return false;
-    return t === "." || t === "," || t === "s" || t === "b" || t === "p";
+  function objectiveLine() {
+    if (game.cleared) return "Hole 9 cleared. Fish, or talk to Zippy.";
+    if (!game.talkedZippy) return "Walk north in the reeds. Talk to Zippy (Z).";
+    if (!game.skills.theNet) return "Step onto the bank. Press Z to cast.";
+    return "Land that fish. FIGHT to tire it, then NET.";
   }
 
   function scaleStats(base, level) {
@@ -213,15 +215,14 @@
   }
 
   function pickWild() {
+    if (!game.skills.theNet) return POND_FISH[0];
     const roll = Math.random();
-    if (roll < 0.28) return POND_FISH[0];
-    if (roll < 0.46) return POND_FISH[1];
-    if (roll < 0.6) return POND_FISH[2];
-    if (roll < 0.72) return POND_FISH[5];
-    if (roll < 0.82) return POND_FISH[3];
-    if (roll < 0.9) return POND_FISH[7];
-    if (roll < 0.97) return POND_FISH[4];
-    return POND_FISH[6];
+    if (roll < 0.4) return POND_FISH[0];
+    if (roll < 0.65) return POND_FISH[1];
+    if (roll < 0.82) return POND_FISH[2];
+    if (roll < 0.92) return POND_FISH[5];
+    if (roll < 0.98) return POND_FISH[3];
+    return POND_FISH[7];
   }
 
   function partyFighters() {
@@ -249,32 +250,11 @@
     if (line) dialog.push(line);
   }
 
-  function spotted() {
-    game.warnings += 1;
-    flash = 12;
-    const lines = [
-      "GROUNDSKEEPER: Hey! This is a golf course, not a landing!",
-      "GROUNDSKEEPER: Keep your line out of my water hazard!",
-    ];
-    if (game.warnings >= 3) {
-      lines.push("He storms toward the 7th green, still yelling.");
-      lines.push("Zippy hisses from the trees: Lay low. He'll loop back.");
-      game.warnings = 0;
-    } else {
-      lines.push("You dive into the cattails.");
-    }
-    game.player.c = 1;
-    game.player.r = 7;
-    game.player.facing = "down";
-    if (game.metCatch && bumpCatch("spotted")) {
-      lines.push("CATCH: You almost got US both tossed, " + game.name + "!");
-    }
-    if (hiddenAt(game.player.c, game.player.r) && !game.skills.keepStill) {
-      game.skills.keepStill = true;
-      lines.push("You learned KEEP STILL!");
-      lines.push("Cattails break his line of sight.");
-    }
-    showDialog(lines);
+  function bumpKeeper() {
+    showDialog([
+      "GROUNDSKEEPER: This is a golf course, not a landing!",
+      "He is busy with the fairway. The reeds and the bank are yours.",
+    ]);
   }
 
   function talkCatch() {
@@ -334,19 +314,20 @@
       game.loaner = makeFighter(SHINER, 5, true);
       showDialog([
         "A man in a faded cap is somehow running a bait shop in the trees.",
-        "ZIPPY: Keep your voice down. I sell the good stuff.",
-        "ZIPPY: Worms. Don't ask where.",
-        "ZIPPY: Take this shiner. You'll need a fish in the can.",
-        "ZIPPY: If the groundskeeper sees you, hide in the cattails.",
-        "ZIPPY: Kid on the east bank thinks he owns the hole. He doesn't.",
+        "ZIPPY: Keep your voice down. Worms. Don't ask where.",
+        "ZIPPY: Take this shiner. Clubs want a fish in the can.",
+        "ZIPPY: Step onto the bank. Press Z to cast.",
+        "ZIPPY: FIGHT tires it. NET lands it. Don't knock it out.",
         "Got 5 WORMS and a loaner GOLDEN SHINER.",
       ]);
+      learnSkill("keepStill", "KEEP STILL", "Stay in the reeds. He watches the fairway, not you.");
+      saveGame();
+      saveNote = 90;
       return;
     }
-    const opts = [
-      "ZIPPY: He's not keen on anglers. I noticed.",
-      "ZIPPY: Worms are on the house while that guy watches the fairway.",
-    ];
+    const opts = game.cleared
+      ? ["ZIPPY: Shore license. The clubs will hear you now.", "ZIPPY: Worms are still on the house."]
+      : ["ZIPPY: He's not keen on anglers. I noticed.", "ZIPPY: Worms are on the house while that guy watches the fairway."];
     game.worms = Math.max(game.worms, 5);
     if (game.loaner && game.loaner.hp <= 0) {
       game.loaner.hp = game.loaner.maxHp;
@@ -368,31 +349,31 @@
       showDialog(["The coffee-can is empty.", "Zippy might float you a fish."]);
       return;
     }
-    if (catchRank() === "friend" && chebyshev(game.player, game.keeper) <= 4 && !hiddenAt(game.player.c, game.player.r)) {
-      showDialog(["CATCH: Wait. Cart path. He's looking this way."]);
-      return;
-    }
-    if (keeperSeesPlayer()) {
-      spotted();
+    if (catchRank() === "friend" && chebyshev(game.player, game.keeper) <= 1) {
+      showDialog(["CATCH: Wait. Cart path. Give him a second."]);
       return;
     }
     game.worms -= 1;
+    const tutorial = !game.skills.theNet;
     const wildSp = pickWild();
-    const wildLv = 2 + Math.floor(Math.random() * 4);
+    const wildLv = tutorial ? 2 : 2 + Math.floor(Math.random() * 2);
     battle = {
       phase: "intro",
       cursor: 0,
       sub: 0,
+      fought: false,
       wild: makeFighter(wildSp, wildLv, false),
       mine: activeFighter(),
-      log: "A wild " + wildSp.name + " splashed at hole 9!",
+      log: tutorial
+        ? "A bluegill! FIGHT to tire it, then NET. Do not knock it out."
+        : "A wild " + wildSp.name + " splashed at hole 9!",
       netFails: 0,
       closed: false,
     };
     mode = "battle";
     if (!game.skills.dropALine) {
       game.skills.dropALine = true;
-      battle.log = "You learned DROP A LINE! A wild " + wildSp.name + " splashed!";
+      battle.log = "You learned DROP A LINE! FIGHT, then NET.";
     }
   }
 
@@ -427,7 +408,8 @@
   function enemyTurn() {
     const w = battle.wild;
     const m = battle.mine;
-    const power = 28 + Math.floor(Math.random() * 18);
+    const tutorial = !game.skills.theNet;
+    const power = tutorial ? 10 + Math.floor(Math.random() * 6) : 28 + Math.floor(Math.random() * 18);
     const dmg = damageFor(w, m, power, Math.random() < 0.3);
     m.hp = Math.max(0, m.hp - dmg);
     battle.log = "Wild " + w.name + " thrashed for " + dmg + "!";
@@ -442,6 +424,7 @@
       m.holdStage = Math.min(3, m.holdStage + 1);
       battle.log = m.name + " used Lay Up! Hold rose.";
     } else {
+      battle.fought = true;
       const special = kind === "sig";
       const power = kind === "sig" ? 50 : kind === "shake" ? 32 : 40;
       const dmg = damageFor(m, w, power, special);
@@ -452,7 +435,16 @@
       if (extra > 1.05) battle.log += " It bit deep!";
       if (extra < 0.95) battle.log += " A dull hit.";
     }
+    if (!game.skills.theNet && w.hp > 0 && battle.fought) {
+      battle.log += " Now NET it!";
+    }
     if (w.hp <= 0) {
+      if (!game.skills.theNet) {
+        w.hp = 1;
+        battle.log = "Easy. It is tired enough. NET it.";
+        battle.phase = "playerLog";
+        return;
+      }
       battle.phase = "lost";
       battle.log += " It rolled over. Too late to net.";
       return;
@@ -466,6 +458,15 @@
       battle.log = "Nothing left to land.";
       return;
     }
+    if (!game.skills.theNet) {
+      if (!battle.fought) {
+        battle.log = "Still too lively. FIGHT first, then NET.";
+        battle.phase = "playerLog";
+        return;
+      }
+      landFish(w);
+      return;
+    }
     if (w.species.lengthFactor > 28) {
       battle.netFails += 1;
       battle.log = "The " + w.name + " is too big for a hand net. It broke off.";
@@ -473,20 +474,19 @@
       return;
     }
     const stamPct = w.hp / w.maxHp;
-    let chance = 0.42 * (1 - stamPct * 0.7) * (1 - w.slip / 120);
-    if (w.species.lengthFactor > 20) chance *= 0.45;
+    let chance = 0.72 * (1 - stamPct * 0.55) * (1 - w.slip / 140);
+    if (w.species.lengthFactor > 20) chance *= 0.55;
     if (Math.random() < chance) {
       landFish(w);
     } else {
       battle.netFails += 1;
       const misses = [
-        "The groundskeeper's cart horn startles you. Slack!",
-        "It jumped and threw the hook.",
-        "Zippy almost cheers. You almost drop the rod.",
-        "Weeds. Just weeds. Then not weeds. Then gone.",
+        "Slack! Try NET again.",
+        "It jumped. Still on. NET it.",
+        "Weeds. It is still there. NET.",
       ];
       battle.log = misses[Math.floor(Math.random() * misses.length)];
-      if (battle.netFails >= 3) {
+      if (battle.netFails >= 5) {
         battle.log += " Line snaps. It is gone.";
         battle.phase = "lost";
       } else {
@@ -522,19 +522,37 @@
     battle.phase = "done";
   }
 
+  function clearValleybrook() {
+    game.cleared = true;
+    saveGame();
+    saveNote = 90;
+    const lines = ["The warped rod bent. That was a real fish."];
+    if (game.metCatch) {
+      lines.push("CATCH: ...Beginner's luck, " + game.name + ". Don't get used to my pond.");
+    } else {
+      lines.push("CATCH yells from the east bank. He saw that.");
+    }
+    lines.push("ZIPPY: Clubs talk to a can with a fish in it. You're in.");
+    lines.push("You slip off hole 9 before the cart comes back.");
+    lines.push("VALLEYBROOK POND — CLEARED");
+    showDialog(lines);
+  }
+
   function endBattle() {
+    const landed = battle && battle.phase === "done" && game.skills.theNet;
+    const tutorialFail = battle && !game.skills.theNet && !landed;
+    const phase = battle && battle.phase;
     battle = null;
     mode = "play";
-    if (game.pendingCatch === "fish" && game.metCatch) {
-      game.pendingCatch = null;
-      showDialog([
-        "CATCH: ...You actually landed one.",
-        "CATCH: Don't get cocky, " + game.name + ".",
-      ]);
+    game.pendingCatch = null;
+    if (tutorialFail) {
+      game.worms += 1;
+      if (phase === "lost" || phase === "wipe") {
+        showDialog(["ZIPPY: FIGHT once to tire it. Then NET. Don't knock it out.", "Worm's on the house."]);
+      }
       return;
     }
-    game.pendingCatch = null;
-    if (keeperSeesPlayer()) spotted();
+    if (landed && !game.cleared) clearValleybrook();
   }
 
   function saveGame() {
@@ -551,6 +569,7 @@
         metCatch: game.metCatch,
         catchBond: game.catchBond,
         catchFlags: game.catchFlags,
+        cleared: game.cleared,
         player: game.player,
         keeper: game.keeper,
         catchNpc: game.catchNpc,
@@ -567,10 +586,19 @@
       if (!game.catchNpc) game.catchNpc = { c: 14, r: 7, facing: "left" };
       if (!game.catchFlags) game.catchFlags = { spotted: false, fish: false, zippy: false };
       if (game.catchBond == null) game.catchBond = 0;
+      if (game.cleared == null) game.cleared = false;
+      keeperTimer = 0;
+      keeperDwell = 0;
       return true;
     } catch (err) {
       return false;
     }
+  }
+
+  function beginIntro() {
+    hideNameEntry();
+    introIndex = 0;
+    mode = "intro";
   }
 
   function newGame(name) {
@@ -587,16 +615,15 @@
     game.catchBond = 0;
     game.catchFlags = { spotted: false, fish: false, zippy: false };
     game.pendingCatch = null;
+    game.cleared = false;
     game.player = { c: 1, r: 7, facing: "down" };
-    game.keeper = { c: 4, r: 4, facing: "right", pathI: 0 };
+    game.keeper = { c: 8, r: 3, facing: "right", pathI: 1 };
     game.catchNpc = { c: 14, r: 7, facing: "left" };
+    keeperTimer = 0;
+    keeperDwell = 0;
     showDialog([
-      "VALLEYBROOK POND",
-      "Valleybrook Golf Course, hole 9.",
-      game.name + " sneaks onto the course with a warped rod.",
-      "Someone is already on the east bank. They do not look friendly.",
-      "The groundskeeper is not keen on people fishing his course.",
-      "Stay in the cattails. Leaves are moving by the clubhouse.",
+      "ZIPPY: " + game.name + ". Trees by the clubhouse. I have bait.",
+      "Stay in the reeds. Walk north. Land one fish. That is how this starts.",
     ]);
   }
 
@@ -662,9 +689,9 @@
       talkZippy();
       return;
     }
-    if (fishable(game.player.c, game.player.r, game.player.facing) || tileAt(game.player.c, game.player.r) === "b") {
+    if (fishable(game.player.c, game.player.r)) {
       if (!game.talkedZippy) {
-        showDialog(["You need bait first.", "Leaves are moving in the trees by the clubhouse."]);
+        showDialog(["You need bait first.", "Walk north in the reeds. Talk to Zippy."]);
         return;
       }
       startBattle();
@@ -689,34 +716,45 @@
     const nc = game.player.c + dc;
     const nr = game.player.r + dr;
     if (!walkable(nc, nr)) return;
+    if (nc === game.keeper.c && nr === game.keeper.r) {
+      bumpKeeper();
+      return;
+    }
     game.player.c = nc;
     game.player.r = nr;
     walkLock = 8;
-    if (hiddenAt(nc, nr) && keeperSeesPlayer() === false && chebyshev(game.player, game.keeper) <= 5 && !game.skills.keepStill) {
-      // standing in cattails near him
-      if (chebyshev(game.player, game.keeper) <= 4) {
-        learnSkill("keepStill", "KEEP STILL", "He looked right past the cattails.");
-        showDialog(dialog);
-      }
-    }
-    if (keeperSeesPlayer()) spotted();
+  }
+
+  function faceToward(k, dest) {
+    if (dest.c > k.c) k.facing = "right";
+    else if (dest.c < k.c) k.facing = "left";
+    else if (dest.r > k.r) k.facing = "down";
+    else if (dest.r < k.r) k.facing = "up";
   }
 
   function moveKeeper() {
-    keeperTimer += 1;
-    if (keeperTimer < 22) return;
-    keeperTimer = 0;
+    if (mode !== "play") return;
     const k = game.keeper;
+    if (keeperDwell > 0) {
+      keeperDwell -= 1;
+      if (keeperDwell === 0) faceToward(k, KEEPER_PATH[k.pathI]);
+      return;
+    }
+    keeperTimer += 1;
+    if (keeperTimer < KEEPER_STEP) return;
+    keeperTimer = 0;
     const dest = KEEPER_PATH[k.pathI];
     if (k.c === dest.c && k.r === dest.r) {
       k.pathI = (k.pathI + 1) % KEEPER_PATH.length;
+      keeperDwell = KEEPER_DWELL;
+      return;
     }
-    const next = KEEPER_PATH[k.pathI];
-    if (next.c > k.c) { k.c += 1; k.facing = "right"; }
-    else if (next.c < k.c) { k.c -= 1; k.facing = "left"; }
-    else if (next.r > k.r) { k.r += 1; k.facing = "down"; }
-    else if (next.r < k.r) { k.r -= 1; k.facing = "up"; }
-    if (mode === "play" && keeperSeesPlayer()) spotted();
+    faceToward(k, dest);
+    const nc = dest.c > k.c ? k.c + 1 : dest.c < k.c ? k.c - 1 : k.c;
+    const nr = dest.r > k.r ? k.r + 1 : dest.r < k.r ? k.r - 1 : k.r;
+    if (nc === game.player.c && nr === game.player.r) return;
+    k.c = nc;
+    k.r = nr;
   }
 
   function fitCanvas() {
@@ -865,7 +903,7 @@
     drawPerson(1, 1, "zippy", "down");
     drawPerson(game.catchNpc.c, game.catchNpc.r, "catch", game.catchNpc.facing);
     drawPerson(game.player.c, game.player.r, "player", game.player.facing);
-    if (nearZippy() && tick % 40 < 20) {
+    if ((!game.talkedZippy || nearZippy()) && tick % 40 < 20) {
       text("!", 18, 8, "#f0e0a0", 8);
     }
     if (nearCatch() && tick % 40 < 20) {
@@ -874,7 +912,7 @@
     drawHud();
     if (mode === "play") {
       drawBox(8, HEIGHT - 36, WIDTH - 16, 28);
-      wrapText("West cattails hide you. East bank is Catch's. Z talks.", 14, HEIGHT - 30, 26, "#203018");
+      wrapText(objectiveLine(), 14, HEIGHT - 30, 26, "#203018");
     }
   }
 
@@ -950,7 +988,7 @@
     text("CATCH AND CRAFT", 24, 24, "#f0e0a0", 8);
     text("VALLEYBROOK POND", 28, 42, "#f8f0d8", 8);
     text("Hole 9  ·  Golf Course", 28, 58, "#b8c8a8", 8);
-    const items = ["Sneak onto the course", "Continue", "How to play"];
+    const items = ["Start", "Continue", "How to play"];
     items.forEach((lab, i) => {
       text((menuIndex === i ? ">" : " ") + lab, 28, 88 + i * 14, "#f8f0d8", 8);
     });
@@ -958,13 +996,37 @@
     if (mode === "name") text("Type your name below.", 28, 176, "#f0e0a0", 8);
   }
 
+  function drawIntro() {
+    px(0, 0, WIDTH, HEIGHT, introIndex === 0 ? "#1a1410" : introIndex === 1 ? "#203018" : "#1a3a28");
+    if (introIndex === 0) {
+      px(40, 48, 48, 28, "#6b5428");
+      px(48, 56, 32, 12, "#c4a35a");
+      px(86, 62, 70, 4, "#8a6a3a");
+      text("THE WARPED ROD", 24, 16, "#f0e0a0", 8);
+    } else if (introIndex === 1) {
+      px(32, 40, 192, 56, "#3a2a18");
+      px(40, 48, 176, 40, "#c4b8a0");
+      text("CLUB NOTICE", 56, 56, "#8b3a2f", 8);
+      text("NO EMPTY CANS", 48, 72, "#203018", 8);
+    } else {
+      for (let i = 0; i < 16; i++) px(i * 16, 140, 16, 84, i % 2 ? "#1a6a9a" : "#16384a");
+      px(0, 120, WIDTH, 24, "#3cb043");
+      px(8, 88, 16, 32, "#2a4a38");
+      text("HOLE 9", 28, 16, "#f0e0a0", 8);
+      text("WATER HAZARD", 28, 32, "#f8f0d8", 8);
+    }
+    drawBox(8, HEIGHT - 88, WIDTH - 16, 80);
+    wrapText(INTRO_PAGES[introIndex] || "", 16, HEIGHT - 80, 26, "#203018");
+    if (tick % 30 < 15) text("v", WIDTH - 22, HEIGHT - 18, "#203018", 8);
+  }
+
   function drawHelp() {
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
     wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
-    wrapText("Hide in cattails. The groundskeeper will run you off the fairway.", 16, 72, 26, "#203018");
-    wrapText("FIGHT weakens a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
-    wrapText("Catch is on the east bank. He thinks hole 9 is his. Zippy is in the trees by the clubhouse.", 16, 152, 26, "#203018");
+    wrapText("Walk north in the reeds to Zippy. Step on the bank and press Z to fish.", 16, 72, 26, "#203018");
+    wrapText("FIGHT tires a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
+    wrapText("You inherited a warped rod. Hole 9 is the closest water. Land one fish and the clubs will talk.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
   }
 
@@ -997,16 +1059,23 @@
     }
   }
 
+  function handleIntro() {
+    if (consume("ok") || consume("cancel")) {
+      introIndex += 1;
+      if (introIndex >= INTRO_PAGES.length) showNameEntry();
+    }
+  }
+
   function handleTitle() {
     if (consume("up")) menuIndex = (menuIndex + 2) % 3;
     if (consume("down")) menuIndex = (menuIndex + 1) % 3;
     if (consume("ok")) {
-      if (menuIndex === 0) showNameEntry();
+      if (menuIndex === 0) beginIntro();
       else if (menuIndex === 1) {
         if (loadGame()) {
           hideNameEntry();
-          showDialog(["Welcome back to hole 9, " + game.name + "."]);
-        } else showNameEntry();
+          showDialog(["Welcome back to hole 9, " + game.name + ".", objectiveLine()]);
+        } else beginIntro();
       } else mode = "help";
     }
   }
@@ -1111,6 +1180,7 @@
     if (saveNote > 0) saveNote -= 1;
 
     if (mode === "title") handleTitle();
+    else if (mode === "intro") handleIntro();
     else if (mode === "name") { /* HTML name field */ }
     else if (mode === "help") handleHelp();
     else if (mode === "dialog") handleDialog();
@@ -1130,6 +1200,7 @@
   function render() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     if (mode === "title" || mode === "name") drawTitle();
+    else if (mode === "intro") drawIntro();
     else if (mode === "help") drawHelp();
     else if (mode === "dialog") drawDialog();
     else if (mode === "menu") drawMenu();
