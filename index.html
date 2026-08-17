@@ -36,13 +36,21 @@
     nav { display: grid; gap: 8px; margin-top: 18px; }
     a {
       display: block;
-      padding: 12px;
+      padding: 14px;
       background: #203018;
       color: #f8f0d8;
       text-decoration: none;
       border: 4px solid #405838;
       font-size: 8px;
       line-height: 1.6;
+      min-height: 48px;
+    }
+    @media (max-width: 640px) {
+      body { padding: 12px; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+      h1 { font-size: 12px; }
+      p { font-size: 10px; line-height: 1.7; }
+      a { font-size: 10px; }
+      a strong { font-size: 12px; }
     }
     a:hover, a:focus { border-color: #f0e0a0; color: #fff; }
     a strong { display: block; color: #9adcff; margin-bottom: 6px; font-size: 10px; }
@@ -53,11 +61,11 @@
 <body>
   <main>
     <h1>Catch and Craft</h1>
-    <p>Ol Catch N. Kraft’s Fishing Quest. Name your angler. Catch already thinks hole 9 is his. Zippy has the bait.</p>
+    <p>Ol Catch N. Kraft’s Fishing Quest. You name your angler. Catch is already on the water. Zippy has the bait.</p>
     <nav>
       <a href="quest/index.html">
         <strong>Valleybrook Pond</strong>
-        Inherit a warped rod. Sneak onto hole 9. Land one fish.
+        Photograph your first fish. Pictures or it never happened.
       </a>
       <a href="fishingtrip.html">
         <strong>Quick Trip</strong>

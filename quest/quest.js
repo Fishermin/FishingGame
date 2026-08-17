@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const SAVE_KEY = "catchAndCraftQuestV2";
+  const SAVE_KEY = "catchAndCraftQuestV3";
   const TILE = 16;
   const COLS = 16;
   const ROWS = 14;
@@ -32,6 +32,26 @@
 
   const SHINER = POND_FISH[7];
 
+  const RODS = {
+    warped: { id: "warped", name: "Warped rod", drag: 8, backbone: 7 }
+  };
+  const LINES = {
+    six: { id: "six", name: "6 lb line", tensile: 7, stealth: 8 }
+  };
+  const BAITS = {
+    worm: { id: "worm", name: "Worm", hook: 8, attract: ["Sun", "Weed"] }
+  };
+  const NETS = {
+    hand: { id: "hand", name: "Hand net", scoop: 9, sizeCap: 22 }
+  };
+  const CAMERAS = {
+    pocket: { id: "pocket", name: "Pocket camera", proof: 10 }
+  };
+
+  function starterKit() {
+    return { rod: "warped", line: "six", bait: null, net: "hand", camera: "pocket" };
+  }
+
   // . fairway  , rough  w water  b bank  T tree  h hide  s sand  C club  p path
   const MAP_ROWS = [
     "TTTTTTTTTTTTTTTT",
@@ -59,7 +79,14 @@
   const keys = Object.create(null);
   const just = Object.create(null);
 
-  let mode = "title";
+  let mode = "intro";
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(SAVE_KEY) : null;
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data && data.cleared) mode = "title";
+    }
+  } catch (err) { /* ignore */ }
   let tick = 0;
   let walkLock = 0;
   let keeperTimer = 0;
@@ -76,26 +103,27 @@
     name: "Angler",
     worms: 0,
     warnings: 0,
-    skills: { keepStill: false, dropALine: false, theNet: false },
+    skills: { keepStill: false, dropALine: false, snapshot: false },
     fieldGuide: {},
-    livewell: [],
-    loaner: null,
+    album: [],
+    kit: starterKit(),
     talkedZippy: false,
     metCatch: false,
     catchBond: 0,
     catchFlags: { spotted: false, fish: false, zippy: false },
     cleared: false,
-    player: { c: 1, r: 7, facing: "down" },
-    keeper: { c: 8, r: 3, facing: "right", pathI: 1 },
+    player: { c: 1, r: 7, facing: "up" },
+    keeper: { c: 8, r: 4, facing: "left", pathI: 0 },
     catchNpc: { c: 14, r: 7, facing: "left" },
   };
 
   const KEEPER_STEP = 50;
   const KEEPER_DWELL = 48;
   const INTRO_PAGES = [
-    "A package hits the porch at dawn. No note. Just a warped spinning rod and a coffee-can.",
-    "The fishing clubs own the watershed. Empty can, they will not even look at you. You need a fish.",
-    "Closest water is Valleybrook Pond: hole 9, a golf-course hazard. Golfers hate anglers. The bluegill do not.",
+    "A package is on the porch at dawn. There is no note.",
+    "Inside: a warped spinning rod, a hand net, six-pound line, and a pocket camera.",
+    "Fishing clubs run the lakes. Pictures or it never happened. No photo, they will not let you in.",
+    "The closest water is a pond on a golf course. Valleybrook, hole 9. That is your first hole.",
   ];
   const KEEPER_PATH = [
     { c: 4, r: 3 },
@@ -162,11 +190,50 @@
     return Math.max(Math.abs(a.c - b.c), Math.abs(a.r - b.r));
   }
 
-  function objectiveLine() {
-    if (game.cleared) return "Hole 9 cleared. Fish, or talk to Zippy.";
-    if (!game.talkedZippy) return "Walk north in the reeds. Talk to Zippy (Z).";
-    if (!game.skills.theNet) return "Step onto the bank. Press Z to cast.";
-    return "Land that fish. FIGHT to tire it, then NET.";
+  function objectiveLines() {
+    if (game.cleared) {
+      return ["Hole 9 is cleared.", "Fish more, or talk to Zippy."];
+    }
+    if (!game.talkedZippy) {
+      return [
+        "Press UP. Stay on the left reeds.",
+        "Do not walk on the green grass.",
+        "Press Z at the man in the trees.",
+      ];
+    }
+    if (!game.skills.snapshot) {
+      return [
+        "Press DOWN to the brown bank.",
+        "Stand next to the water.",
+        "Press Z to cast.",
+      ];
+    }
+    return ["Keep fishing, or talk to Zippy."];
+  }
+
+  function kitStats() {
+    const rod = RODS[game.kit.rod] || RODS.warped;
+    const line = LINES[game.kit.line] || LINES.six;
+    const bait = BAITS[game.kit.bait] || { name: "No bait", hook: 4, attract: [] };
+    const net = NETS[game.kit.net] || NETS.hand;
+    const cam = CAMERAS[game.kit.camera] || { name: "No camera", proof: 0 };
+    return {
+      rod: rod,
+      line: line,
+      bait: bait,
+      net: net,
+      camera: cam,
+      control: rod.drag + (bait.hook || 0) / 2,
+      maxLine: rod.backbone * 6 + line.tensile * 4,
+      scoop: net.scoop,
+      sizeCap: net.sizeCap,
+      proof: cam.proof,
+      attract: bait.attract || []
+    };
+  }
+
+  function photoCount() {
+    return Object.keys(game.fieldGuide).length;
   }
 
   function scaleStats(base, level) {
@@ -215,7 +282,7 @@
   }
 
   function pickWild() {
-    if (!game.skills.theNet) return POND_FISH[0];
+    if (!game.skills.snapshot) return POND_FISH[0];
     const roll = Math.random();
     if (roll < 0.4) return POND_FISH[0];
     if (roll < 0.65) return POND_FISH[1];
@@ -223,18 +290,6 @@
     if (roll < 0.92) return POND_FISH[5];
     if (roll < 0.98) return POND_FISH[3];
     return POND_FISH[7];
-  }
-
-  function partyFighters() {
-    const list = [];
-    if (game.loaner && !game.loaner.fainted) list.push(game.loaner);
-    game.livewell.forEach((f) => list.push(f));
-    return list.filter((f) => f.hp > 0);
-  }
-
-  function activeFighter() {
-    const p = partyFighters();
-    return p[0] || null;
   }
 
   function showDialog(lines) {
@@ -252,8 +307,8 @@
 
   function bumpKeeper() {
     showDialog([
-      "GROUNDSKEEPER: This is a golf course, not a landing!",
-      "He is busy with the fairway. The reeds and the bank are yours.",
+      "GROUNDSKEEPER: Stay off the green. I'm mowing.",
+      "Leave him. Walk the left reeds.",
     ]);
   }
 
@@ -286,6 +341,7 @@
     if (!nameWrap) return;
     nameWrap.classList.add("hidden");
     if (nameEntry) nameEntry.blur();
+    fitCanvas();
   }
 
   function showNameEntry() {
@@ -296,6 +352,7 @@
       nameEntry.value = "";
       setTimeout(() => nameEntry.focus(), 0);
     }
+    fitCanvas();
   }
 
   function confirmName() {
@@ -311,29 +368,23 @@
     if (!game.talkedZippy) {
       game.talkedZippy = true;
       game.worms = 5;
-      game.loaner = makeFighter(SHINER, 5, true);
+      game.kit.bait = "worm";
       showDialog([
-        "A man in a faded cap is somehow running a bait shop in the trees.",
-        "ZIPPY: Keep your voice down. Worms. Don't ask where.",
-        "ZIPPY: Take this shiner. Clubs want a fish in the can.",
-        "ZIPPY: Step onto the bank. Press Z to cast.",
-        "ZIPPY: FIGHT tires it. NET lands it. Don't knock it out.",
-        "Got 5 WORMS and a loaner GOLDEN SHINER.",
+        "ZIPPY: " + game.name + ". Worms. Don't ask.",
+        "ZIPPY: That camera in the package is how you get in. Clubs stamp a photo.",
+        "ZIPPY: Press DOWN to the bank. Press Z to cast.",
+        "ZIPPY: REEL once. Then SNAP. The fish goes back. The photo stays.",
+        "Got 5 WORMS.",
       ]);
-      learnSkill("keepStill", "KEEP STILL", "Stay in the reeds. He watches the fairway, not you.");
+      learnSkill("keepStill", "KEEP STILL", "Stay off the grass. He is mowing.");
       saveGame();
       saveNote = 90;
       return;
     }
     const opts = game.cleared
-      ? ["ZIPPY: Shore license. The clubs will hear you now.", "ZIPPY: Worms are still on the house."]
-      : ["ZIPPY: He's not keen on anglers. I noticed.", "ZIPPY: Worms are on the house while that guy watches the fairway."];
+      ? ["ZIPPY: That's a club photo. They'll stamp it.", "ZIPPY: Worms are still on the house."]
+      : ["ZIPPY: Pictures or it never happened. I noticed.", "ZIPPY: Worms are on the house."];
     game.worms = Math.max(game.worms, 5);
-    if (game.loaner && game.loaner.hp <= 0) {
-      game.loaner.hp = game.loaner.maxHp;
-      game.loaner.fainted = false;
-      opts.push("ZIPPY: I floated your shiner. Don't make a habit of it.");
-    }
     opts.push("Your worms are topped off. Progress saved.");
     saveGame();
     saveNote = 90;
@@ -342,152 +393,123 @@
 
   function startBattle() {
     if (game.worms <= 0) {
-      showDialog(["You're out of worms.", "Someone is rustling in those trees..."]);
+      showDialog(["You're out of worms.", "Zippy is in the trees."]);
       return;
     }
-    if (!activeFighter()) {
-      showDialog(["The coffee-can is empty.", "Zippy might float you a fish."]);
+    if (!game.kit.camera) {
+      showDialog(["Your pocket camera was in the package.", "Check KIT."]);
       return;
     }
-    if (catchRank() === "friend" && chebyshev(game.player, game.keeper) <= 1) {
-      showDialog(["CATCH: Wait. Cart path. Give him a second."]);
+    if (!game.kit.bait) {
+      showDialog(["You need bait. Zippy has worms."]);
       return;
     }
     game.worms -= 1;
-    const tutorial = !game.skills.theNet;
+    const tutorial = !game.skills.snapshot;
     const wildSp = pickWild();
     const wildLv = tutorial ? 2 : 2 + Math.floor(Math.random() * 2);
+    const kit = kitStats();
     battle = {
       phase: "intro",
       cursor: 0,
-      sub: 0,
       fought: false,
+      slack: 0,
       wild: makeFighter(wildSp, wildLv, false),
-      mine: activeFighter(),
+      lineHp: kit.maxLine,
+      maxLine: kit.maxLine,
       log: tutorial
-        ? "A bluegill! FIGHT to tire it, then NET. Do not knock it out."
-        : "A wild " + wildSp.name + " splashed at hole 9!",
-      netFails: 0,
-      closed: false,
+        ? "A bluegill! REEL to tire it, then SNAP. It goes back."
+        : "A wild " + wildSp.name + " took the worm!",
+      snapFails: 0
     };
     mode = "battle";
     if (!game.skills.dropALine) {
       game.skills.dropALine = true;
-      battle.log = "You learned DROP A LINE! FIGHT, then NET.";
+      battle.log = "You learned DROP A LINE! REEL, then SNAP.";
     }
   }
 
-  function damageFor(attacker, defender, power, special) {
-    const atk = special ? attacker.wile : attacker.pull;
-    const def = special ? defender.grit : (defender.hold * (1 + defender.holdStage * 0.2));
-    const mod = typeMultiplier(attacker.types, defender.types);
-    const swing = 0.85 + Math.random() * 0.15;
-    return Math.max(2, Math.round((power * atk) / Math.max(8, def) * mod * swing));
-  }
-
-  function afterFaintCheck() {
-    if (battle.wild.hp <= 0) {
-      battle.phase = "lost";
-      battle.log = "The " + battle.wild.name + " sank away. No net, no fish.";
-      return;
-    }
-    if (battle.mine.hp <= 0) {
-      battle.mine.fainted = true;
-      const next = activeFighter();
-      if (!next) {
-        battle.phase = "wipe";
-        battle.log = "The coffee-can is quiet. You have to RUN.";
-      } else {
-        battle.mine = next;
-        battle.log = "Go, " + next.name + "!";
-        battle.phase = "command";
-      }
-    }
-  }
-
-  function enemyTurn() {
+  function reelFish() {
     const w = battle.wild;
-    const m = battle.mine;
-    const tutorial = !game.skills.theNet;
-    const power = tutorial ? 10 + Math.floor(Math.random() * 6) : 28 + Math.floor(Math.random() * 18);
-    const dmg = damageFor(w, m, power, Math.random() < 0.3);
-    m.hp = Math.max(0, m.hp - dmg);
-    battle.log = "Wild " + w.name + " thrashed for " + dmg + "!";
-    afterFaintCheck();
-    if (battle.phase === "playerLog") battle.phase = "command";
-  }
-
-  function playerMove(kind) {
-    const m = battle.mine;
-    const w = battle.wild;
-    if (kind === "cover") {
-      m.holdStage = Math.min(3, m.holdStage + 1);
-      battle.log = m.name + " used Lay Up! Hold rose.";
-    } else {
-      battle.fought = true;
-      const special = kind === "sig";
-      const power = kind === "sig" ? 50 : kind === "shake" ? 32 : 40;
-      const dmg = damageFor(m, w, power, special);
-      w.hp = Math.max(0, w.hp - dmg);
-      const label = kind === "sig" ? m.species.signature : kind === "shake" ? "Headshake" : "Strike";
-      const extra = typeMultiplier(m.types, w.types);
-      battle.log = m.name + " used " + label + "! " + dmg + " pull.";
-      if (extra > 1.05) battle.log += " It bit deep!";
-      if (extra < 0.95) battle.log += " A dull hit.";
-    }
-    if (!game.skills.theNet && w.hp > 0 && battle.fought) {
-      battle.log += " Now NET it!";
-    }
+    const kit = kitStats();
+    battle.fought = true;
+    let power = kit.control * 3.2;
+    if (kit.attract.some((t) => w.types.indexOf(t) !== -1)) power *= 1.2;
+    const dmg = Math.max(4, Math.round(power / Math.max(8, w.hold) * 14));
+    w.hp = Math.max(0, w.hp - dmg);
+    battle.log = kit.rod.name + " reeled " + dmg + ".";
+    if (!game.skills.snapshot && w.hp > 0) battle.log += " Now SNAP.";
     if (w.hp <= 0) {
-      if (!game.skills.theNet) {
+      if (!game.skills.snapshot) {
         w.hp = 1;
-        battle.log = "Easy. It is tired enough. NET it.";
-        battle.phase = "playerLog";
+        battle.log = "Tired enough. SNAP the picture.";
+      } else {
+        battle.phase = "lost";
+        battle.log += " It rolled over. No photo.";
         return;
       }
-      battle.phase = "lost";
-      battle.log += " It rolled over. Too late to net.";
-      return;
     }
     battle.phase = "playerLog";
   }
 
-  function tryNet() {
+  function slackLine() {
+    battle.slack = Math.min(3, battle.slack + 1);
+    battle.log = "You gave slack. The line eased.";
+    battle.phase = "playerLog";
+  }
+
+  function enemyTurn() {
     const w = battle.wild;
+    const kit = kitStats();
+    const tutorial = !game.skills.snapshot;
+    const raw = tutorial ? 6 + Math.floor(Math.random() * 4) : Math.max(4, Math.round(w.pull * 0.35));
+    const dmg = Math.max(1, raw - battle.slack * 2);
+    battle.lineHp = Math.max(0, battle.lineHp - dmg);
+    battle.log = w.name + " thrashed the " + kit.line.name + " for " + dmg + ".";
+    if (battle.lineHp <= 0) {
+      battle.phase = "wipe";
+      battle.log += " Line snapped.";
+      return;
+    }
     if (w.hp <= 0) {
-      battle.log = "Nothing left to land.";
-      return;
-    }
-    if (!game.skills.theNet) {
-      if (!battle.fought) {
-        battle.log = "Still too lively. FIGHT first, then NET.";
-        battle.phase = "playerLog";
-        return;
-      }
-      landFish(w);
-      return;
-    }
-    if (w.species.lengthFactor > 28) {
-      battle.netFails += 1;
-      battle.log = "The " + w.name + " is too big for a hand net. It broke off.";
       battle.phase = "lost";
+      battle.log = "The " + w.name + " sank. No photo.";
+      return;
+    }
+    if (battle.phase === "playerLog") battle.phase = "command";
+  }
+
+  function trySnap() {
+    const w = battle.wild;
+    const kit = kitStats();
+    if (w.hp <= 0) {
+      battle.log = "Nothing left to photograph.";
+      return;
+    }
+    if (!battle.fought) {
+      battle.log = "Still too lively. REEL first, then SNAP.";
+      battle.phase = "playerLog";
+      return;
+    }
+    if (w.species.lengthFactor > kit.sizeCap) {
+      battle.phase = "lost";
+      battle.log = "Too big for the " + kit.net.name + ". It broke off.";
+      return;
+    }
+    if (!game.skills.snapshot) {
+      takePhoto(w);
       return;
     }
     const stamPct = w.hp / w.maxHp;
-    let chance = 0.72 * (1 - stamPct * 0.55) * (1 - w.slip / 140);
-    if (w.species.lengthFactor > 20) chance *= 0.55;
+    let chance = (kit.proof / 10) * (kit.scoop / 10) * (1 - stamPct * 0.55) * (1 - w.slip / 140);
+    if (kit.attract.some((t) => w.types.indexOf(t) !== -1)) chance *= 1.15;
     if (Math.random() < chance) {
-      landFish(w);
+      takePhoto(w);
     } else {
-      battle.netFails += 1;
-      const misses = [
-        "Slack! Try NET again.",
-        "It jumped. Still on. NET it.",
-        "Weeds. It is still there. NET.",
-      ];
-      battle.log = misses[Math.floor(Math.random() * misses.length)];
-      if (battle.netFails >= 5) {
-        battle.log += " Line snaps. It is gone.";
+      battle.snapFails += 1;
+      battle.log = ["Blurry. SNAP again.", "It splashed the lens. SNAP.", "Thumb on the glass. SNAP."][Math.floor(Math.random() * 3)];
+      if (battle.snapFails >= 5) {
+        battle.log += " It is gone.";
         battle.phase = "lost";
       } else {
         battle.phase = "playerLog";
@@ -495,30 +517,22 @@
     }
   }
 
-  function landFish(w) {
-    const caught = makeFighter(w.species, w.level, false);
-    caught.hp = Math.max(1, Math.round(caught.maxHp * 0.7));
+  function takePhoto(w) {
     game.fieldGuide[w.species.id] = true;
-    const canKeep = game.livewell.length < 3;
-    battle.phase = "catch";
-    battle.caught = caught;
-    battle.canKeep = canKeep;
-    battle.log = "You landed a Lv" + w.level + " " + w.name + "!";
-    if (!game.skills.theNet) {
-      game.skills.theNet = true;
-      battle.log += " You learned THE NET!";
+    game.album.push({ id: w.species.id, name: w.name, level: w.level, water: "valleybrook-pond" });
+    battle.phase = "photo";
+    battle.caught = w;
+    battle.log = "Click. Pictures or it never happened.";
+    if (!game.skills.snapshot) {
+      game.skills.snapshot = true;
+      battle.log += " You learned THE SNAPSHOT!";
     }
-    if (game.metCatch && bumpCatch("fish")) game.pendingCatch = "fish";
-    battle.sub = canKeep ? 0 : 1;
+    if (game.metCatch) bumpCatch("fish");
+    flash = 10;
   }
 
-  function finishCatch(keep) {
-    if (keep && battle.canKeep) {
-      game.livewell.push(battle.caught);
-      battle.log = battle.caught.name + " went in the coffee-can.";
-    } else {
-      battle.log = "Released. The Field Guide still remembers.";
-    }
+  function finishPhoto() {
+    battle.log = battle.caught.name + " slipped back into hole 9. Proof is in the album.";
     battle.phase = "done";
   }
 
@@ -526,29 +540,28 @@
     game.cleared = true;
     saveGame();
     saveNote = 90;
-    const lines = ["The warped rod bent. That was a real fish."];
+    const lines = ["You have a photograph. The fish is back in the pond."];
     if (game.metCatch) {
       lines.push("CATCH: ...Beginner's luck, " + game.name + ". Don't get used to my pond.");
     } else {
-      lines.push("CATCH yells from the east bank. He saw that.");
+      lines.push("CATCH yells from the east bank. He saw the flash.");
     }
-    lines.push("ZIPPY: Clubs talk to a can with a fish in it. You're in.");
+    lines.push("ZIPPY: Clubs stamp a photo, not a story. You're in.");
     lines.push("You slip off hole 9 before the cart comes back.");
     lines.push("VALLEYBROOK POND — CLEARED");
     showDialog(lines);
   }
 
   function endBattle() {
-    const landed = battle && battle.phase === "done" && game.skills.theNet;
-    const tutorialFail = battle && !game.skills.theNet && !landed;
+    const landed = battle && battle.phase === "done" && game.skills.snapshot;
+    const tutorialFail = battle && !game.skills.snapshot && !landed;
     const phase = battle && battle.phase;
     battle = null;
     mode = "play";
-    game.pendingCatch = null;
     if (tutorialFail) {
       game.worms += 1;
       if (phase === "lost" || phase === "wipe") {
-        showDialog(["ZIPPY: FIGHT once to tire it. Then NET. Don't knock it out.", "Worm's on the house."]);
+        showDialog(["ZIPPY: REEL once. Then SNAP. Put it back.", "Worm's on the house."]);
       }
       return;
     }
@@ -563,8 +576,8 @@
         warnings: game.warnings,
         skills: game.skills,
         fieldGuide: game.fieldGuide,
-        livewell: game.livewell,
-        loaner: game.loaner,
+        album: game.album,
+        kit: game.kit,
         talkedZippy: game.talkedZippy,
         metCatch: game.metCatch,
         catchBond: game.catchBond,
@@ -587,6 +600,10 @@
       if (!game.catchFlags) game.catchFlags = { spotted: false, fish: false, zippy: false };
       if (game.catchBond == null) game.catchBond = 0;
       if (game.cleared == null) game.cleared = false;
+      if (!game.kit) game.kit = starterKit();
+      if (!game.kit.camera) game.kit.camera = "pocket";
+      if (!game.album) game.album = [];
+      if (game.skills && game.skills.theNet && !game.skills.snapshot) game.skills.snapshot = true;
       keeperTimer = 0;
       keeperDwell = 0;
       return true;
@@ -606,25 +623,52 @@
     game.name = formatName(name) || "Angler";
     game.worms = 0;
     game.warnings = 0;
-    game.skills = { keepStill: false, dropALine: false, theNet: false };
+    game.skills = { keepStill: false, dropALine: false, snapshot: false };
     game.fieldGuide = {};
-    game.livewell = [];
-    game.loaner = null;
+    game.album = [];
+    game.kit = starterKit();
     game.talkedZippy = false;
     game.metCatch = false;
     game.catchBond = 0;
     game.catchFlags = { spotted: false, fish: false, zippy: false };
     game.pendingCatch = null;
     game.cleared = false;
-    game.player = { c: 1, r: 7, facing: "down" };
-    game.keeper = { c: 8, r: 3, facing: "right", pathI: 1 };
+    game.player = { c: 1, r: 7, facing: "up" };
+    game.keeper = { c: 8, r: 4, facing: "left", pathI: 0 };
     game.catchNpc = { c: 14, r: 7, facing: "left" };
     keeperTimer = 0;
     keeperDwell = 0;
     showDialog([
-      "ZIPPY: " + game.name + ". Trees by the clubhouse. I have bait.",
-      "Stay in the reeds. Walk north. Land one fish. That is how this starts.",
+      "You are in the cattails on the LEFT side of the screen.",
+      "Press UP (arrow or D-pad). Stay on the left. Do not walk on the grass.",
+      "The man in the trees is ZIPPY. Press Z or A when you reach him.",
+      "He has worms. You already have the camera. One photo gets you in.",
     ]);
+  }
+
+  function pressKey(name) {
+    if (mode === "name") {
+      if (name === "ok" || name === "start") confirmName();
+      if (name === "cancel") {
+        hideNameEntry();
+        mode = "title";
+      }
+      return;
+    }
+    if (name === "start") {
+      if (mode === "play") {
+        openMenu();
+        return;
+      }
+      name = "ok";
+    }
+    if (!keys[name]) just[name] = true;
+    keys[name] = true;
+  }
+
+  function releaseKey(name) {
+    if (name === "start") name = "ok";
+    keys[name] = false;
   }
 
   window.addEventListener("keydown", (e) => {
@@ -642,6 +686,7 @@
     }
     const map = {
       ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      w: "up", W: "up", s: "down", S: "down", a: "left", A: "left", d: "right", D: "right",
       z: "ok", Z: "ok", Enter: "ok",
       x: "cancel", X: "cancel", Shift: "cancel",
       Escape: "menu",
@@ -654,17 +699,17 @@
     const k = map[e.key];
     if (!k) return;
     e.preventDefault();
-    if (!keys[k]) just[k] = true;
-    keys[k] = true;
+    pressKey(k === "menu" ? "start" : k);
   });
   window.addEventListener("keyup", (e) => {
     const map = {
       ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      w: "up", W: "up", s: "down", S: "down", a: "left", A: "left", d: "right", D: "right",
       z: "ok", Z: "ok", Enter: "ok",
       x: "cancel", X: "cancel", Shift: "cancel",
     };
     const k = map[e.key];
-    if (k) keys[k] = false;
+    if (k) releaseKey(k);
   });
 
   function consume(k) {
@@ -691,13 +736,31 @@
     }
     if (fishable(game.player.c, game.player.r)) {
       if (!game.talkedZippy) {
-        showDialog(["You need bait first.", "Walk north in the reeds. Talk to Zippy."]);
+        showDialog([
+          "Not yet. You need bait.",
+          "Press UP. Stay on the left reeds.",
+          "Press Z at the man in the trees. That is Zippy.",
+        ]);
         return;
       }
       startBattle();
       return;
     }
-    showDialog(["Hole 9. Keep off the fairway if you can help it."]);
+    if (!game.talkedZippy) {
+      showDialog([
+        "Press the UP ARROW. Stay on the left.",
+        "Talk to Zippy in the trees. Press Z when you see him.",
+      ]);
+      return;
+    }
+    if (!game.skills.snapshot) {
+      showDialog([
+        "Press DOWN to the brown bank by the water.",
+        "Stand on the bank. Press Z to cast.",
+      ]);
+      return;
+    }
+    showDialog(["Press Z on the bank to fish. Talk to Zippy if you need bait."]);
   }
 
   function movePlayer() {
@@ -733,37 +796,67 @@
   }
 
   function moveKeeper() {
-    if (mode !== "play") return;
-    const k = game.keeper;
-    if (keeperDwell > 0) {
-      keeperDwell -= 1;
-      if (keeperDwell === 0) faceToward(k, KEEPER_PATH[k.pathI]);
-      return;
-    }
-    keeperTimer += 1;
-    if (keeperTimer < KEEPER_STEP) return;
-    keeperTimer = 0;
-    const dest = KEEPER_PATH[k.pathI];
-    if (k.c === dest.c && k.r === dest.r) {
-      k.pathI = (k.pathI + 1) % KEEPER_PATH.length;
-      keeperDwell = KEEPER_DWELL;
-      return;
-    }
-    faceToward(k, dest);
-    const nc = dest.c > k.c ? k.c + 1 : dest.c < k.c ? k.c - 1 : k.c;
-    const nr = dest.r > k.r ? k.r + 1 : dest.r < k.r ? k.r - 1 : k.r;
-    if (nc === game.player.c && nr === game.player.r) return;
-    k.c = nc;
-    k.r = nr;
+    return;
   }
 
   function fitCanvas() {
-    const s = Math.max(2, Math.floor(Math.min((window.innerWidth - 32) / WIDTH, (window.innerHeight - 80) / HEIGHT)));
+    const extraEls = [
+      document.querySelector(".hint-keys"),
+      document.querySelector(".hint-touch"),
+      document.querySelector(".home-link"),
+      document.getElementById("pad"),
+      nameWrap
+    ];
+    let extra = 20;
+    extraEls.forEach((el) => {
+      if (!el || el.classList.contains("hidden")) return;
+      const st = window.getComputedStyle(el);
+      if (st.display === "none") return;
+      extra += el.getBoundingClientRect().height + 8;
+    });
+    const availW = Math.max(160, window.innerWidth - 16);
+    const availH = Math.max(112, (window.visualViewport ? window.visualViewport.height : window.innerHeight) - extra);
+    const s = Math.max(1, Math.floor(Math.min(availW / WIDTH, availH / HEIGHT)));
     canvas.style.width = WIDTH * s + "px";
     canvas.style.height = HEIGHT * s + "px";
   }
   window.addEventListener("resize", fitCanvas);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", fitCanvas);
+  window.addEventListener("load", fitCanvas);
   fitCanvas();
+
+  function bindPad() {
+    const pad = document.getElementById("pad");
+    if (!pad) return;
+    pad.querySelectorAll("[data-btn]").forEach((btn) => {
+      const name = btn.getAttribute("data-btn");
+      const down = (e) => {
+        e.preventDefault();
+        btn.classList.add("held");
+        pressKey(name);
+        if (e.pointerId != null && btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
+      };
+      const up = (e) => {
+        if (e) e.preventDefault();
+        btn.classList.remove("held");
+        releaseKey(name);
+      };
+      btn.addEventListener("pointerdown", down);
+      btn.addEventListener("pointerup", up);
+      btn.addEventListener("pointercancel", up);
+      btn.addEventListener("lostpointercapture", up);
+    });
+    pad.addEventListener("contextmenu", (e) => e.preventDefault());
+  }
+  bindPad();
+
+  const nameOk = document.getElementById("nameOk");
+  if (nameOk) {
+    nameOk.addEventListener("click", (e) => {
+      e.preventDefault();
+      confirmName();
+    });
+  }
 
   function px(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -890,8 +983,8 @@
   function drawHud() {
     px(0, 0, WIDTH, 12, "#203018");
     text((game.name || "ANGLER").slice(0, 8).toUpperCase(), 4, 2, "#f0e0a0", 8);
-    text("W" + game.worms, 140, 2, "#f8f0d8", 8);
-    text("CAN " + game.livewell.length + "/3", 176, 2, "#f8f0d8", 8);
+    text("W" + game.worms, 132, 2, "#f8f0d8", 8);
+    text("PIC " + photoCount(), 176, 2, "#f8f0d8", 8);
     if (saveNote > 0) text("SAVED", 216, 2, "#70f070", 8);
   }
 
@@ -903,6 +996,9 @@
     drawPerson(1, 1, "zippy", "down");
     drawPerson(game.catchNpc.c, game.catchNpc.r, "catch", game.catchNpc.facing);
     drawPerson(game.player.c, game.player.r, "player", game.player.facing);
+    if (!game.talkedZippy && tick % 36 < 22) {
+      for (let r = 3; r <= 6; r++) text("^", 4, r * TILE + 4, "#f0e0a0", 8);
+    }
     if ((!game.talkedZippy || nearZippy()) && tick % 40 < 20) {
       text("!", 18, 8, "#f0e0a0", 8);
     }
@@ -911,8 +1007,9 @@
     }
     drawHud();
     if (mode === "play") {
-      drawBox(8, HEIGHT - 36, WIDTH - 16, 28);
-      wrapText(objectiveLine(), 14, HEIGHT - 30, 26, "#203018");
+      const lines = objectiveLines();
+      drawBox(8, HEIGHT - 52, WIDTH - 16, 44);
+      lines.forEach((line, i) => text(line, 14, HEIGHT - 46 + i * 12, "#203018", 8));
     }
   }
 
@@ -935,47 +1032,35 @@
     px(0, 70, WIDTH, 80, "#1a6a9a");
     px(0, 100, WIDTH, 50, "#0d3a5c");
     const w = battle.wild;
-    const m = battle.mine;
+    const kit = kitStats();
     drawFish(w, 186, 52, true);
     drawBox(8, 12, 120, 40);
     text(w.name, 14, 16, "#203018", 8);
     text("Lv" + w.level, 14, 26, "#405838", 8);
     hpBar(14, 38, 100, w.hp, w.maxHp);
-    if (m) {
-      drawFish(m, 70, 128, false);
-      drawBox(128, 108, 120, 44);
-      text(m.name, 134, 112, "#203018", 8);
-      text("Lv" + m.level + (m.loaner ? " LOAN" : ""), 134, 122, "#405838", 8);
-      hpBar(134, 136, 100, m.hp, m.maxHp);
-    }
+    drawBox(128, 108, 120, 48);
+    text(kit.rod.name, 134, 112, "#203018", 8);
+    text(kit.bait.name + " / " + kit.net.name.split(" ")[0], 134, 122, "#405838", 8);
+    text("LINE", 134, 132, "#405838", 8);
+    hpBar(134, 142, 100, battle.lineHp, battle.maxLine);
     drawBox(8, HEIGHT - 64, WIDTH - 16, 56);
     if (battle.phase === "command") {
-      wrapText(battle.log, 16, HEIGHT - 58, 16, "#203018");
-      const labels = ["FIGHT", "LIVEWELL", "NET", "RUN"];
+      const hint = !game.skills.snapshot
+        ? (battle.fought ? "Now pick SNAP." : "Pick REEL, then SNAP.")
+        : battle.log;
+      wrapText(hint, 16, HEIGHT - 58, 14, "#203018");
+      const labels = ["REEL", "SLACK", "SNAP", "RUN"];
       labels.forEach((lab, i) => {
         const x = 148 + (i % 2) * 50;
         const y = HEIGHT - 58 + Math.floor(i / 2) * 16;
         text((battle.cursor === i ? ">" : " ") + lab, x, y, "#203018", 8);
       });
-    } else if (battle.phase === "fight") {
-      const moves = ["Strike", "Headshake", "Lay Up", m.species.signature];
-      moves.forEach((lab, i) => {
-        const y = HEIGHT - 58 + i * 12;
-        text((battle.sub === i ? ">" : " ") + lab, 16, y, "#203018", 8);
-      });
-    } else if (battle.phase === "live") {
-      const party = [];
-      if (game.loaner) party.push(game.loaner);
-      game.livewell.forEach((f) => party.push(f));
-      if (!party.length) text("No other fish.", 16, HEIGHT - 50, "#203018", 8);
-      party.forEach((f, i) => {
-        const mark = f.hp <= 0 ? "X" : (battle.sub === i ? ">" : " ");
-        text(mark + f.name + " HP" + f.hp, 16, HEIGHT - 58 + i * 10, "#203018", 8);
-      });
-    } else if (battle.phase === "catch") {
-      wrapText(battle.log, 16, HEIGHT - 58, 26, "#203018");
-      text((battle.sub === 0 ? ">" : " ") + "KEEP in coffee-can", 16, HEIGHT - 28, "#203018", 8);
-      text((battle.sub === 1 ? ">" : " ") + "RELEASE", 16, HEIGHT - 18, "#203018", 8);
+    } else if (battle.phase === "photo") {
+      px(88, 40, 80, 72, "#f8f0d8");
+      px(92, 44, 72, 52, "#7eb6d9");
+      drawFish(w, 128, 70, true);
+      text("PROOF", 104, 100, "#8b3a2f", 8);
+      wrapText(battle.log, 16, HEIGHT - 50, 26, "#203018");
     } else {
       wrapText(battle.log, 16, HEIGHT - 50, 26, "#203018");
     }
@@ -986,9 +1071,8 @@
     for (let i = 0; i < 16; i++) px(i * 16, 140, 16, 84, i % 2 ? "#1a6a9a" : "#16384a");
     px(0, 120, WIDTH, 24, "#3cb043");
     text("CATCH AND CRAFT", 24, 24, "#f0e0a0", 8);
-    text("VALLEYBROOK POND", 28, 42, "#f8f0d8", 8);
-    text("Hole 9  ·  Golf Course", 28, 58, "#b8c8a8", 8);
-    const items = ["Start", "Continue", "How to play"];
+    text("A fishing quest", 28, 42, "#b8c8a8", 8);
+    const items = ["New game", "Continue", "How to play"];
     items.forEach((lab, i) => {
       text((menuIndex === i ? ">" : " ") + lab, 28, 88 + i * 14, "#f8f0d8", 8);
     });
@@ -997,61 +1081,72 @@
   }
 
   function drawIntro() {
-    px(0, 0, WIDTH, HEIGHT, introIndex === 0 ? "#1a1410" : introIndex === 1 ? "#203018" : "#1a3a28");
+    px(0, 0, WIDTH, HEIGHT, introIndex === 0 ? "#1a1410" : introIndex < 3 ? "#203018" : "#1a3a28");
     if (introIndex === 0) {
       px(40, 48, 48, 28, "#6b5428");
       px(48, 56, 32, 12, "#c4a35a");
       px(86, 62, 70, 4, "#8a6a3a");
-      text("THE WARPED ROD", 24, 16, "#f0e0a0", 8);
+      px(92, 50, 14, 10, "#3a3a30");
+      px(95, 53, 8, 5, "#8aa8c8");
+      text("A PACKAGE", 24, 16, "#f0e0a0", 8);
     } else if (introIndex === 1) {
+      px(48, 52, 4, 40, "#6b5428");
+      px(44, 48, 12, 8, "#c4a35a");
+      px(160, 56, 28, 20, "#3a3a30");
+      px(166, 60, 16, 10, "#8aa8c8");
+      px(184, 62, 4, 4, "#d4a017");
+      text("ROD AND CAMERA", 24, 16, "#f0e0a0", 8);
+    } else if (introIndex === 2) {
       px(32, 40, 192, 56, "#3a2a18");
       px(40, 48, 176, 40, "#c4b8a0");
-      text("CLUB NOTICE", 56, 56, "#8b3a2f", 8);
-      text("NO EMPTY CANS", 48, 72, "#203018", 8);
+      text("NO PHOTO", 72, 56, "#8b3a2f", 8);
+      text("NO ENTRY", 80, 72, "#203018", 8);
     } else {
       for (let i = 0; i < 16; i++) px(i * 16, 140, 16, 84, i % 2 ? "#1a6a9a" : "#16384a");
       px(0, 120, WIDTH, 24, "#3cb043");
       px(8, 88, 16, 32, "#2a4a38");
-      text("HOLE 9", 28, 16, "#f0e0a0", 8);
-      text("WATER HAZARD", 28, 32, "#f8f0d8", 8);
+      text("FIRST WATER", 28, 16, "#f0e0a0", 8);
     }
     drawBox(8, HEIGHT - 88, WIDTH - 16, 80);
     wrapText(INTRO_PAGES[introIndex] || "", 16, HEIGHT - 80, 26, "#203018");
-    if (tick % 30 < 15) text("v", WIDTH - 22, HEIGHT - 18, "#203018", 8);
+    text("Z or A", WIDTH - 70, HEIGHT - 18, "#405838", 8);
   }
 
   function drawHelp() {
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
-    wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
-    wrapText("Walk north in the reeds to Zippy. Step on the bank and press Z to fish.", 16, 72, 26, "#203018");
-    wrapText("FIGHT tires a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
-    wrapText("You inherited a warped rod. Hole 9 is the closest water. Land one fish and the clubs will talk.", 16, 152, 26, "#203018");
+    wrapText("Arrows or D-pad move. Z or A talks, fishes, confirms. X or B backs out. Enter or START opens your pack.", 16, 32, 26, "#203018");
+    wrapText("1. Press UP. Stay on the left reeds. Talk to Zippy with Z.", 16, 72, 26, "#203018");
+    wrapText("2. Press DOWN to the bank. Press Z to fish.", 16, 112, 26, "#203018");
+    wrapText("3. REEL once, then SNAP. The fish goes back. The photo is proof.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
   }
 
   function drawMenu() {
     drawOverworld();
     drawBox(72, 24, 176, 160);
-    const items = ["FIELD GUIDE", "COFFEE-CAN", "SKILLS", "SAVE", "CLOSE"];
+    const items = ["ALBUM", "KIT", "SKILLS", "SAVE", "CLOSE"];
     items.forEach((lab, i) => {
       text((menuIndex === i ? ">" : " ") + lab, 84, 36 + i * 14, "#203018", 8);
     });
-    const caught = Object.keys(game.fieldGuide).length;
+    const caught = photoCount();
     if (menuIndex === 0) {
-      text(caught + "/8 pond fish", 84, 120, "#405838", 8);
+      text(caught + "/8 photos", 84, 120, "#405838", 8);
       POND_FISH.forEach((f, i) => {
         const mark = game.fieldGuide[f.id] ? "*" : "-";
         if (i < 4) text(mark + f.name.slice(0, 10), 84, 134 + i * 10, "#203018", 8);
       });
     } else if (menuIndex === 1) {
-      const names = game.livewell.map((f) => f.name);
-      if (game.loaner) names.unshift(game.loaner.name + " (loan)");
-      wrapText(names.join(", ") || "empty", 84, 120, 16, "#405838");
+      const kit = kitStats();
+      text(kit.rod.name + " DRG" + kit.rod.drag, 84, 120, "#203018", 8);
+      text(kit.line.name + " TEN" + kit.line.tensile, 84, 132, "#203018", 8);
+      text((game.kit.bait ? kit.bait.name : "No bait") + " HOK" + (kit.bait.hook || 0), 84, 144, "#203018", 8);
+      text(kit.net.name + " SCP" + kit.scoop, 84, 156, "#203018", 8);
+      text((game.kit.camera ? "Camera" : "No cam") + " PRF" + kit.proof, 84, 168, "#203018", 8);
     } else if (menuIndex === 2) {
       text((game.skills.keepStill ? "*" : "-") + " Keep Still", 84, 120, "#203018", 8);
       text((game.skills.dropALine ? "*" : "-") + " Drop a Line", 84, 132, "#203018", 8);
-      text((game.skills.theNet ? "*" : "-") + " The Net", 84, 144, "#203018", 8);
+      text((game.skills.snapshot ? "*" : "-") + " Snapshot", 84, 144, "#203018", 8);
       text("Catch:" + catchRank(), 84, 156, "#405838", 8);
     } else if (menuIndex === 3) {
       text("Talk to Zippy to save,", 84, 120, "#405838", 8);
@@ -1074,7 +1169,7 @@
       else if (menuIndex === 1) {
         if (loadGame()) {
           hideNameEntry();
-          showDialog(["Welcome back to hole 9, " + game.name + ".", objectiveLine()]);
+          showDialog(["Welcome back, " + game.name + "."].concat(objectiveLines()));
         } else beginIntro();
       } else mode = "help";
     }
@@ -1132,42 +1227,17 @@
       if (consume("ok")) endBattle();
       return;
     }
-    if (b.phase === "catch") {
-      if (consume("up") || consume("down")) b.sub = b.sub ? 0 : 1;
-      if (consume("ok")) finishCatch(b.sub === 0);
-      return;
-    }
-    if (b.phase === "fight") {
-      if (consume("up")) b.sub = (b.sub + 3) % 4;
-      if (consume("down")) b.sub = (b.sub + 1) % 4;
-      if (consume("cancel")) b.phase = "command";
-      if (consume("ok")) {
-        const kinds = ["strike", "shake", "cover", "sig"];
-        playerMove(kinds[b.sub]);
-      }
-      return;
-    }
-    if (b.phase === "live") {
-      const party = [];
-      if (game.loaner) party.push(game.loaner);
-      game.livewell.forEach((f) => party.push(f));
-      if (consume("up")) b.sub = (b.sub + party.length - 1) % Math.max(1, party.length);
-      if (consume("down")) b.sub = (b.sub + 1) % Math.max(1, party.length);
-      if (consume("cancel")) b.phase = "command";
-      if (consume("ok") && party[b.sub] && party[b.sub].hp > 0) {
-        b.mine = party[b.sub];
-        b.log = "Go, " + b.mine.name + "!";
-        b.phase = "command";
-      }
+    if (b.phase === "photo") {
+      if (consume("ok")) finishPhoto();
       return;
     }
     if (b.phase === "command") {
       if (consume("up") || consume("down")) b.cursor = (b.cursor + 2) % 4;
       if (consume("left") || consume("right")) b.cursor = b.cursor ^ 1;
       if (consume("ok")) {
-        if (b.cursor === 0) { b.phase = "fight"; b.sub = 0; }
-        else if (b.cursor === 1) { b.phase = "live"; b.sub = 0; }
-        else if (b.cursor === 2) tryNet();
+        if (b.cursor === 0) reelFish();
+        else if (b.cursor === 1) slackLine();
+        else if (b.cursor === 2) trySnap();
         else endBattle();
       }
     }

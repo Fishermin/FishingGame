@@ -5,19 +5,19 @@ is skipped, the tool or skill does not exist yet.
 
 ## Gear timeline
 
-| After this scene | Rod / vessel | Net / livewell | Skill |
+| After this scene | Rod / line / camera | Net / bait | Skill |
 | --- | --- | --- | --- |
-| Game start (Valleybrook Pond) | Warped spinning rod, 6 lb line | Hand net, coffee-can (3) | — |
-| Hide from the groundskeeper | — | — | Keep Still |
+| Game start (Valleybrook Pond) | Warped spinning rod, 6 lb line, pocket camera | Hand net | — |
+| Talk to Zippy | — | Worms | Keep Still |
 | First cast at hole 9 | — | — | Drop a Line |
-| Starter / first Bluegill netted | — | — | The Net |
+| First Bluegill photographed | — | — | The Snapshot |
 | First Sioux Valley Open loss + lesson | — | — | Set the Hook |
 | Elysian dockhand tackle box | — | Landing net | — |
-| Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | Dock cooler (4) | Drag Control |
+| Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | — | Drag Control |
 | Englehorn old-timer | LeSeuer Creek wand | — | Read the Seam |
 | Hook Protector side arc | — | — | Check the Knot |
-| Landing repair | Rowboat | Boat livewell (6) | Crawler Finder |
-| Field Guide 12 | — | Holding pond | — |
+| Landing repair | Rowboat | — | Crawler Finder |
+| Field Guide 12 | — | Extra album pages | — |
 | Cougar Slough lantern walk | — | — | Night Eyes |
 | Snag Crew exposed | — | Conservation net | Cut the Mesh |
 | Granite Falls hut repaired | Model 67 Fly rod | — | Fly Presentation |
@@ -33,8 +33,8 @@ is skipped, the tool or skill does not exist yet.
 | Size class | Examples | Needs |
 | --- | --- | --- |
 | Pan | Bluegill, shiners, darters | Hand net |
-| Sport | Bass, perch, trout, pike under 30 in | Landing net + cooler |
-| Trophy | Musky, big cat, drum | Trophy net + boat livewell |
+| Sport | Bass, perch, trout, pike under 30 in | Landing net |
+| Trophy | Musky, big cat, drum | Trophy net |
 | River giant | Lake sturgeon, alligator gar, monsters | Rapidan Bend rod + trophy net |
 
 A failed size gate is a scripted break-off, not a silent RNG miss.

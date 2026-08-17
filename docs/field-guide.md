@@ -5,8 +5,9 @@ inland fish. Names match what an angler would say on the bank (the trip
 game's "Sheepshead" and "Dogfish" and "Eelpout" stay as primary names;
 scientific or textbook names are aliases).
 
-Starter three are marked. The original twenty trip-game species are marked
-with a dagger (†). River monsters are last and are not real species.
+First photo at Valleybrook is a Bluegill. The original twenty trip-game
+species are marked with a dagger (†). River monsters are last and are not
+real species.
 
 Rarity: C common · U uncommon · R rare · T trophy · L legend.
 
