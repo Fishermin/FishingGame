@@ -133,7 +133,7 @@ Count: **74 regular species + 5 river monsters = 79**.
 | 075 | Cattail King | Fang / Weed | Pond | 20 Field Guide pages |
 | 076 | Redfin Widow | Cold / Swift | Granite Falls Rapids | Tragedy at the Dam Store, cleaned |
 | 077 | The Dam Ghost | Scale / Stone | Rapidan Bend | Journey of Ruby II |
-| 078 | Old Copper | Fang / Weed | Horseshoe Chain | Ol Catch N. Kraft's fish that got away |
+| 078 | Old Copper | Fang / Weed | Horseshoe Chain | Catch's fish that got away |
 | 079 | Ice-Eye | Cold / Night | Ice hole / Boot Lake | Ice Moon Derby |
 
 ## Trip-game species index

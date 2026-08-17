@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Derek's Fishing Game</title>
+  <title>Catch and Craft</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -488,7 +488,7 @@
 <body>
   <div class="app">
     <header class="brand-bar">
-      <h1 class="brand"><span>Lakeside Trip</span>Derek's Fishing Game</h1>
+      <h1 class="brand"><span>Lakeside Trip</span>Catch and Craft</h1>
       <div class="stats hidden" id="hud">
         <div class="stat">Angler: <strong id="hudName">—</strong></div>
         <div class="stat">Score: <strong id="hudScore">0</strong></div>
@@ -515,7 +515,7 @@
           <p class="muted">You'll get 10 casts. Each fish is scored by size and rarity. Beat the weather — and the odd pelican.</p>
           <div class="field">
             <label for="nameInput">Your name</label>
-            <input id="nameInput" type="text" maxlength="24" placeholder="e.g. Riley" autocomplete="nickname" />
+            <input id="nameInput" type="text" maxlength="24" placeholder="e.g. Catch" autocomplete="nickname" />
           </div>
           <div class="btn-row" style="margin-top: 0.85rem;">
             <button class="btn" id="startBtn" type="button">Start trip</button>
@@ -598,7 +598,7 @@
     </details>
 
     <p class="footer-note">
-      Web port of Derek's bash fishing game · High scores stay in your browser
+      Catch and Craft · High scores stay in your browser
       · <a href="fishingtrail.html" style="color: var(--wood-light);">Play the 1980s Trail edition</a>
     </p>
   </div>
@@ -612,8 +612,8 @@
     const BAROMETER = ["Rising", "Steady", "Steady", "Falling"];
     const MOON = ["Crescent", "Crescent", "None", "Full"];
 
-    // Secondary fishing partner shown in cast narratives (not a rotating name list).
-    const HELPER_NAME = "Derek";
+    // Bank partner in cast narratives: Zippy, the mysterious bait shop owner.
+    const HELPER_NAME = "Zippy";
     const LURES = ["Original Rapala", "Jointed Rapala", "SuperDuper", "Swedish Pimple", "Spoon", "Lazy Ike", "RattleTrap", "Lindy-Rig", "Mepps Agilia", "Bucktail Jig", "Silver Minnow", "Daredevil", "Jig and Mr.Twister", "Whopper Plopper", "Hula Popper", "Spinnerbait", "Berkly Flickershad", "Topwater Frog", "Blade Bait", "Jigging Rap", "Husky Jerk", "Beetlespin", "Jawbreaker", "Tube Bait", "Buzzbait", "Chatter Bait", "Panther Martin", "Kastmaster", "Wally Diver"];
     const LURE_COLORS = ["pink and white", "Pink", "White", "Black and Green", "Chartreuse", "Black and Orange", "Silver", "Blue and Black", "Yellow", "Firetiger", "Purple", "Green", "White", "Glowing", "Red and White", "Lime", "Pumpkin", "Chrome", "Gold", "Glowing", "Rusty", "Lucky"];
     const CUT_BAIT = ["Shad Head", "Shad Tail", "Bloody Nugget", "Frozen Herring", "Frozen Sucker", "Garlic Chicken", "Ball of Crawlers"];
@@ -843,7 +843,7 @@
         <div class="chip"><b>Moon</b>${c.moon}</div>
         <div class="chip"><b>Bite outlook</b>${state.conditionFactor}</div>
       `;
-      el.predictionText.textContent = `Derek's prediction: ${c.prediction}`;
+      el.predictionText.textContent = `Zippy's prediction: ${c.prediction}`;
       el.conditionFactor.textContent = String(state.conditionFactor);
     }
 
@@ -1135,7 +1135,7 @@
       generateConditions();
       renderConditions();
       updateHud();
-      setScene("Weather check", "Derek sizes up the day.");
+      setScene("Weather check", "Zippy sizes up the day.");
       showScreen("conditions");
       addLog(`Conditions locked in. Factor ${state.conditionFactor}. ${state.conditions.prediction}`, "note");
     }

@@ -1,20 +1,23 @@
-# Derek's Fishing Game
+# Catch and Craft
 
 A lakeside fishing game that began as a bash script and now has two playable
 web editions, plus a design for a Pokemon-style RPG campaign.
 
+Live home: [catchandcraft.cc](https://catchandcraft.cc)
+
 ## Play
 
-- [Derek's Fishing Game](fishingtrip.html) — modern lakeside trip, 10 casts
+- [Catch and Craft](fishingtrip.html) — modern lakeside trip, 10 casts
 - [The Fishing Trail](fishingtrail.html) — 1980s trail-game edition
 
-Enter a name, check the weather, pick bait, and fish. High scores stay in
-the browser. Derek is your partner. Catch a Bullhead or Sheepshead for a
-free cast.
+Enter a name (Catch is the persona), check the weather, pick bait, and fish.
+High scores stay in the browser. Zippy is your partner. Catch a Bullhead or
+Sheepshead for a free cast.
 
 ## Next: Ol Catch N. Kraft's Fishing Quest
 
-A planned 16-bit RPG built on this game's fish, jokes, and weather:
+A planned 16-bit RPG. You play as Catch. Zippy sells the best bait. Ruby II
+looks like a junker and fishes like a legend.
 
 - Turn-based battles and a Field Guide of 79 freshwater species
 - Club pins instead of gym badges, nets instead of balls
@@ -28,5 +31,4 @@ Read the plan:
 4. [Starter dex data](data/fish-dex.json)
 
 The trip games stay as Quick Trip and The Fishing Trail. Quest is a new
-`quest/` game once Phase 1 starts. The Quest build is static files, so it
-can live on GitHub Pages now and move to Apache later.
+`quest/` game once Phase 1 starts.

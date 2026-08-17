@@ -9,7 +9,7 @@ is skipped, the tool or skill does not exist yet.
 | --- | --- | --- | --- |
 | Game start | Warped spinning rod, 6 lb line | Hand net, coffee-can (3) | — |
 | Starter caught | — | — | — |
-| First Ol Catch N. Kraft loss + lesson | — | — | Set the Hook |
+| First Sioux Valley Open loss + lesson | — | — | Set the Hook |
 | Elysian dockhand tackle box | — | Landing net | — |
 | Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | Dock cooler (4) | Drag Control |
 | Englehorn old-timer | LeSeuer Creek wand | — | Read the Seam |
@@ -24,7 +24,7 @@ is skipped, the tool or skill does not exist yet.
 | Horseshoe Chain club pin | — | Rubber trophy net | — |
 | Ice Moon Derby | Boot Lake Ice rod, fish house | — | Jig in the Dark |
 | Conservation path | — | Honor Net | Honor Release |
-| Mystery of Heron Lake / circuit cup | — | — | Ol Catch N. Kraft boats with you |
+| Mystery of Heron Lake / circuit cup | Ruby II | — | Catch skippers Ruby II |
 
 ## Size gates (cannot catch until gear exists)
 

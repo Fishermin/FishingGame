@@ -478,7 +478,7 @@
 
   <script>
     const STORAGE_KEY = "dereksFishingTrailScoresV1";
-    const HELPER_NAME = "Derek";
+    const HELPER_NAME = "Zippy";
 
     const SUN = ["Sunny", "Partly Cloudy", "Foggy", "Overcast"];
     const PRECIP = ["None", "Drizzle", "Rain", "Down Pour"];
@@ -883,10 +883,10 @@
       showTitle(false);
       writeOutput(
         "THE FISHING TRAIL\n\n" +
-        "An alternate edition of Derek's Fishing Game,\n" +
+        "An alternate edition of Catch and Craft,\n" +
         "styled after 1980s trail games on the Apple IIGS.\n\n" +
         "Numbered menus guide your trip.\n" +
-        "Derek is your fishing partner.\n" +
+        "Zippy is your fishing partner.\n" +
         "Bullhead or Sheepshead earn a free cast.\n" +
         "Cut bait can mean bigger fish — or no fish."
       );
@@ -956,7 +956,7 @@
         `  Barometer:  ${c.barometer}\n` +
         `  Moon:       ${c.moon}\n` +
         `  Bite factor:${state.conditionFactor}\n\n` +
-        `Derek's prediction:\n${c.prediction}`;
+        `Zippy's prediction:\n${c.prediction}`;
       writeOutput(intro);
       await waitForContinue("Continue on the trail");
       baitMenu();
