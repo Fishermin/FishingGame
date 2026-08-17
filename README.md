@@ -11,14 +11,15 @@ Live home: [catchandcraft.cc](https://catchandcraft.cc)
 - [Catch and Craft](fishingtrip.html) — modern lakeside trip, 10 casts
 - [The Fishing Trail](fishingtrail.html) — 1980s trail-game edition
 
-Enter a name (Catch is the persona), check the weather, pick bait, and fish.
-High scores stay in the browser. Zippy is your partner. Catch a Bullhead or
-Sheepshead for a free cast.
+Enter a name, check the weather, pick bait, and fish. High scores stay in
+the browser. Zippy is your partner. A Bullhead or Sheepshead earns a free
+cast.
 
 ## Next: Ol Catch N. Kraft's Fishing Quest
 
-A planned 16-bit RPG. You play as Catch. Zippy sells the best bait. Ruby II
-looks like a junker and fishes like a legend.
+A planned 16-bit RPG. You name your angler. **Catch** starts as a rival on
+the bank and can become a friend. Zippy sells the best bait. Ruby II looks
+like a junker and fishes like a legend.
 
 - Turn-based battles and a Field Guide of 79 freshwater species
 - Club pins instead of gym badges, nets instead of balls

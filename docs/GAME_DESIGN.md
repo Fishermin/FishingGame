@@ -9,20 +9,19 @@ This document is the build contract. Existing trip modes
 arcade side modes (Quick Trip and The Fishing Trail). The new campaign is a
 separate game that reuses their tone, fish names, weather, and bait jokes.
 
-You play as **Catch** — the Catch N. Kraft persona, a nod to the maker,
-never a real-world personal name. The live site is
-[catchandcraft.cc](https://catchandcraft.cc).
+You name your own angler. **Catch** is an in-game character — a nod to
+Catch N. Kraft — who starts adversarial and can become a friend. The live
+site is [catchandcraft.cc](https://catchandcraft.cc).
 
 ---
 
 ## 1. Pitch
 
-You are **Catch**, a junior angler who inherits a warped spinning rod and a
-coffee-can livewell. The watershed's fishing clubs run a circuit the way old
-Pokemon leagues ran gyms. Wild fish are fought and captured. Rival anglers
-duel you with the champions in their livewells. Permits, rods, and skills
-are not purchased from a full catalog — they are the natural result of the
-situations you get into.
+You pick your identity and sneak onto the watershed with a warped spinning
+rod and a coffee-can livewell. The clubs run a circuit the way old Pokemon
+leagues ran gyms. Wild fish are fought and captured. **Catch** is already
+on the water: at first he wants the holes to himself, then — if you keep
+showing up — he stops treating you like a problem.
 
 **Working title:** Ol Catch N. Kraft's Fishing Quest
 **Genre:** 16-bit overworld RPG + turn-based battles + collection
@@ -30,8 +29,8 @@ situations you get into.
 files; GitHub Pages is only a preview host while building)
 **Look:** Super Nintendo / Game Boy Color era pixel art, not modern UI
 **Tone:** Midwest lakeside humor from the current game, plus a real story
-**Player persona:** Catch (Catch N. Kraft). Do not use a real-world personal
-name anywhere in the game.
+**Player:** named by the player at the start. Catch is an NPC, not the
+avatar. Do not put a real-world personal name in the scripted cast.
 
 The Pokemon analog is structural, not a clone. No monsters-in-orbs branding.
 The mapping is:
@@ -242,8 +241,8 @@ at the Dam Store.
 Target: **74 regular species + 5 river monsters = 79**. All freshwater.
 Midwest core first (the current 20), then the rest of the inland map.
 
-Starter pool (player Catch chooses one; a Sioux Valley Open rival takes a
-type-advantage neighbor):
+Starter pool (the player chooses one; Catch takes a type-advantage
+neighbor and treats it like a dare):
 
 | Starter | Type | Why |
 | --- | --- | --- |
@@ -251,8 +250,9 @@ type-advantage neighbor):
 | Bullhead | Night / Stone | Joke fish of the trip game, secretly tough |
 | Largemouth Bass | Fang / Weed | The poster fish |
 
-A pasture rival at the Sioux Valley Open takes the starter that beats
-yours, then later shows up with a Musky they "definitely meant to catch."
+Catch takes the starter that beats yours and treats it like a dare. The
+dare starts at Valleybrook Pond. At the Sioux Valley Open he shows up with
+a Musky he "definitely meant to catch."
 
 Rarity bands: Common, Uncommon, Rare, Trophy, Legend. Trophy fish are
 regional; Legends are story-locked.
@@ -291,10 +291,12 @@ crossing that you cannot take until the landing is repaired.
 
 ### Cast
 
-- **Catch** — you. The Catch N. Kraft persona. Default player name.
+- **You** — a named junior angler. Identity is chosen at the start.
+- **Catch** — in-game rival. Starts adversarial ("this is my water"), then
+  friendship can grow if you keep fishing the same holes. Nod to Catch N.
+  Kraft; not the player.
 - **Zippy** — mysterious bait shop owner. Somehow always has the best bait.
 - **The Valleybrook groundskeeper** — not keen on fishing at his golf course
-- A Sioux Valley Open rival (pasture angler, not named Catch)
 - Club champions / wardens
 - Elysian dockhand
 - Englehorn Creek old-timer
@@ -325,14 +327,16 @@ one leaves a tool, a skill, a fish, or a permanent map change.
 
 ### 8.1 Main spine
 
-1. **The Warped Rod.** Inherit the rod. Sneak onto Valleybrook Golf Course.
-   The pond on hole 9 is the classroom. Zippy sells bait from the trees.
-   The groundskeeper patrols the fairway — learn Keep Still in the cattails,
-   Drop a Line on the bank, and The Net on your first Bluegill.
+1. **The Warped Rod.** Inherit the rod. Name yourself. Sneak onto
+   Valleybrook Golf Course. Catch is already on hole 9 and does not want
+   company. The groundskeeper patrols the fairway. Zippy sells bait from
+   the trees. Learn Keep Still, Drop a Line, and The Net — and, if you
+   share the cattails long enough, Catch stops telling you to scram.
 2. **Sioux Valley Open.** First club event. The water is a pond in a farm
-   pasture, full of sheep. Learn livewell duels with a pasture rival. A ski
-   boat still shows up as a hazard on the nearby reservoir. Payoff: reservoir
-   pin, Elysian Model 202 baitcaster, Drag Control.
+   pasture, full of sheep. Catch is the livewell rival if friendship is still
+   thin; if it has grown, he is a reluctant partner who still wants to win.
+   A ski boat still shows up as a hazard on the nearby reservoir. Payoff:
+   reservoir pin, Elysian Model 202 baitcaster, Drag Control.
 3. **Search for Zippy's Treasure.** Zippy is a mysterious bait shop owner
    who always seems to sell the best bait. The "treasure" is whatever Zippy
    will not put on the counter: a cache of named lures and maps. Following
@@ -342,7 +346,8 @@ one leaves a tool, a skill, a fish, or a permanent map change.
    game. Trees around Heron Lake go missing — they disappear, they do not
    just get cut in front of you. The gauntlet of club champions happens
    while you find out why the timber is vanishing. Payoff: Circuit cup.
-   After this, Catch skippers **Ruby II**.
+   After this, you skipper **Ruby II**. Catch will ride along if you are
+   friends by then.
 
 ### 8.2 Villain arc — The Snag Crew
 
@@ -367,9 +372,11 @@ talks about the pie.
 
 ### 8.4 Catch's fish that got away
 
-Catch will not talk about a jump at dusk on the Horseshoe Chain. The arc
-unlocks after club 6. Payoff: the river monster **Old Copper** (Fang/Weed
-musky). After you land or release it, **Ruby II** is yours to skipper.
+Catch will not talk about a jump at dusk on the Horseshoe Chain. This is
+his unfinished business, not the player's. The arc unlocks after club 6,
+and only opens fully if Catch trusts you. Payoff: the river monster
+**Old Copper** (Fang/Weed musky). After you land or release it together,
+**Ruby II** is yours to skipper.
 
 ### 8.5 The Lost Swedish Pimple
 
@@ -499,8 +506,9 @@ You cannot skip the scene and buy the skill.
 - **Field Guide pages** — completion ribbons, not just a %, unlock postgame
 - **Conservation tokens** — currency for the Dam Store vote and Honor Net
 - **Named lures** — held items with histories from the existing lure list
-- **Ruby II** — later, Catch skippers her; Zippy may appear in the bow
-  with bait and still knock a fish off the net, because of course
+- **Ruby II** — later, the player skippers her. Catch may take the bow
+  once you are friends. Zippy may appear with bait and still knock a fish
+  off the net, because of course
 
 XP goes to fish. Reputation goes to the angler and gates which NPCs will
 talk. Reputation is earned by finishing arcs, not by grinding the same
@@ -588,22 +596,24 @@ not break the 16-bit layout.
 Ship a playable slice before a region, a region before a circuit, a
 circuit before legendaries. Each phase should be fun alone.
 
-### Phase 0 — Design (this PR)
+### Phase 0 — Design
 
-Documents and a starter dex. No quest code yet.
+Documents and a starter dex.
 
-### Phase 1 — Vertical slice
+### Phase 1 — Vertical slice (in progress)
 
-One screen of Valleybrook Pond at Valleybrook Golf Course. Walk, hide from
-the groundskeeper in the cattails, face water, cast, one wild battle,
-catch a Bluegill, buy bait from Zippy, save. 8 fish max. Placeholder
-tiles are fine if the silhouette reads. **Exit test:** a stranger understands
-FIGHT / NET / LIVEWELL without a manual, and can fish without getting run off.
+Valleybrook Pond at Valleybrook Golf Course is playable at `quest/index.html`.
+Name your angler. Catch is already on hole 9 and starts unfriendly.
+
+One screen of Valleybrook Pond. Walk, hide from the groundskeeper, deal
+with Catch, buy bait from Zippy, battle, net a Bluegill, save. **Exit test:**
+a stranger understands FIGHT / NET / LIVEWELL, can avoid the groundskeeper,
+and can tell the player apart from Catch.
 
 ### Phase 2 — Livewell duels + Field Guide UI
 
-Pasture rival rematch as a 2v2 duel. Field Guide pages for whatever you
-caught. Holding pond at the camp shack. Starter choice.
+Catch rematch as a 2v2 duel if friendship is still thin. Field Guide pages
+for whatever you caught. Holding pond at the camp shack. Starter choice.
 
 ### Phase 3 — Elysian Reservoir
 
@@ -669,8 +679,8 @@ changing the code.
 | Livewell size | 3 → 4 → 6 |
 | Level cap | 50 story, 70 postgame |
 | Engine | Phaser 3, static files on catchandcraft.cc |
-| Player persona | Catch (Catch N. Kraft). No real-world personal name in the game |
-| Bank partner | Zippy |
+| Player identity | Chosen at the start. Catch is an NPC rival-to-friend |
+| Bank partner | Zippy (bait). Catch (rival who can become a friend) |
 | Boat | Ruby II |
 
 ---

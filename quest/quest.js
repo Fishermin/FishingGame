@@ -53,6 +53,8 @@
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
+  const nameWrap = document.getElementById("nameWrap");
+  const nameEntry = document.getElementById("nameEntry");
 
   const keys = Object.create(null);
   const just = Object.create(null);
@@ -69,7 +71,7 @@
   let saveNote = 0;
 
   const game = {
-    name: "Catch",
+    name: "Angler",
     worms: 0,
     warnings: 0,
     skills: { keepStill: false, dropALine: false, theNet: false },
@@ -77,8 +79,12 @@
     livewell: [],
     loaner: null,
     talkedZippy: false,
+    metCatch: false,
+    catchBond: 0,
+    catchFlags: { spotted: false, fish: false, zippy: false },
     player: { c: 1, r: 7, facing: "down" },
     keeper: { c: 4, r: 4, facing: "right", pathI: 0 },
+    catchNpc: { c: 14, r: 7, facing: "left" },
   };
 
   const KEEPER_PATH = [
@@ -116,9 +122,34 @@
       ["w"].includes(tileAt(c, r + 1)) || ["w"].includes(tileAt(c, r - 1));
   }
 
+  function formatName(raw) {
+    const trimmed = String(raw || "").trim().replace(/\s+/g, " ");
+    if (!trimmed) return "";
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  }
+
+  function catchRank() {
+    if (game.catchBond >= 2) return "friend";
+    if (game.catchBond >= 1) return "wary";
+    return "rival";
+  }
+
+  function bumpCatch(flag) {
+    if (game.catchFlags[flag]) return false;
+    game.catchFlags[flag] = true;
+    if (game.catchBond < 2) game.catchBond += 1;
+    return true;
+  }
+
   function nearZippy() {
     const p = game.player;
-    return Math.abs(p.c - 1) + Math.abs(p.r - 1) <= 2 && (p.r <= 2);
+    return Math.abs(p.c - 1) + Math.abs(p.r - 1) <= 2 && p.r <= 2;
+  }
+
+  function nearCatch() {
+    const p = game.player;
+    const c = game.catchNpc;
+    return Math.abs(p.c - c.c) + Math.abs(p.r - c.r) <= 1;
   }
 
   function chebyshev(a, b) {
@@ -235,12 +266,65 @@
     game.player.c = 1;
     game.player.r = 7;
     game.player.facing = "down";
+    if (game.metCatch && bumpCatch("spotted")) {
+      lines.push("CATCH: You almost got US both tossed, " + game.name + "!");
+    }
     if (hiddenAt(game.player.c, game.player.r) && !game.skills.keepStill) {
       game.skills.keepStill = true;
       lines.push("You learned KEEP STILL!");
       lines.push("Cattails break his line of sight.");
     }
     showDialog(lines);
+  }
+
+  function talkCatch() {
+    const who = game.name;
+    game.metCatch = true;
+    const rank = catchRank();
+    const lines = [];
+    if (rank === "rival") {
+      lines.push("A kid in a gold cap is already on the east bank.");
+      if (who.toLowerCase() === "catch") {
+        lines.push("CATCH: You're also Catch? Cute. Don't wear it out.");
+      }
+      lines.push("CATCH: This is my pond, " + who + ". Scram.");
+      lines.push("CATCH: I had hole 9 first. The groundskeeper is my problem, not yours.");
+    } else if (rank === "wary") {
+      lines.push("CATCH: You're still here.");
+      lines.push("CATCH: Fine. West bank is yours. East is mine. Don't splash.");
+      if (game.talkedZippy && bumpCatch("zippy")) {
+        lines.push("CATCH: You found Zippy. That bait is wasted on you.");
+      }
+    } else {
+      lines.push("CATCH: ...If we're stuck sharing hole 9, I'll watch the cart path.");
+      lines.push("CATCH: Don't make me cover for you, " + who + ".");
+    }
+    showDialog(lines);
+  }
+
+  function hideNameEntry() {
+    if (!nameWrap) return;
+    nameWrap.classList.add("hidden");
+    if (nameEntry) nameEntry.blur();
+  }
+
+  function showNameEntry() {
+    mode = "name";
+    menuIndex = 0;
+    if (nameWrap) nameWrap.classList.remove("hidden");
+    if (nameEntry) {
+      nameEntry.value = "";
+      setTimeout(() => nameEntry.focus(), 0);
+    }
+  }
+
+  function confirmName() {
+    const n = formatName(nameEntry ? nameEntry.value : "");
+    if (!n) {
+      if (nameEntry) nameEntry.placeholder = "Need a name";
+      return;
+    }
+    newGame(n);
   }
 
   function talkZippy() {
@@ -254,6 +338,7 @@
         "ZIPPY: Worms. Don't ask where.",
         "ZIPPY: Take this shiner. You'll need a fish in the can.",
         "ZIPPY: If the groundskeeper sees you, hide in the cattails.",
+        "ZIPPY: Kid on the east bank thinks he owns the hole. He doesn't.",
         "Got 5 WORMS and a loaner GOLDEN SHINER.",
       ]);
       return;
@@ -281,6 +366,10 @@
     }
     if (!activeFighter()) {
       showDialog(["The coffee-can is empty.", "Zippy might float you a fish."]);
+      return;
+    }
+    if (catchRank() === "friend" && chebyshev(game.player, game.keeper) <= 4 && !hiddenAt(game.player.c, game.player.r)) {
+      showDialog(["CATCH: Wait. Cart path. He's looking this way."]);
       return;
     }
     if (keeperSeesPlayer()) {
@@ -419,6 +508,7 @@
       game.skills.theNet = true;
       battle.log += " You learned THE NET!";
     }
+    if (game.metCatch && bumpCatch("fish")) game.pendingCatch = "fish";
     battle.sub = canKeep ? 0 : 1;
   }
 
@@ -435,6 +525,15 @@
   function endBattle() {
     battle = null;
     mode = "play";
+    if (game.pendingCatch === "fish" && game.metCatch) {
+      game.pendingCatch = null;
+      showDialog([
+        "CATCH: ...You actually landed one.",
+        "CATCH: Don't get cocky, " + game.name + ".",
+      ]);
+      return;
+    }
+    game.pendingCatch = null;
     if (keeperSeesPlayer()) spotted();
   }
 
@@ -449,8 +548,12 @@
         livewell: game.livewell,
         loaner: game.loaner,
         talkedZippy: game.talkedZippy,
+        metCatch: game.metCatch,
+        catchBond: game.catchBond,
+        catchFlags: game.catchFlags,
         player: game.player,
         keeper: game.keeper,
+        catchNpc: game.catchNpc,
       }));
     } catch (err) { /* ignore */ }
   }
@@ -461,14 +564,18 @@
       if (!raw) return false;
       const data = JSON.parse(raw);
       Object.assign(game, data);
+      if (!game.catchNpc) game.catchNpc = { c: 14, r: 7, facing: "left" };
+      if (!game.catchFlags) game.catchFlags = { spotted: false, fish: false, zippy: false };
+      if (game.catchBond == null) game.catchBond = 0;
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  function newGame() {
-    game.name = "Catch";
+  function newGame(name) {
+    hideNameEntry();
+    game.name = formatName(name) || "Angler";
     game.worms = 0;
     game.warnings = 0;
     game.skills = { keepStill: false, dropALine: false, theNet: false };
@@ -476,18 +583,36 @@
     game.livewell = [];
     game.loaner = null;
     game.talkedZippy = false;
+    game.metCatch = false;
+    game.catchBond = 0;
+    game.catchFlags = { spotted: false, fish: false, zippy: false };
+    game.pendingCatch = null;
     game.player = { c: 1, r: 7, facing: "down" };
     game.keeper = { c: 4, r: 4, facing: "right", pathI: 0 };
+    game.catchNpc = { c: 14, r: 7, facing: "left" };
     showDialog([
       "VALLEYBROOK POND",
       "Valleybrook Golf Course, hole 9.",
-      "You are Catch. The pond is full of panfish.",
+      game.name + " sneaks onto the course with a warped rod.",
+      "Someone is already on the east bank. They do not look friendly.",
       "The groundskeeper is not keen on people fishing his course.",
-      "Stay in the cattails. Someone is whispering from the trees.",
+      "Stay in the cattails. Leaves are moving by the clubhouse.",
     ]);
   }
 
   window.addEventListener("keydown", (e) => {
+    if (mode === "name" || (nameEntry && document.activeElement === nameEntry)) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        confirmName();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        hideNameEntry();
+        mode = "title";
+      }
+      return;
+    }
     const map = {
       ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
       z: "ok", Z: "ok", Enter: "ok",
@@ -529,6 +654,10 @@
   }
 
   function tryInteract() {
+    if (nearCatch()) {
+      talkCatch();
+      return;
+    }
     if (nearZippy()) {
       talkZippy();
       return;
@@ -676,6 +805,11 @@
       px(x + 5, y + 4, 6, 3, "#e8c8a0");
       px(x + 3, y + 10, 10, 5, "#2a2a28");
       px(x + 5, y + 1, 6, 3, "#c45c2a");
+    } else if (kind === "catch") {
+      px(x + 4, y + 3, 8, 8, "#8b3a2f");
+      px(x + 5, y + 4, 6, 3, "#f0d0b0");
+      px(x + 3, y + 10, 10, 5, "#203018");
+      px(x + 6, y + 1, 4, 3, "#d4a017");
     } else {
       px(x + 4, y + 3, 8, 8, hide ? "#2a4a38" : "#2a5aa8");
       px(x + 5, y + 4, 6, 3, "#f0d0b0");
@@ -717,7 +851,7 @@
 
   function drawHud() {
     px(0, 0, WIDTH, 12, "#203018");
-    text("VALLEYBROOK", 4, 2, "#f0e0a0", 8);
+    text((game.name || "ANGLER").slice(0, 8).toUpperCase(), 4, 2, "#f0e0a0", 8);
     text("W" + game.worms, 140, 2, "#f8f0d8", 8);
     text("CAN " + game.livewell.length + "/3", 176, 2, "#f8f0d8", 8);
     if (saveNote > 0) text("SAVED", 216, 2, "#70f070", 8);
@@ -729,14 +863,18 @@
     }
     drawPerson(game.keeper.c, game.keeper.r, "keeper", game.keeper.facing);
     drawPerson(1, 1, "zippy", "down");
+    drawPerson(game.catchNpc.c, game.catchNpc.r, "catch", game.catchNpc.facing);
     drawPerson(game.player.c, game.player.r, "player", game.player.facing);
     if (nearZippy() && tick % 40 < 20) {
       text("!", 18, 8, "#f0e0a0", 8);
     }
+    if (nearCatch() && tick % 40 < 20) {
+      text("!", game.catchNpc.c * TILE + 4, game.catchNpc.r * TILE - 8, "#f0e0a0", 8);
+    }
     drawHud();
     if (mode === "play") {
       drawBox(8, HEIGHT - 36, WIDTH - 16, 28);
-      wrapText("Hole 9. Z: talk / fish   cattails hide you", 14, HEIGHT - 30, 26, "#203018");
+      wrapText("West cattails hide you. East bank is Catch's. Z talks.", 14, HEIGHT - 30, 26, "#203018");
     }
   }
 
@@ -817,6 +955,7 @@
       text((menuIndex === i ? ">" : " ") + lab, 28, 88 + i * 14, "#f8f0d8", 8);
     });
     text("Z confirm", 28, 200, "#8aa878", 8);
+    if (mode === "name") text("Type your name below.", 28, 176, "#f0e0a0", 8);
   }
 
   function drawHelp() {
@@ -825,7 +964,7 @@
     wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
     wrapText("Hide in cattails. The groundskeeper will run you off the fairway.", 16, 72, 26, "#203018");
     wrapText("FIGHT weakens a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
-    wrapText("Zippy is in the trees by the clubhouse.", 16, 152, 26, "#203018");
+    wrapText("Catch is on the east bank. He thinks hole 9 is his. Zippy is in the trees by the clubhouse.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
   }
 
@@ -851,6 +990,7 @@
       text((game.skills.keepStill ? "*" : "-") + " Keep Still", 84, 120, "#203018", 8);
       text((game.skills.dropALine ? "*" : "-") + " Drop a Line", 84, 132, "#203018", 8);
       text((game.skills.theNet ? "*" : "-") + " The Net", 84, 144, "#203018", 8);
+      text("Catch:" + catchRank(), 84, 156, "#405838", 8);
     } else if (menuIndex === 3) {
       text("Talk to Zippy to save,", 84, 120, "#405838", 8);
       text("or press Z here.", 84, 132, "#405838", 8);
@@ -861,12 +1001,12 @@
     if (consume("up")) menuIndex = (menuIndex + 2) % 3;
     if (consume("down")) menuIndex = (menuIndex + 1) % 3;
     if (consume("ok")) {
-      if (menuIndex === 0) newGame();
+      if (menuIndex === 0) showNameEntry();
       else if (menuIndex === 1) {
         if (loadGame()) {
-          mode = "play";
-          showDialog(["Welcome back to hole 9, Catch."]);
-        } else newGame();
+          hideNameEntry();
+          showDialog(["Welcome back to hole 9, " + game.name + "."]);
+        } else showNameEntry();
       } else mode = "help";
     }
   }
@@ -971,6 +1111,7 @@
     if (saveNote > 0) saveNote -= 1;
 
     if (mode === "title") handleTitle();
+    else if (mode === "name") { /* HTML name field */ }
     else if (mode === "help") handleHelp();
     else if (mode === "dialog") handleDialog();
     else if (mode === "menu") handleMenu();
@@ -988,7 +1129,7 @@
 
   function render() {
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    if (mode === "title") drawTitle();
+    if (mode === "title" || mode === "name") drawTitle();
     else if (mode === "help") drawHelp();
     else if (mode === "dialog") drawDialog();
     else if (mode === "menu") drawMenu();

@@ -26,7 +26,7 @@ is skipped, the tool or skill does not exist yet.
 | Horseshoe Chain club pin | — | Rubber trophy net | — |
 | Ice Moon Derby | Boot Lake Ice rod, fish house | — | Jig in the Dark |
 | Conservation path | — | Honor Net | Honor Release |
-| Mystery of Heron Lake / circuit cup | Ruby II | — | Catch skippers Ruby II |
+| Mystery of Heron Lake / circuit cup | Ruby II | — | Player skippers; Catch rides if friends |
 
 ## Size gates (cannot catch until gear exists)
 
