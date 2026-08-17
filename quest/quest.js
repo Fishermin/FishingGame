@@ -59,7 +59,14 @@
   const keys = Object.create(null);
   const just = Object.create(null);
 
-  let mode = "title";
+  let mode = "intro";
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(SAVE_KEY) : null;
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data && data.cleared) mode = "title";
+    }
+  } catch (err) { /* ignore */ }
   let tick = 0;
   let walkLock = 0;
   let keeperTimer = 0;
@@ -85,17 +92,18 @@
     catchBond: 0,
     catchFlags: { spotted: false, fish: false, zippy: false },
     cleared: false,
-    player: { c: 1, r: 7, facing: "down" },
-    keeper: { c: 8, r: 3, facing: "right", pathI: 1 },
+    player: { c: 1, r: 7, facing: "up" },
+    keeper: { c: 8, r: 4, facing: "left", pathI: 0 },
     catchNpc: { c: 14, r: 7, facing: "left" },
   };
 
   const KEEPER_STEP = 50;
   const KEEPER_DWELL = 48;
   const INTRO_PAGES = [
-    "A package hits the porch at dawn. No note. Just a warped spinning rod and a coffee-can.",
-    "The fishing clubs own the watershed. Empty can, they will not even look at you. You need a fish.",
-    "Closest water is Valleybrook Pond: hole 9, a golf-course hazard. Golfers hate anglers. The bluegill do not.",
+    "A package is on the porch at dawn. There is no note.",
+    "Inside: a warped spinning rod and an empty coffee-can. That is all you inherited.",
+    "Fishing clubs run the lakes around here. Empty can, they will not talk. You need one fish.",
+    "The closest water is a pond on a golf course. Valleybrook, hole 9. They call it a water hazard. That is your first hole.",
   ];
   const KEEPER_PATH = [
     { c: 4, r: 3 },
@@ -162,11 +170,25 @@
     return Math.max(Math.abs(a.c - b.c), Math.abs(a.r - b.r));
   }
 
-  function objectiveLine() {
-    if (game.cleared) return "Hole 9 cleared. Fish, or talk to Zippy.";
-    if (!game.talkedZippy) return "Walk north in the reeds. Talk to Zippy (Z).";
-    if (!game.skills.theNet) return "Step onto the bank. Press Z to cast.";
-    return "Land that fish. FIGHT to tire it, then NET.";
+  function objectiveLines() {
+    if (game.cleared) {
+      return ["Hole 9 is cleared.", "Fish more, or talk to Zippy."];
+    }
+    if (!game.talkedZippy) {
+      return [
+        "Press UP. Stay on the left reeds.",
+        "Do not walk on the green grass.",
+        "Press Z at the man in the trees.",
+      ];
+    }
+    if (!game.skills.theNet) {
+      return [
+        "Press DOWN to the brown bank.",
+        "Stand next to the water.",
+        "Press Z to cast.",
+      ];
+    }
+    return ["Keep fishing, or talk to Zippy."];
   }
 
   function scaleStats(base, level) {
@@ -252,8 +274,8 @@
 
   function bumpKeeper() {
     showDialog([
-      "GROUNDSKEEPER: This is a golf course, not a landing!",
-      "He is busy with the fairway. The reeds and the bank are yours.",
+      "GROUNDSKEEPER: Stay off the green. I'm mowing.",
+      "Leave him. Walk the left reeds.",
     ]);
   }
 
@@ -313,14 +335,12 @@
       game.worms = 5;
       game.loaner = makeFighter(SHINER, 5, true);
       showDialog([
-        "A man in a faded cap is somehow running a bait shop in the trees.",
-        "ZIPPY: Keep your voice down. Worms. Don't ask where.",
-        "ZIPPY: Take this shiner. Clubs want a fish in the can.",
-        "ZIPPY: Step onto the bank. Press Z to cast.",
-        "ZIPPY: FIGHT tires it. NET lands it. Don't knock it out.",
+        "ZIPPY: " + game.name + ". Worms. A shiner. Don't ask.",
+        "ZIPPY: Press DOWN to the brown bank. Press Z to cast.",
+        "ZIPPY: In the fight, pick FIGHT once. Then pick NET.",
         "Got 5 WORMS and a loaner GOLDEN SHINER.",
       ]);
-      learnSkill("keepStill", "KEEP STILL", "Stay in the reeds. He watches the fairway, not you.");
+      learnSkill("keepStill", "KEEP STILL", "Stay off the grass. He is mowing.");
       saveGame();
       saveNote = 90;
       return;
@@ -616,14 +636,16 @@
     game.catchFlags = { spotted: false, fish: false, zippy: false };
     game.pendingCatch = null;
     game.cleared = false;
-    game.player = { c: 1, r: 7, facing: "down" };
-    game.keeper = { c: 8, r: 3, facing: "right", pathI: 1 };
+    game.player = { c: 1, r: 7, facing: "up" };
+    game.keeper = { c: 8, r: 4, facing: "left", pathI: 0 };
     game.catchNpc = { c: 14, r: 7, facing: "left" };
     keeperTimer = 0;
     keeperDwell = 0;
     showDialog([
-      "ZIPPY: " + game.name + ". Trees by the clubhouse. I have bait.",
-      "Stay in the reeds. Walk north. Land one fish. That is how this starts.",
+      "You are in the cattails on the LEFT side of the screen.",
+      "Press the UP ARROW. Stay on the left. Do not walk on the grass.",
+      "The man in the trees is ZIPPY. Press Z when you reach him.",
+      "He has bait. Then you fish. Land one fish and the clubs will talk.",
     ]);
   }
 
@@ -642,6 +664,7 @@
     }
     const map = {
       ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      w: "up", W: "up", s: "down", S: "down", a: "left", A: "left", d: "right", D: "right",
       z: "ok", Z: "ok", Enter: "ok",
       x: "cancel", X: "cancel", Shift: "cancel",
       Escape: "menu",
@@ -660,6 +683,7 @@
   window.addEventListener("keyup", (e) => {
     const map = {
       ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+      w: "up", W: "up", s: "down", S: "down", a: "left", A: "left", d: "right", D: "right",
       z: "ok", Z: "ok", Enter: "ok",
       x: "cancel", X: "cancel", Shift: "cancel",
     };
@@ -691,13 +715,31 @@
     }
     if (fishable(game.player.c, game.player.r)) {
       if (!game.talkedZippy) {
-        showDialog(["You need bait first.", "Walk north in the reeds. Talk to Zippy."]);
+        showDialog([
+          "Not yet. You need bait.",
+          "Press UP. Stay on the left reeds.",
+          "Press Z at the man in the trees. That is Zippy.",
+        ]);
         return;
       }
       startBattle();
       return;
     }
-    showDialog(["Hole 9. Keep off the fairway if you can help it."]);
+    if (!game.talkedZippy) {
+      showDialog([
+        "Press the UP ARROW. Stay on the left.",
+        "Talk to Zippy in the trees. Press Z when you see him.",
+      ]);
+      return;
+    }
+    if (!game.skills.theNet) {
+      showDialog([
+        "Press DOWN to the brown bank by the water.",
+        "Stand on the bank. Press Z to cast.",
+      ]);
+      return;
+    }
+    showDialog(["Press Z on the bank to fish. Talk to Zippy if you need bait."]);
   }
 
   function movePlayer() {
@@ -733,28 +775,7 @@
   }
 
   function moveKeeper() {
-    if (mode !== "play") return;
-    const k = game.keeper;
-    if (keeperDwell > 0) {
-      keeperDwell -= 1;
-      if (keeperDwell === 0) faceToward(k, KEEPER_PATH[k.pathI]);
-      return;
-    }
-    keeperTimer += 1;
-    if (keeperTimer < KEEPER_STEP) return;
-    keeperTimer = 0;
-    const dest = KEEPER_PATH[k.pathI];
-    if (k.c === dest.c && k.r === dest.r) {
-      k.pathI = (k.pathI + 1) % KEEPER_PATH.length;
-      keeperDwell = KEEPER_DWELL;
-      return;
-    }
-    faceToward(k, dest);
-    const nc = dest.c > k.c ? k.c + 1 : dest.c < k.c ? k.c - 1 : k.c;
-    const nr = dest.r > k.r ? k.r + 1 : dest.r < k.r ? k.r - 1 : k.r;
-    if (nc === game.player.c && nr === game.player.r) return;
-    k.c = nc;
-    k.r = nr;
+    return;
   }
 
   function fitCanvas() {
@@ -903,6 +924,9 @@
     drawPerson(1, 1, "zippy", "down");
     drawPerson(game.catchNpc.c, game.catchNpc.r, "catch", game.catchNpc.facing);
     drawPerson(game.player.c, game.player.r, "player", game.player.facing);
+    if (!game.talkedZippy && tick % 36 < 22) {
+      for (let r = 3; r <= 6; r++) text("^", 4, r * TILE + 4, "#f0e0a0", 8);
+    }
     if ((!game.talkedZippy || nearZippy()) && tick % 40 < 20) {
       text("!", 18, 8, "#f0e0a0", 8);
     }
@@ -911,8 +935,9 @@
     }
     drawHud();
     if (mode === "play") {
-      drawBox(8, HEIGHT - 36, WIDTH - 16, 28);
-      wrapText(objectiveLine(), 14, HEIGHT - 30, 26, "#203018");
+      const lines = objectiveLines();
+      drawBox(8, HEIGHT - 52, WIDTH - 16, 44);
+      lines.forEach((line, i) => text(line, 14, HEIGHT - 46 + i * 12, "#203018", 8));
     }
   }
 
@@ -950,7 +975,10 @@
     }
     drawBox(8, HEIGHT - 64, WIDTH - 16, 56);
     if (battle.phase === "command") {
-      wrapText(battle.log, 16, HEIGHT - 58, 16, "#203018");
+      const hint = !game.skills.theNet
+        ? (battle.fought ? "Now pick NET." : "Pick FIGHT, then NET.")
+        : battle.log;
+      wrapText(hint, 16, HEIGHT - 58, 16, "#203018");
       const labels = ["FIGHT", "LIVEWELL", "NET", "RUN"];
       labels.forEach((lab, i) => {
         const x = 148 + (i % 2) * 50;
@@ -986,9 +1014,8 @@
     for (let i = 0; i < 16; i++) px(i * 16, 140, 16, 84, i % 2 ? "#1a6a9a" : "#16384a");
     px(0, 120, WIDTH, 24, "#3cb043");
     text("CATCH AND CRAFT", 24, 24, "#f0e0a0", 8);
-    text("VALLEYBROOK POND", 28, 42, "#f8f0d8", 8);
-    text("Hole 9  ·  Golf Course", 28, 58, "#b8c8a8", 8);
-    const items = ["Start", "Continue", "How to play"];
+    text("A fishing quest", 28, 42, "#b8c8a8", 8);
+    const items = ["New game", "Continue", "How to play"];
     items.forEach((lab, i) => {
       text((menuIndex === i ? ">" : " ") + lab, 28, 88 + i * 14, "#f8f0d8", 8);
     });
@@ -997,36 +1024,35 @@
   }
 
   function drawIntro() {
-    px(0, 0, WIDTH, HEIGHT, introIndex === 0 ? "#1a1410" : introIndex === 1 ? "#203018" : "#1a3a28");
+    px(0, 0, WIDTH, HEIGHT, introIndex === 0 ? "#1a1410" : introIndex < 3 ? "#203018" : "#1a3a28");
     if (introIndex === 0) {
       px(40, 48, 48, 28, "#6b5428");
       px(48, 56, 32, 12, "#c4a35a");
       px(86, 62, 70, 4, "#8a6a3a");
-      text("THE WARPED ROD", 24, 16, "#f0e0a0", 8);
-    } else if (introIndex === 1) {
+      text("A PACKAGE", 24, 16, "#f0e0a0", 8);
+    } else if (introIndex < 3) {
       px(32, 40, 192, 56, "#3a2a18");
       px(40, 48, 176, 40, "#c4b8a0");
-      text("CLUB NOTICE", 56, 56, "#8b3a2f", 8);
+      text("THE CLUBS", 72, 56, "#8b3a2f", 8);
       text("NO EMPTY CANS", 48, 72, "#203018", 8);
     } else {
       for (let i = 0; i < 16; i++) px(i * 16, 140, 16, 84, i % 2 ? "#1a6a9a" : "#16384a");
       px(0, 120, WIDTH, 24, "#3cb043");
       px(8, 88, 16, 32, "#2a4a38");
-      text("HOLE 9", 28, 16, "#f0e0a0", 8);
-      text("WATER HAZARD", 28, 32, "#f8f0d8", 8);
+      text("FIRST WATER", 28, 16, "#f0e0a0", 8);
     }
     drawBox(8, HEIGHT - 88, WIDTH - 16, 80);
     wrapText(INTRO_PAGES[introIndex] || "", 16, HEIGHT - 80, 26, "#203018");
-    if (tick % 30 < 15) text("v", WIDTH - 22, HEIGHT - 18, "#203018", 8);
+    text("Press Z", WIDTH - 78, HEIGHT - 18, "#405838", 8);
   }
 
   function drawHelp() {
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
     wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
-    wrapText("Walk north in the reeds to Zippy. Step on the bank and press Z to fish.", 16, 72, 26, "#203018");
-    wrapText("FIGHT tires a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
-    wrapText("You inherited a warped rod. Hole 9 is the closest water. Land one fish and the clubs will talk.", 16, 152, 26, "#203018");
+    wrapText("1. Press UP. Stay on the left reeds. Talk to Zippy with Z.", 16, 72, 26, "#203018");
+    wrapText("2. Press DOWN to the bank. Press Z to fish.", 16, 112, 26, "#203018");
+    wrapText("3. FIGHT once, then NET. Land one fish. That clears the first hole.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
   }
 
@@ -1074,7 +1100,7 @@
       else if (menuIndex === 1) {
         if (loadGame()) {
           hideNameEntry();
-          showDialog(["Welcome back to hole 9, " + game.name + ".", objectiveLine()]);
+          showDialog(["Welcome back, " + game.name + "."].concat(objectiveLines()));
         } else beginIntro();
       } else mode = "help";
     }
