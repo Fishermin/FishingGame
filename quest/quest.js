@@ -36,12 +36,12 @@
   const MAP_ROWS = [
     "TTTTTTTTTTTTTTTT",
     "TZCCCCCCCCCCCCCT",
-    "T,,..........,,T",
-    "T..............T",
-    "T....ssss......T",
-    "T..............T",
-    "T,,..........,,T",
-    "hhbb........bbhh",
+    "Th,..........,hT",
+    "Th............hT",
+    "Th...ssss.....hT",
+    "Th............hT",
+    "Th,..........,hT",
+    "hhbbbbbbbbbbbbhh",
     "hbbwwwwwwwwwwbbh",
     "TwwwwwwwwwwwwwwT",
     "TwwwwwwwwwwwwwwT",
@@ -63,6 +63,8 @@
   let tick = 0;
   let walkLock = 0;
   let keeperTimer = 0;
+  let keeperDwell = 0;
+  let keeperGrace = 0;
   let dialog = [];
   let dialogPage = 0;
   let flash = 0;
@@ -83,15 +85,19 @@
     catchBond: 0,
     catchFlags: { spotted: false, fish: false, zippy: false },
     player: { c: 1, r: 7, facing: "down" },
-    keeper: { c: 4, r: 4, facing: "right", pathI: 0 },
+    keeper: { c: 11, r: 3, facing: "right", pathI: 1 },
     catchNpc: { c: 14, r: 7, facing: "left" },
   };
 
+  const KEEPER_STEP = 42;
+  const KEEPER_VISION = 2;
+  const KEEPER_DWELL = 40;
+  const KEEPER_GRACE = 90;
   const KEEPER_PATH = [
-    { c: 2, r: 3 },
-    { c: 13, r: 3 },
-    { c: 13, r: 6 },
-    { c: 2, r: 6 },
+    { c: 4, r: 3 },
+    { c: 11, r: 3 },
+    { c: 11, r: 5 },
+    { c: 4, r: 5 },
   ];
 
   function tileAt(c, r) {
@@ -156,15 +162,41 @@
     return Math.max(Math.abs(a.c - b.c), Math.abs(a.r - b.r));
   }
 
+  function bankCovered(c, r) {
+    if (c <= 3 || c >= 12) return true;
+    return hiddenAt(c - 1, r) || hiddenAt(c + 1, r) || hiddenAt(c, r - 1) || hiddenAt(c, r + 1);
+  }
+
+  function inKeeperCone(k, p) {
+    const dc = p.c - k.c;
+    const dr = p.r - k.r;
+    if (k.facing === "right") return dc > 0 && Math.abs(dr) <= dc;
+    if (k.facing === "left") return dc < 0 && Math.abs(dr) <= -dc;
+    if (k.facing === "down") return dr > 0 && Math.abs(dc) <= dr;
+    if (k.facing === "up") return dr < 0 && Math.abs(dc) <= -dr;
+    return false;
+  }
+
   function keeperSeesPlayer() {
+    if (keeperGrace > 0) return false;
     const p = game.player;
     const k = game.keeper;
     if (hiddenAt(p.c, p.r)) return false;
-    const dist = chebyshev(p, k);
-    if (dist > 4) return false;
     const t = tileAt(p.c, p.r);
-    if (t === "T" || t === "C") return false;
-    return t === "." || t === "," || t === "s" || t === "b" || t === "p";
+    if (t === "T" || t === "C" || t === "Z") return false;
+    if (t === "b" && bankCovered(p.c, p.r)) return false;
+    if (t !== "." && t !== "," && t !== "s" && t !== "b" && t !== "p") return false;
+    if (chebyshev(p, k) > KEEPER_VISION) return false;
+    return inKeeperCone(k, p);
+  }
+
+  function maybeLearnKeepStill() {
+    if (game.skills.keepStill) return false;
+    if (!hiddenAt(game.player.c, game.player.r)) return false;
+    if (chebyshev(game.player, game.keeper) > 3) return false;
+    learnSkill("keepStill", "KEEP STILL", "He looked right past the cattails.");
+    showDialog(dialog);
+    return true;
   }
 
   function scaleStats(base, level) {
@@ -337,7 +369,8 @@
         "ZIPPY: Keep your voice down. I sell the good stuff.",
         "ZIPPY: Worms. Don't ask where.",
         "ZIPPY: Take this shiner. You'll need a fish in the can.",
-        "ZIPPY: If the groundskeeper sees you, hide in the cattails.",
+        "ZIPPY: He watches the fairway. Hug the bank and wait till he turns.",
+        "ZIPPY: If he looks your way, freeze in the cattails.",
         "ZIPPY: Kid on the east bank thinks he owns the hole. He doesn't.",
         "Got 5 WORMS and a loaner GOLDEN SHINER.",
       ]);
@@ -368,7 +401,7 @@
       showDialog(["The coffee-can is empty.", "Zippy might float you a fish."]);
       return;
     }
-    if (catchRank() === "friend" && chebyshev(game.player, game.keeper) <= 4 && !hiddenAt(game.player.c, game.player.r)) {
+    if (catchRank() === "friend" && keeperSeesPlayer()) {
       showDialog(["CATCH: Wait. Cart path. He's looking this way."]);
       return;
     }
@@ -567,6 +600,9 @@
       if (!game.catchNpc) game.catchNpc = { c: 14, r: 7, facing: "left" };
       if (!game.catchFlags) game.catchFlags = { spotted: false, fish: false, zippy: false };
       if (game.catchBond == null) game.catchBond = 0;
+      keeperTimer = 0;
+      keeperDwell = 0;
+      keeperGrace = KEEPER_GRACE;
       return true;
     } catch (err) {
       return false;
@@ -588,15 +624,18 @@
     game.catchFlags = { spotted: false, fish: false, zippy: false };
     game.pendingCatch = null;
     game.player = { c: 1, r: 7, facing: "down" };
-    game.keeper = { c: 4, r: 4, facing: "right", pathI: 0 };
+    game.keeper = { c: 11, r: 3, facing: "right", pathI: 1 };
     game.catchNpc = { c: 14, r: 7, facing: "left" };
+    keeperTimer = 0;
+    keeperDwell = 0;
+    keeperGrace = KEEPER_GRACE;
     showDialog([
       "VALLEYBROOK POND",
       "Valleybrook Golf Course, hole 9.",
       game.name + " sneaks onto the course with a warped rod.",
       "Someone is already on the east bank. They do not look friendly.",
-      "The groundskeeper is not keen on people fishing his course.",
-      "Stay in the cattails. Leaves are moving by the clubhouse.",
+      "The groundskeeper watches the fairway, not the reeds.",
+      "Stay in the cattails. Hug the bank. Leaves are moving by the clubhouse.",
     ]);
   }
 
@@ -692,30 +731,43 @@
     game.player.c = nc;
     game.player.r = nr;
     walkLock = 8;
-    if (hiddenAt(nc, nr) && keeperSeesPlayer() === false && chebyshev(game.player, game.keeper) <= 5 && !game.skills.keepStill) {
-      // standing in cattails near him
-      if (chebyshev(game.player, game.keeper) <= 4) {
-        learnSkill("keepStill", "KEEP STILL", "He looked right past the cattails.");
-        showDialog(dialog);
-      }
-    }
+    if (maybeLearnKeepStill()) return;
     if (keeperSeesPlayer()) spotted();
   }
 
+  function faceToward(k, dest) {
+    if (dest.c > k.c) k.facing = "right";
+    else if (dest.c < k.c) k.facing = "left";
+    else if (dest.r > k.r) k.facing = "down";
+    else if (dest.r < k.r) k.facing = "up";
+  }
+
   function moveKeeper() {
-    keeperTimer += 1;
-    if (keeperTimer < 22) return;
-    keeperTimer = 0;
+    if (mode !== "play") return;
     const k = game.keeper;
+    if (keeperGrace > 0) keeperGrace -= 1;
+    if (keeperDwell > 0) {
+      keeperDwell -= 1;
+      if (keeperDwell === 0) faceToward(k, KEEPER_PATH[k.pathI]);
+      if (maybeLearnKeepStill()) return;
+      if (mode === "play" && keeperSeesPlayer()) spotted();
+      return;
+    }
+    keeperTimer += 1;
+    if (keeperTimer < KEEPER_STEP) return;
+    keeperTimer = 0;
     const dest = KEEPER_PATH[k.pathI];
     if (k.c === dest.c && k.r === dest.r) {
       k.pathI = (k.pathI + 1) % KEEPER_PATH.length;
+      keeperDwell = KEEPER_DWELL;
+      return;
     }
-    const next = KEEPER_PATH[k.pathI];
-    if (next.c > k.c) { k.c += 1; k.facing = "right"; }
-    else if (next.c < k.c) { k.c -= 1; k.facing = "left"; }
-    else if (next.r > k.r) { k.r += 1; k.facing = "down"; }
-    else if (next.r < k.r) { k.r -= 1; k.facing = "up"; }
+    faceToward(k, dest);
+    if (dest.c > k.c) k.c += 1;
+    else if (dest.c < k.c) k.c -= 1;
+    else if (dest.r > k.r) k.r += 1;
+    else if (dest.r < k.r) k.r -= 1;
+    if (maybeLearnKeepStill()) return;
     if (mode === "play" && keeperSeesPlayer()) spotted();
   }
 
@@ -874,7 +926,7 @@
     drawHud();
     if (mode === "play") {
       drawBox(8, HEIGHT - 36, WIDTH - 16, 28);
-      wrapText("West cattails hide you. East bank is Catch's. Z talks.", 14, HEIGHT - 30, 26, "#203018");
+      wrapText("Hug the bank. Cattails hide you. He only sees the fairway he faces.", 14, HEIGHT - 30, 26, "#203018");
     }
   }
 
@@ -962,7 +1014,7 @@
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
     wrapText("Arrows move. Z talks, fishes, confirms. X backs out. Enter opens your pack.", 16, 32, 26, "#203018");
-    wrapText("Hide in cattails. The groundskeeper will run you off the fairway.", 16, 72, 26, "#203018");
+    wrapText("Hug the bank and hide in cattails. He only spots you on the fairway if he is looking your way.", 16, 72, 26, "#203018");
     wrapText("FIGHT weakens a fish. NET lands it. LIVEWELL swaps. RUN bolts.", 16, 112, 26, "#203018");
     wrapText("Catch is on the east bank. He thinks hole 9 is his. Zippy is in the trees by the clubhouse.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
