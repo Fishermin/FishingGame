@@ -276,7 +276,7 @@ region. Each water is a "gym town" plus routes.
 
 | # | Water | Habitat | Club champion theme | Permit you earn |
 | --- | --- | --- | --- | --- |
-| 0 | Home Camp / Cattail Pond | Weedy farm pond | Tutorial with Zippy | Shore license |
+| 0 | Valleybrook Pond | Golf-course pond, hole 9 | Tutorial: Zippy + groundskeeper | Shore license |
 | 1 | Elysian Reservoir | Warm reservoir + sheep-pasture pond | Sioux Valley Open | Reservoir pin |
 | 2 | Englehorn Creek | Clear stream | Smallmouth and current | Creek walk pin |
 | 3 | Cougar Slough | Backwater, cypress, night | Catfish club, lanterns | Night permit |
@@ -293,6 +293,7 @@ crossing that you cannot take until the landing is repaired.
 
 - **Catch** — you. The Catch N. Kraft persona. Default player name.
 - **Zippy** — mysterious bait shop owner. Somehow always has the best bait.
+- **The Valleybrook groundskeeper** — not keen on fishing at his golf course
 - A Sioux Valley Open rival (pasture angler, not named Catch)
 - Club champions / wardens
 - Elysian dockhand
@@ -324,8 +325,10 @@ one leaves a tool, a skill, a fish, or a permanent map change.
 
 ### 8.1 Main spine
 
-1. **The Warped Rod.** Inherit the rod. Catch the starter. Zippy sells you
-   bait that is suspiciously perfect for the pond.
+1. **The Warped Rod.** Inherit the rod. Sneak onto Valleybrook Golf Course.
+   The pond on hole 9 is the classroom. Zippy sells bait from the trees.
+   The groundskeeper patrols the fairway — learn Keep Still in the cattails,
+   Drop a Line on the bank, and The Net on your first Bluegill.
 2. **Sioux Valley Open.** First club event. The water is a pond in a farm
    pasture, full of sheep. Learn livewell duels with a pasture rival. A ski
    boat still shows up as a hazard on the nearby reservoir. Payoff: reservoir
@@ -425,7 +428,7 @@ Story-locked, one per late water. Not random shiny chases.
 
 | Name | Water | Types | How you meet them |
 | --- | --- | --- | --- |
-| Cattail King | Pond, postgame | Fang / Weed | Record largemouth after Field Guide 20 |
+| Cattail King | Valleybrook Pond, postgame | Fang / Weed | Record largemouth after Field Guide 20 |
 | Redfin Widow | Granite Falls Rapids | Cold / Swift | After Tragedy at the Dam Store is cleaned |
 | The Dam Ghost | Rapidan Bend | Scale / Stone | Albino sturgeon under the spillway |
 | Old Copper | Horseshoe Chain | Fang / Weed | Catch's dusk jump |
@@ -472,6 +475,9 @@ the overworld or as a battle passive.
 
 | Skill | Earned from | Use |
 | --- | --- | --- |
+| Keep Still | Hide from the Valleybrook groundskeeper | Cattails break his line of sight |
+| Drop a Line | First successful cast at hole 9 | Unlocks fishing on a water tile |
+| The Net | First fish landed | NET command is understood, not grayed |
 | Read the Seam | Englehorn Creek old-timer | See hidden current encounter tiles |
 | Set the Hook | First club loss at the Sioux Valley Open, then a rematch lesson | +catch on the turn after a crit |
 | Drag Control | Elysian ski-boat rescue | Wild fish with high Pull no longer auto-snap |
@@ -588,10 +594,11 @@ Documents and a starter dex. No quest code yet.
 
 ### Phase 1 — Vertical slice
 
-One screen of Cattail Pond. Walk, face water, cast, one wild battle,
+One screen of Valleybrook Pond at Valleybrook Golf Course. Walk, hide from
+the groundskeeper in the cattails, face water, cast, one wild battle,
 catch a Bluegill, buy bait from Zippy, save. 8 fish max. Placeholder
 tiles are fine if the silhouette reads. **Exit test:** a stranger understands
-FIGHT / NET / LIVEWELL without a manual.
+FIGHT / NET / LIVEWELL without a manual, and can fish without getting run off.
 
 ### Phase 2 — Livewell duels + Field Guide UI
 

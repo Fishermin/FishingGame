@@ -7,6 +7,7 @@ Live home: [catchandcraft.cc](https://catchandcraft.cc)
 
 ## Play
 
+- [Valleybrook Pond](quest/index.html) — Quest slice: sneak onto hole 9
 - [Catch and Craft](fishingtrip.html) — modern lakeside trip, 10 casts
 - [The Fishing Trail](fishingtrail.html) — 1980s trail-game edition
 
@@ -30,5 +31,5 @@ Read the plan:
 3. [Progression map](docs/progression.md)
 4. [Starter dex data](data/fish-dex.json)
 
-The trip games stay as Quick Trip and The Fishing Trail. Quest is a new
-`quest/` game once Phase 1 starts.
+Play the [Valleybrook Pond](quest/index.html) slice (Phase 1). The trip games
+stay as Quick Trip and The Fishing Trail.

@@ -7,8 +7,10 @@ is skipped, the tool or skill does not exist yet.
 
 | After this scene | Rod / vessel | Net / livewell | Skill |
 | --- | --- | --- | --- |
-| Game start | Warped spinning rod, 6 lb line | Hand net, coffee-can (3) | — |
-| Starter caught | — | — | — |
+| Game start (Valleybrook Pond) | Warped spinning rod, 6 lb line | Hand net, coffee-can (3) | — |
+| Hide from the groundskeeper | — | — | Keep Still |
+| First cast at hole 9 | — | — | Drop a Line |
+| Starter / first Bluegill netted | — | — | The Net |
 | First Sioux Valley Open loss + lesson | — | — | Set the Hook |
 | Elysian dockhand tackle box | — | Landing net | — |
 | Sioux Valley Open / Elysian pin | Elysian Model 202 baitcaster | Dock cooler (4) | Drag Control |

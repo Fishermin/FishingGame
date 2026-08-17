@@ -12,7 +12,7 @@ Rarity: C common · U uncommon · R rare · T trophy · L legend.
 
 Count: **74 regular species + 5 river monsters = 79**.
 
-## Cattail Pond (tutorial water)
+## Valleybrook Pond (tutorial water — Valleybrook Golf Course)
 
 | # | Name | Types | Rarity | Notes |
 | --- | --- | --- | --- | --- |
@@ -130,7 +130,7 @@ Count: **74 regular species + 5 river monsters = 79**.
 
 | # | Name | Types | Water | Arc |
 | --- | --- | --- | --- | --- |
-| 075 | Cattail King | Fang / Weed | Pond | 20 Field Guide pages |
+| 075 | Cattail King | Fang / Weed | Valleybrook Pond | 20 Field Guide pages |
 | 076 | Redfin Widow | Cold / Swift | Granite Falls Rapids | Tragedy at the Dam Store, cleaned |
 | 077 | The Dam Ghost | Scale / Stone | Rapidan Bend | Journey of Ruby II |
 | 078 | Old Copper | Fang / Weed | Horseshoe Chain | Catch's fish that got away |

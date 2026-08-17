@@ -1,0 +1,40 @@
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: #0c140c;
+  color: #d8e8c8;
+  font-family: "Press Start 2P", monospace;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+
+.wrap {
+  text-align: center;
+}
+
+canvas {
+  display: block;
+  margin: 0 auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #1a3a28;
+  border: 8px solid #2a2a24;
+}
+
+.hint {
+  font-size: 8px;
+  line-height: 1.8;
+  margin: 10px 0 0;
+  color: #8aa878;
+}
+
+.hint a {
+  color: #e6b35c;
+}
