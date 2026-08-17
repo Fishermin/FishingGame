@@ -98,6 +98,9 @@
   let menuIndex = 0;
   let battle = null;
   let saveNote = 0;
+  let walkPath = [];
+  let afterWalk = null;
+  let hover = null;
 
   const game = {
     name: "Angler",
@@ -196,19 +199,18 @@
     }
     if (!game.talkedZippy) {
       return [
-        "Press UP. Stay on the left reeds.",
+        "Tap the man in the trees. That is Zippy.",
+        "Stay on the left reeds.",
         "Do not walk on the green grass.",
-        "Press Z at the man in the trees.",
       ];
     }
     if (!game.skills.snapshot) {
       return [
-        "Press DOWN to the brown bank.",
-        "Stand next to the water.",
-        "Press Z to cast.",
+        "Tap the brown bank by the water.",
+        "That casts. Then REEL, then NET.",
       ];
     }
-    return ["Keep fishing, or talk to Zippy."];
+    return ["Tap the bank to fish, or tap Zippy."];
   }
 
   function kitStats() {
@@ -295,6 +297,8 @@
   function showDialog(lines) {
     dialog = Array.isArray(lines) ? lines.slice() : [String(lines)];
     dialogPage = 0;
+    walkPath = [];
+    afterWalk = null;
     mode = "dialog";
   }
 
@@ -372,7 +376,7 @@
       showDialog([
         "ZIPPY: " + game.name + ". Worms. Don't ask.",
         "ZIPPY: That camera in the package is how you get in. Clubs stamp a photo.",
-        "ZIPPY: Press DOWN to the bank. Press Z to cast.",
+        "ZIPPY: Tap the brown bank by the water to fish.",
         "ZIPPY: REEL once. Then NET. The camera fires if you land it. Fish goes back.",
         "Got 5 WORMS.",
       ]);
@@ -644,8 +648,7 @@
     keeperDwell = 0;
     showDialog([
       "You are in the cattails on the LEFT side of the screen.",
-      "Press UP (arrow or D-pad). Stay on the left. Do not walk on the grass.",
-      "The man in the trees is ZIPPY. Press Z or A when you reach him.",
+      "Tap Zippy in the trees. Stay on the left reeds. Do not walk on the grass.",
       "He has worms. You already have the camera. One photo gets you in.",
     ]);
   }
@@ -742,8 +745,7 @@
       if (!game.talkedZippy) {
         showDialog([
           "Not yet. You need bait.",
-          "Press UP. Stay on the left reeds.",
-          "Press Z at the man in the trees. That is Zippy.",
+          "Tap Zippy in the trees. Stay on the left reeds.",
         ]);
         return;
       }
@@ -751,24 +753,158 @@
       return;
     }
     if (!game.talkedZippy) {
-      showDialog([
-        "Press the UP ARROW. Stay on the left.",
-        "Talk to Zippy in the trees. Press Z when you see him.",
-      ]);
+      showDialog(["Tap Zippy in the trees. Stay on the left reeds."]);
       return;
     }
     if (!game.skills.snapshot) {
-      showDialog([
-        "Press DOWN to the brown bank by the water.",
-        "Stand on the bank. Press Z to cast.",
-      ]);
+      showDialog(["Tap the brown bank by the water to cast."]);
       return;
     }
-    showDialog(["Press Z on the bank to fish. Talk to Zippy if you need bait."]);
+    showDialog(["Tap the bank to fish. Tap Zippy if you need bait."]);
+  }
+
+  function findPath(gc, gr) {
+    const sc = game.player.c;
+    const sr = game.player.r;
+    if (sc === gc && sr === gr) return [];
+    if (!walkable(gc, gr)) return null;
+    if (gc === game.keeper.c && gr === game.keeper.r) return null;
+    const seen = Object.create(null);
+    const q = [{ c: sc, r: sr }];
+    seen[sc + "," + sr] = -1;
+    const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+    let found = false;
+    for (let i = 0; i < q.length; i++) {
+      const cur = q[i];
+      for (let d = 0; d < 4; d++) {
+        const nc = cur.c + dirs[d][0];
+        const nr = cur.r + dirs[d][1];
+        const k = nc + "," + nr;
+        if (seen[k] !== undefined) continue;
+        if (!walkable(nc, nr)) continue;
+        if (nc === game.keeper.c && nr === game.keeper.r) continue;
+        seen[k] = i;
+        q.push({ c: nc, r: nr });
+        if (nc === gc && nr === gr) {
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+    if (!found) return null;
+    const path = [];
+    let idx = q.length - 1;
+    while (idx > 0) {
+      path.push(q[idx]);
+      idx = seen[q[idx].c + "," + q[idx].r];
+    }
+    path.reverse();
+    return path;
+  }
+
+  function pickStandTile(okFn) {
+    let best = null;
+    let bestScore = 9999;
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (!walkable(c, r)) continue;
+        if (c === game.keeper.c && r === game.keeper.r) continue;
+        if (!okFn(c, r)) continue;
+        const d = Math.abs(c - game.player.c) + Math.abs(r - game.player.r);
+        if (d < bestScore) {
+          bestScore = d;
+          best = { c: c, r: r };
+        }
+      }
+    }
+    return best;
+  }
+
+  function finishWalkAction() {
+    const act = afterWalk;
+    afterWalk = null;
+    if (act === "zippy") talkZippy();
+    else if (act === "catch") talkCatch();
+    else if (act === "fish") {
+      if (fishable(game.player.c, game.player.r)) startBattle();
+    }
+  }
+
+  function startWalk(goal, action) {
+    if (!goal) {
+      showDialog(["Can't get there."]);
+      return;
+    }
+    if (game.player.c === goal.c && game.player.r === goal.r) {
+      afterWalk = action;
+      finishWalkAction();
+      return;
+    }
+    const path = findPath(goal.c, goal.r);
+    if (!path) {
+      showDialog(["The path is blocked."]);
+      return;
+    }
+    walkPath = path;
+    afterWalk = action || null;
+  }
+
+  function goTalkZippy() {
+    if (nearZippy()) {
+      talkZippy();
+      return;
+    }
+    startWalk(pickStandTile((c, r) => Math.abs(c - 1) + Math.abs(r - 1) <= 2 && r <= 2), "zippy");
+  }
+
+  function goTalkCatch() {
+    if (nearCatch()) {
+      talkCatch();
+      return;
+    }
+    startWalk(pickStandTile((c, r) => {
+      const n = game.catchNpc;
+      return Math.abs(c - n.c) + Math.abs(r - n.r) <= 1;
+    }), "catch");
+  }
+
+  function goFishAt(c, r) {
+    if (fishable(game.player.c, game.player.r) && (tileAt(c, r) === "w" || fishable(c, r))) {
+      startBattle();
+      return;
+    }
+    let goal = null;
+    if (fishable(c, r)) goal = { c: c, r: r };
+    else goal = pickStandTile((tc, tr) => fishable(tc, tr));
+    startWalk(goal, "fish");
   }
 
   function movePlayer() {
     if (walkLock > 0) return;
+    if (walkPath.length) {
+      const step = walkPath.shift();
+      faceToward(game.player, step);
+      if (step.c === game.keeper.c && step.r === game.keeper.r) {
+        walkPath = [];
+        afterWalk = null;
+        bumpKeeper();
+        return;
+      }
+      if (!walkable(step.c, step.r)) {
+        walkPath = [];
+        afterWalk = null;
+        return;
+      }
+      game.player.c = step.c;
+      game.player.r = step.r;
+      walkLock = 6;
+      return;
+    }
+    if (afterWalk) {
+      finishWalkAction();
+      return;
+    }
     let dc = 0;
     let dr = 0;
     if (keys.up) dr = -1;
@@ -805,10 +941,8 @@
 
   function fitCanvas() {
     const extraEls = [
-      document.querySelector(".hint-keys"),
-      document.querySelector(".hint-touch"),
+      document.querySelector(".hint"),
       document.querySelector(".home-link"),
-      document.getElementById("pad"),
       nameWrap
     ];
     let extra = 20;
@@ -829,30 +963,162 @@
   window.addEventListener("load", fitCanvas);
   fitCanvas();
 
-  function bindPad() {
-    const pad = document.getElementById("pad");
-    if (!pad) return;
-    pad.querySelectorAll("[data-btn]").forEach((btn) => {
-      const name = btn.getAttribute("data-btn");
-      const down = (e) => {
-        e.preventDefault();
-        btn.classList.add("held");
-        pressKey(name);
-        if (e.pointerId != null && btn.setPointerCapture) btn.setPointerCapture(e.pointerId);
-      };
-      const up = (e) => {
-        if (e) e.preventDefault();
-        btn.classList.remove("held");
-        releaseKey(name);
-      };
-      btn.addEventListener("pointerdown", down);
-      btn.addEventListener("pointerup", up);
-      btn.addEventListener("pointercancel", up);
-      btn.addEventListener("lostpointercapture", up);
-    });
-    pad.addEventListener("contextmenu", (e) => e.preventDefault());
+  function gamePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * WIDTH / Math.max(1, rect.width);
+    const y = (e.clientY - rect.top) * HEIGHT / Math.max(1, rect.height);
+    return { x: x, y: y, c: Math.floor(x / TILE), r: Math.floor(y / TILE) };
   }
-  bindPad();
+
+  function hit(p, x, y, w, h) {
+    return p.x >= x && p.x < x + w && p.y >= y && p.y < y + h;
+  }
+
+  function battleBtnBox(i) {
+    return {
+      x: 140 + (i % 2) * 54,
+      y: HEIGHT - 54 + Math.floor(i / 2) * 24,
+      w: 52,
+      h: 22
+    };
+  }
+
+  function clickTitle(p) {
+    for (let i = 0; i < 3; i++) {
+      if (hit(p, 20, 82 + i * 14, 180, 14)) {
+        menuIndex = i;
+        if (i === 0) beginIntro();
+        else if (i === 1) {
+          if (loadGame()) {
+            hideNameEntry();
+            showDialog(["Welcome back, " + game.name + "."].concat(objectiveLines()));
+          } else beginIntro();
+        } else mode = "help";
+        return;
+      }
+    }
+  }
+
+  function clickMenu(p) {
+    if (hit(p, 72, 24, 176, 160)) {
+      for (let i = 0; i < 5; i++) {
+        if (hit(p, 80, 32 + i * 14, 160, 14)) {
+          menuIndex = i;
+          if (i === 3) {
+            saveGame();
+            saveNote = 90;
+            mode = "play";
+          } else if (i === 4) mode = "play";
+          return;
+        }
+      }
+    } else mode = "play";
+  }
+
+  function clickBattle(p) {
+    const b = battle;
+    if (!b) return;
+    if (b.phase === "intro") {
+      b.phase = "command";
+      return;
+    }
+    if (b.phase === "playerLog") {
+      enemyTurn();
+      if (b.phase === "playerLog") b.phase = "command";
+      return;
+    }
+    if (b.phase === "lost" || b.phase === "wipe" || b.phase === "done") {
+      endBattle();
+      return;
+    }
+    if (b.phase === "photo") {
+      finishPhoto();
+      return;
+    }
+    if (b.phase === "command") {
+      for (let i = 0; i < 4; i++) {
+        const box = battleBtnBox(i);
+        if (hit(p, box.x, box.y, box.w, box.h)) {
+          b.cursor = i;
+          if (i === 0) reelFish();
+          else if (i === 1) slackLine();
+          else if (i === 2) tryNet();
+          else endBattle();
+          return;
+        }
+      }
+    }
+  }
+
+  function clickPlay(p) {
+    if (hit(p, 200, 0, 56, 12)) {
+      openMenu();
+      return;
+    }
+    if (p.y >= HEIGHT - 52) return;
+    if (p.r <= 2 && Math.abs(p.c - 1) + Math.abs(p.r - 1) <= 2) {
+      goTalkZippy();
+      return;
+    }
+    const n = game.catchNpc;
+    if (Math.abs(p.c - n.c) + Math.abs(p.r - n.r) <= 1) {
+      goTalkCatch();
+      return;
+    }
+    if (tileAt(p.c, p.r) === "w" || fishable(p.c, p.r)) {
+      goFishAt(p.c, p.r);
+      return;
+    }
+    if (walkable(p.c, p.r)) startWalk({ c: p.c, r: p.r }, null);
+  }
+
+  function onCanvasTap(e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    e.preventDefault();
+    const p = gamePos(e);
+    if (mode === "intro") {
+      introIndex += 1;
+      if (introIndex >= INTRO_PAGES.length) showNameEntry();
+      return;
+    }
+    if (mode === "help") {
+      mode = "title";
+      return;
+    }
+    if (mode === "dialog") {
+      dialogPage += 1;
+      if (dialogPage >= dialog.length) {
+        dialog = [];
+        mode = "play";
+      }
+      return;
+    }
+    if (mode === "title") {
+      clickTitle(p);
+      return;
+    }
+    if (mode === "name") return;
+    if (mode === "menu") {
+      clickMenu(p);
+      return;
+    }
+    if (mode === "battle") {
+      clickBattle(p);
+      return;
+    }
+    if (mode === "play") clickPlay(p);
+  }
+
+  canvas.addEventListener("pointerup", onCanvasTap);
+  canvas.addEventListener("pointermove", (e) => {
+    if (mode !== "play") {
+      hover = null;
+      return;
+    }
+    hover = gamePos(e);
+  });
+  canvas.addEventListener("pointerleave", () => { hover = null; });
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
   const nameOk = document.getElementById("nameOk");
   if (nameOk) {
@@ -988,8 +1254,8 @@
     px(0, 0, WIDTH, 12, "#203018");
     text((game.name || "ANGLER").slice(0, 8).toUpperCase(), 4, 2, "#f0e0a0", 8);
     text("W" + game.worms, 132, 2, "#f8f0d8", 8);
-    text("PIC " + photoCount(), 176, 2, "#f8f0d8", 8);
-    if (saveNote > 0) text("SAVED", 216, 2, "#70f070", 8);
+    text("PIC " + photoCount(), 168, 2, "#f8f0d8", 8);
+    text(saveNote > 0 ? "SAVED" : "PACK", 216, 2, saveNote > 0 ? "#70f070" : "#f0e0a0", 8);
   }
 
   function drawOverworld() {
@@ -1008,6 +1274,10 @@
     }
     if (nearCatch() && tick % 40 < 20) {
       text("!", game.catchNpc.c * TILE + 4, game.catchNpc.r * TILE - 8, "#f0e0a0", 8);
+    }
+    if (mode === "play" && hover && hover.r >= 0 && hover.r < ROWS && hover.c >= 0 && hover.c < COLS && hover.y < HEIGHT - 52 && hover.y >= 12) {
+      px(hover.c * TILE, hover.r * TILE, TILE, 2, "rgba(240,224,160,0.7)");
+      px(hover.c * TILE, hover.r * TILE + TILE - 2, TILE, 2, "rgba(240,224,160,0.7)");
     }
     drawHud();
     if (mode === "play") {
@@ -1055,9 +1325,12 @@
       wrapText(hint, 16, HEIGHT - 58, 14, "#203018");
       const labels = ["REEL", "SLACK", "NET", "RUN"];
       labels.forEach((lab, i) => {
-        const x = 148 + (i % 2) * 50;
-        const y = HEIGHT - 58 + Math.floor(i / 2) * 16;
-        text((battle.cursor === i ? ">" : " ") + lab, x, y, "#203018", 8);
+        const box = battleBtnBox(i);
+        px(box.x, box.y, box.w, box.h, battle.cursor === i ? "#c4a35a" : "#d8d0b0");
+        ctx.strokeStyle = "#203018";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(box.x + 0.5, box.y + 0.5, box.w - 1, box.h - 1);
+        text(lab, box.x + 6, box.y + 7, "#203018", 8);
       });
     } else if (battle.phase === "photo") {
       px(88, 40, 80, 72, "#f8f0d8");
@@ -1080,7 +1353,7 @@
     items.forEach((lab, i) => {
       text((menuIndex === i ? ">" : " ") + lab, 28, 88 + i * 14, "#f8f0d8", 8);
     });
-    text("Z confirm", 28, 200, "#8aa878", 8);
+    text("Tap a choice", 28, 200, "#8aa878", 8);
     if (mode === "name") text("Type your name below.", 28, 176, "#f0e0a0", 8);
   }
 
@@ -1113,17 +1386,17 @@
     }
     drawBox(8, HEIGHT - 88, WIDTH - 16, 80);
     wrapText(INTRO_PAGES[introIndex] || "", 16, HEIGHT - 80, 26, "#203018");
-    text("Z or A", WIDTH - 70, HEIGHT - 18, "#405838", 8);
+    text("TAP", WIDTH - 48, HEIGHT - 18, "#405838", 8);
   }
 
   function drawHelp() {
     px(0, 0, WIDTH, HEIGHT, "#f8f0d8");
     text("HOW TO FISH", 16, 12, "#203018", 8);
-    wrapText("Arrows or D-pad move. Z or A talks, fishes, confirms. X or B backs out. Enter or START opens your pack.", 16, 32, 26, "#203018");
-    wrapText("1. Press UP. Stay on the left reeds. Talk to Zippy with Z.", 16, 72, 26, "#203018");
-    wrapText("2. Press DOWN to the bank. Press Z to fish.", 16, 112, 26, "#203018");
-    wrapText("3. REEL once, then NET. If the net lands, a photo is taken. The fish goes back.", 16, 152, 26, "#203018");
-    text("Z back", 16, 200, "#405838", 8);
+    wrapText("Tap or click the picture. Tap Zippy, the bank, menus, and battle buttons. No keyboard needed.", 16, 32, 26, "#203018");
+    wrapText("1. Tap Zippy in the trees. Stay on the left reeds.", 16, 72, 26, "#203018");
+    wrapText("2. Tap the brown bank by the water to fish.", 16, 112, 26, "#203018");
+    wrapText("3. Tap REEL, then NET. If the net lands, a photo is taken. The fish goes back.", 16, 152, 26, "#203018");
+    text("Tap to go back", 16, 200, "#405838", 8);
   }
 
   function drawMenu() {
@@ -1154,7 +1427,7 @@
       text("Catch:" + catchRank(), 84, 156, "#405838", 8);
     } else if (menuIndex === 3) {
       text("Talk to Zippy to save,", 84, 120, "#405838", 8);
-      text("or press Z here.", 84, 132, "#405838", 8);
+      text("or tap SAVE here.", 84, 132, "#405838", 8);
     }
   }
 
