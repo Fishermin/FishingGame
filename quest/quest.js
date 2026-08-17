@@ -373,7 +373,7 @@
         "ZIPPY: " + game.name + ". Worms. Don't ask.",
         "ZIPPY: That camera in the package is how you get in. Clubs stamp a photo.",
         "ZIPPY: Press DOWN to the bank. Press Z to cast.",
-        "ZIPPY: REEL once. Then SNAP. The fish goes back. The photo stays.",
+        "ZIPPY: REEL once. Then NET. The camera fires if you land it. Fish goes back.",
         "Got 5 WORMS.",
       ]);
       learnSkill("keepStill", "KEEP STILL", "Stay off the grass. He is mowing.");
@@ -418,14 +418,14 @@
       lineHp: kit.maxLine,
       maxLine: kit.maxLine,
       log: tutorial
-        ? "A bluegill! REEL to tire it, then SNAP. It goes back."
+        ? "A bluegill! REEL to tire it, then NET. A photo is taken if you land it."
         : "A wild " + wildSp.name + " took the worm!",
-      snapFails: 0
+      netFails: 0
     };
     mode = "battle";
     if (!game.skills.dropALine) {
       game.skills.dropALine = true;
-      battle.log = "You learned DROP A LINE! REEL, then SNAP.";
+      battle.log = "You learned DROP A LINE! REEL, then NET.";
     }
   }
 
@@ -438,11 +438,11 @@
     const dmg = Math.max(4, Math.round(power / Math.max(8, w.hold) * 14));
     w.hp = Math.max(0, w.hp - dmg);
     battle.log = kit.rod.name + " reeled " + dmg + ".";
-    if (!game.skills.snapshot && w.hp > 0) battle.log += " Now SNAP.";
+    if (!game.skills.snapshot && w.hp > 0) battle.log += " Now NET.";
     if (w.hp <= 0) {
       if (!game.skills.snapshot) {
         w.hp = 1;
-        battle.log = "Tired enough. SNAP the picture.";
+        battle.log = "Tired enough. NET it. The camera fires after.";
       } else {
         battle.phase = "lost";
         battle.log += " It rolled over. No photo.";
@@ -479,15 +479,15 @@
     if (battle.phase === "playerLog") battle.phase = "command";
   }
 
-  function trySnap() {
+  function tryNet() {
     const w = battle.wild;
     const kit = kitStats();
     if (w.hp <= 0) {
-      battle.log = "Nothing left to photograph.";
+      battle.log = "Nothing left to net.";
       return;
     }
     if (!battle.fought) {
-      battle.log = "Still too lively. REEL first, then SNAP.";
+      battle.log = "Still too lively. REEL first, then NET.";
       battle.phase = "playerLog";
       return;
     }
@@ -497,18 +497,22 @@
       return;
     }
     if (!game.skills.snapshot) {
-      takePhoto(w);
+      landThenPhoto(w);
       return;
     }
     const stamPct = w.hp / w.maxHp;
-    let chance = (kit.proof / 10) * (kit.scoop / 10) * (1 - stamPct * 0.55) * (1 - w.slip / 140);
+    let chance = (kit.scoop / 10) * (1 - stamPct * 0.55) * (1 - w.slip / 140);
     if (kit.attract.some((t) => w.types.indexOf(t) !== -1)) chance *= 1.15;
     if (Math.random() < chance) {
-      takePhoto(w);
+      landThenPhoto(w);
     } else {
-      battle.snapFails += 1;
-      battle.log = ["Blurry. SNAP again.", "It splashed the lens. SNAP.", "Thumb on the glass. SNAP."][Math.floor(Math.random() * 3)];
-      if (battle.snapFails >= 5) {
+      battle.netFails += 1;
+      battle.log = [
+        "It slapped out of the net. NET again.",
+        "Zippy bumped the hoop. NET again.",
+        "Almost had it. NET again.",
+      ][Math.floor(Math.random() * 3)];
+      if (battle.netFails >= 5) {
         battle.log += " It is gone.";
         battle.phase = "lost";
       } else {
@@ -517,12 +521,12 @@
     }
   }
 
-  function takePhoto(w) {
+  function landThenPhoto(w) {
     game.fieldGuide[w.species.id] = true;
     game.album.push({ id: w.species.id, name: w.name, level: w.level, water: "valleybrook-pond" });
     battle.phase = "photo";
     battle.caught = w;
-    battle.log = "Click. Pictures or it never happened.";
+    battle.log = "Netted. The camera fires. Pictures or it never happened.";
     if (!game.skills.snapshot) {
       game.skills.snapshot = true;
       battle.log += " You learned THE SNAPSHOT!";
@@ -561,7 +565,7 @@
     if (tutorialFail) {
       game.worms += 1;
       if (phase === "lost" || phase === "wipe") {
-        showDialog(["ZIPPY: REEL once. Then SNAP. Put it back.", "Worm's on the house."]);
+        showDialog(["ZIPPY: REEL once. Then NET. The camera fires after you land it.", "Worm's on the house."]);
       }
       return;
     }
@@ -1046,10 +1050,10 @@
     drawBox(8, HEIGHT - 64, WIDTH - 16, 56);
     if (battle.phase === "command") {
       const hint = !game.skills.snapshot
-        ? (battle.fought ? "Now pick SNAP." : "Pick REEL, then SNAP.")
+        ? (battle.fought ? "Now pick NET." : "Pick REEL, then NET.")
         : battle.log;
       wrapText(hint, 16, HEIGHT - 58, 14, "#203018");
-      const labels = ["REEL", "SLACK", "SNAP", "RUN"];
+      const labels = ["REEL", "SLACK", "NET", "RUN"];
       labels.forEach((lab, i) => {
         const x = 148 + (i % 2) * 50;
         const y = HEIGHT - 58 + Math.floor(i / 2) * 16;
@@ -1118,7 +1122,7 @@
     wrapText("Arrows or D-pad move. Z or A talks, fishes, confirms. X or B backs out. Enter or START opens your pack.", 16, 32, 26, "#203018");
     wrapText("1. Press UP. Stay on the left reeds. Talk to Zippy with Z.", 16, 72, 26, "#203018");
     wrapText("2. Press DOWN to the bank. Press Z to fish.", 16, 112, 26, "#203018");
-    wrapText("3. REEL once, then SNAP. The fish goes back. The photo is proof.", 16, 152, 26, "#203018");
+    wrapText("3. REEL once, then NET. If the net lands, a photo is taken. The fish goes back.", 16, 152, 26, "#203018");
     text("Z back", 16, 200, "#405838", 8);
   }
 
@@ -1237,7 +1241,7 @@
       if (consume("ok")) {
         if (b.cursor === 0) reelFish();
         else if (b.cursor === 1) slackLine();
-        else if (b.cursor === 2) trySnap();
+        else if (b.cursor === 2) tryNet();
         else endBattle();
       }
     }

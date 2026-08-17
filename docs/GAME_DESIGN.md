@@ -108,8 +108,8 @@ required permit, and a champion who wants to see your book.
 ```
 Camp → walk the bank → cast
         → bite (gear vs wild fish)
-        → REEL / SLACK / SNAP / RUN
-        → photograph + release
+        → REEL / SLACK / NET / RUN
+        → successful net takes the photograph, then release
         → Field Guide album update
         → town talk / story beat
         → club wants the picture
@@ -132,9 +132,9 @@ of angler stats. Better rods, line, bait, nets, and cameras are earned
 from story, the same way skills are.
 
 **Wild hook battle.** You vs a wild fish. REEL wears it down. SLACK
-protects the line. SNAP photographs it once it is tired enough for your
-net. The fish is always released. KO with no photo is a lost specimen
-(it sinks away, no proof).
+protects the line. NET scoops it once it is tired enough. If the net
+lands, the camera fires on its own. The fish is always released. KO with
+no photo is a lost specimen (it sinks away, no proof).
 
 **Club check.** The local club's entry requirement is photographic proof
 of a fish from their water. "Pictures or it never happened." A livewell
@@ -157,11 +157,12 @@ SNES Pokemon battle chrome, fishing-skinned:
   break-off)
 - Bottom text box: 2×2 commands
 
-Commands: `REEL` · `SLACK` · `SNAP` · `RUN`
+Commands: `REEL` · `SLACK` · `NET` · `RUN`
 
-SNAP is grayed until the fish is tired enough for the current net, or
-until the tutorial tells you to press it. Run is easier if the fish's
-Dart is high; club photo-checks forbid it.
+NET is grayed until the fish is tired enough for the current net, or
+until the tutorial tells you to press it. A successful net always takes
+the photograph. Run is easier if the fish's Dart is high; club
+photo-checks forbid it.
 
 ### 5.3 Stats
 
@@ -169,7 +170,7 @@ Dart is high; club photo-checks forbid it.
 
 | Stat | Role |
 | --- | --- |
-| Stamina | Hit points. Wear this down before SNAP. |
+| Stamina | Hit points. Wear this down before NET. |
 | Pull | How hard it thrashes your line |
 | Hold | How well it resists REEL |
 | Dart | Speed / turn order / run chance |
@@ -185,8 +186,8 @@ sum, not a pet fish's stats.
 | Rod | Drag (REEL power), backbone (line HP) | Warped spinning rod |
 | Line | Tensile (line HP), stealth | 6 lb |
 | Bait | Hook, type attract | Worms (Zippy) |
-| Net | Scoop (SNAP chance), size cap | Hand net |
-| Camera | Proof (SNAP chance). No camera, no album page. | Pocket camera (in the package) |
+| Net | Scoop (NET chance), size cap | Hand net |
+| Camera | Proof. Fires after a successful net. No camera, no album page. | Pocket camera (in the package) |
 
 Levels 1–50 still apply to wild fish. Kit upgrades are story beats, not
 XP on a shiner.
@@ -238,12 +239,12 @@ Families:
 Signature examples: Musky gets *Figure-Eight*. Sturgeon gets *River Plate*.
 Bluegill gets *Nest Guard*. Burbot gets *Eelpout Stare*.
 
-### 5.6 Capture math — photograph, then release
+### 5.6 Capture math — net, photograph, then release
 
-On the SNAP command, photo chance is roughly:
+On the NET command, land chance is roughly:
 
 ```
-chance = camera.proof * net.scoop * (1 - stamina% * 0.7) * (1 - slip)
+chance = net.scoop * (1 - stamina% * 0.7) * (1 - slip)
           * baitMatch
           * sizeGate
 ```
@@ -252,15 +253,15 @@ chance = camera.proof * net.scoop * (1 - stamina% * 0.7) * (1 - slip)
 A hand net cannot land a lake sturgeon. That is a story beat, not a
 tooltip buried in a shop.
 
-A successful SNAP always:
+A successful NET always:
 
-1. Writes a Field Guide page (the photograph)
+1. Writes a Field Guide page (the camera fires; the photograph is automatic)
 2. Releases the fish where it was caught
 
 There is no keep prompt. The album is the proof. Clubs ask to see the
 book, not a bucket of fish.
 
-Failed snaps play miss lines from the trip game (pelican, pontoon, Zippy
+Failed nets play miss lines from the trip game (pelican, pontoon, Zippy
 knocks the net, a sheep in the pasture). Three failures in one battle
 and the fish breaks off.
 
@@ -450,7 +451,7 @@ Each should be one sitting, one reward:
 - **Hook Protector** — a green angler never catches. Teach them. Earn
   **Check the Knot** (critical hits can no longer snap your own line).
 - **Bull & Mutton** — catch a Bullhead and a Sheepshead in the same day,
-  recreate the free-cast joke as a real extra SNAP attempt on the next
+  recreate the free-cast joke as a real extra NET attempt on the next
   fish.
 - **Snapping Turtle Stone** — a stone-type tutor move, after you free a
   turtle instead of stealing the lure.
@@ -493,7 +494,7 @@ Slots: Rod, Line, Bait, Net, Camera, Vessel, Held lure.
 | Hand net | Opening | Small fish only |
 | Landing net | Elysian dockhand, after you return a spilled tackle box | Medium size gate |
 | Rubber trophy net | Horseshoe Chain club | Large size gate, gentler Slip penalty |
-| Conservation net | Stop the Snag Crew | Best SNAP rate, still releases |
+| Conservation net | Stop the Snag Crew | Best NET rate, still releases |
 | Pocket camera | Opening package, with the rod | Proof. No camera, no album page |
 | Club Polaroid | First club pin | Better proof, night shots |
 | Rowboat | Landing repair arc | Cross cuts; reach the Lost Swedish Pimple |
@@ -511,7 +512,7 @@ the overworld or as a battle passive.
 | --- | --- | --- |
 | Keep Still | Hide from the Valleybrook groundskeeper | Cattails break his line of sight |
 | Drop a Line | First successful cast at hole 9 | Unlocks fishing on a water tile |
-| The Snapshot | First fish photographed at hole 9 | SNAP command is understood, not grayed |
+| The Snapshot | First fish photographed at hole 9 | After a successful NET, the camera is understood to fire |
 | Read the Seam | Englehorn Creek old-timer | See hidden current encounter tiles |
 | Set the Hook | First club loss at the Sioux Valley Open, then a rematch lesson | +catch on the turn after a crit |
 | Drag Control | Elysian ski-boat rescue | Wild fish with high Pull no longer auto-snap |
@@ -635,7 +636,7 @@ Name your angler. Catch is already on hole 9 and starts unfriendly.
 
 One screen of Valleybrook Pond. Walk, talk to Zippy, cast with your kit,
 photograph a Bluegill, release it, save. **Exit test:** a stranger
-understands REEL / SLACK / SNAP, has a photo in the album, and can tell
+understands REEL / SLACK / NET, sees a photo after a landed net, and can tell
 the player apart from Catch.
 
 ### Phase 2 — Album UI + Catch's dare
@@ -702,8 +703,8 @@ changing the code.
 
 | Question | Default |
 | --- | --- |
-| Fish vs fish, or angler vs fish on the line? | Angler + kit vs fish. SNAP is the capture verb. Always release. |
-| Permadeath of caught fish? | No. Every successful SNAP releases the fish. The photo stays. |
+| Fish vs fish, or angler vs fish on the line? | Angler + kit vs fish. NET lands it; the camera fires after. Always release. |
+| Permadeath of caught fish? | No. Every successful NET releases the fish. The photo stays. |
 | Starter | Warped rod, 6 lb, hand net, worms, pocket camera |
 | Album | One page per species (plus later trophy shots) |
 | Level cap | 50 story, 70 postgame |
