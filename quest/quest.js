@@ -49,7 +49,7 @@
   };
 
   function starterKit() {
-    return { rod: "warped", line: "six", bait: null, net: "hand", camera: null };
+    return { rod: "warped", line: "six", bait: null, net: "hand", camera: "pocket" };
   }
 
   // . fairway  , rough  w water  b bank  T tree  h hide  s sand  C club  p path
@@ -121,8 +121,8 @@
   const KEEPER_DWELL = 48;
   const INTRO_PAGES = [
     "A package is on the porch at dawn. There is no note.",
-    "Inside: a warped spinning rod, a hand net, and six-pound line. That is all you inherited.",
-    "Fishing clubs run the lakes. Pictures or it never happened. No photo, they will not talk.",
+    "Inside: a warped spinning rod, a hand net, six-pound line, and a pocket camera.",
+    "Fishing clubs run the lakes. Pictures or it never happened. No photo, they will not let you in.",
     "The closest water is a pond on a golf course. Valleybrook, hole 9. That is your first hole.",
   ];
   const KEEPER_PATH = [
@@ -369,13 +369,12 @@
       game.talkedZippy = true;
       game.worms = 5;
       game.kit.bait = "worm";
-      game.kit.camera = "pocket";
       showDialog([
-        "ZIPPY: " + game.name + ". Worms. A pocket camera. Don't ask.",
-        "ZIPPY: Clubs want a picture, not a fish in a can.",
+        "ZIPPY: " + game.name + ". Worms. Don't ask.",
+        "ZIPPY: That camera in the package is how you get in. Clubs stamp a photo.",
         "ZIPPY: Press DOWN to the bank. Press Z to cast.",
         "ZIPPY: REEL once. Then SNAP. The fish goes back. The photo stays.",
-        "Got 5 WORMS and a POCKET CAMERA.",
+        "Got 5 WORMS.",
       ]);
       learnSkill("keepStill", "KEEP STILL", "Stay off the grass. He is mowing.");
       saveGame();
@@ -398,7 +397,7 @@
       return;
     }
     if (!game.kit.camera) {
-      showDialog(["You need a camera. Zippy has one."]);
+      showDialog(["Your pocket camera was in the package.", "Check KIT."]);
       return;
     }
     if (!game.kit.bait) {
@@ -602,6 +601,7 @@
       if (game.catchBond == null) game.catchBond = 0;
       if (game.cleared == null) game.cleared = false;
       if (!game.kit) game.kit = starterKit();
+      if (!game.kit.camera) game.kit.camera = "pocket";
       if (!game.album) game.album = [];
       if (game.skills && game.skills.theNet && !game.skills.snapshot) game.skills.snapshot = true;
       keeperTimer = 0;
@@ -642,7 +642,7 @@
       "You are in the cattails on the LEFT side of the screen.",
       "Press UP (arrow or D-pad). Stay on the left. Do not walk on the grass.",
       "The man in the trees is ZIPPY. Press Z or A when you reach him.",
-      "He has worms and a camera. Then you fish. One photo gets you in.",
+      "He has worms. You already have the camera. One photo gets you in.",
     ]);
   }
 
@@ -1086,8 +1086,17 @@
       px(40, 48, 48, 28, "#6b5428");
       px(48, 56, 32, 12, "#c4a35a");
       px(86, 62, 70, 4, "#8a6a3a");
+      px(92, 50, 14, 10, "#3a3a30");
+      px(95, 53, 8, 5, "#8aa8c8");
       text("A PACKAGE", 24, 16, "#f0e0a0", 8);
-    } else if (introIndex < 3) {
+    } else if (introIndex === 1) {
+      px(48, 52, 4, 40, "#6b5428");
+      px(44, 48, 12, 8, "#c4a35a");
+      px(160, 56, 28, 20, "#3a3a30");
+      px(166, 60, 16, 10, "#8aa8c8");
+      px(184, 62, 4, 4, "#d4a017");
+      text("ROD AND CAMERA", 24, 16, "#f0e0a0", 8);
+    } else if (introIndex === 2) {
       px(32, 40, 192, 56, "#3a2a18");
       px(40, 48, 176, 40, "#c4b8a0");
       text("NO PHOTO", 72, 56, "#8b3a2f", 8);

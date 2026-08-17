@@ -7,8 +7,8 @@ is skipped, the tool or skill does not exist yet.
 
 | After this scene | Rod / line / camera | Net / bait | Skill |
 | --- | --- | --- | --- |
-| Game start (Valleybrook Pond) | Warped spinning rod, 6 lb line | Hand net | — |
-| Talk to Zippy | Pocket camera | Worms | Keep Still |
+| Game start (Valleybrook Pond) | Warped spinning rod, 6 lb line, pocket camera | Hand net | — |
+| Talk to Zippy | — | Worms | Keep Still |
 | First cast at hole 9 | — | — | Drop a Line |
 | First Bluegill photographed | — | — | The Snapshot |
 | First Sioux Valley Open loss + lesson | — | — | Set the Hook |

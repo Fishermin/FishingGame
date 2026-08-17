@@ -186,7 +186,7 @@ sum, not a pet fish's stats.
 | Line | Tensile (line HP), stealth | 6 lb |
 | Bait | Hook, type attract | Worms (Zippy) |
 | Net | Scoop (SNAP chance), size cap | Hand net |
-| Camera | Proof (SNAP chance). No camera, no album page. | Pocket camera (Zippy) |
+| Camera | Proof (SNAP chance). No camera, no album page. | Pocket camera (in the package) |
 
 Levels 1–50 still apply to wild fish. Kit upgrades are story beats, not
 XP on a shiner.
@@ -257,8 +257,8 @@ A successful SNAP always:
 1. Writes a Field Guide page (the photograph)
 2. Releases the fish where it was caught
 
-There is no keep-in-the-can prompt. The album is the livewell. Clubs
-ask to see the book, not the bucket.
+There is no keep prompt. The album is the proof. Clubs ask to see the
+book, not a bucket of fish.
 
 Failed snaps play miss lines from the trip game (pelican, pontoon, Zippy
 knocks the net, a sheep in the pasture). Three failures in one battle
@@ -272,9 +272,9 @@ Target: **74 regular species + 5 river monsters = 79**. All freshwater.
 Midwest core first (the current 20), then the rest of the inland map.
 
 Starter pool is **kit**, not a pet fish. The opening loadout is the warped
-rod, 6 lb line, hand net, worms, and Zippy's pocket camera. Catch's dare
-at Valleybrook is "get a better picture than mine," not a type-advantage
-shiner.
+rod, 6 lb line, hand net, and the pocket camera that arrived in the same
+package. Zippy still supplies the worms. Catch's dare at Valleybrook is
+"get a better picture than mine," not a type-advantage shiner.
 
 The first photo the tutorial wants is a **Bluegill**. Bullhead and
 Largemouth remain early pond fish. At the Sioux Valley Open, Catch shows
@@ -353,11 +353,12 @@ one leaves a tool, a skill, a fish, or a permanent map change.
 
 ### 8.1 Main spine
 
-1. **The Warped Rod.** Inherit the rod. Name yourself. Sneak onto
-   Valleybrook Golf Course. Catch is already on hole 9 and does not want
-   company. The groundskeeper patrols the fairway. Zippy sells bait from
-   the trees.    Learn Keep Still, Drop a Line, and The Snapshot — and, if you
-   share the cattails long enough, Catch stops telling you to scram.
+1. **The Warped Rod.** Inherit the rod and a pocket camera. Name yourself.
+   Sneak onto Valleybrook Golf Course. Catch is already on hole 9 and does
+   not want company. The groundskeeper patrols the fairway. Zippy sells
+   bait from the trees. Learn Keep Still, Drop a Line, and The Snapshot —
+   and, if you share the cattails long enough, Catch stops telling you to
+   scram.
 2. **Sioux Valley Open.** First club event. The water is a pond in a farm
    pasture, full of sheep. Catch is the photo rival if friendship is still
    thin; if it has grown, he is a reluctant partner who still wants the
@@ -493,7 +494,7 @@ Slots: Rod, Line, Bait, Net, Camera, Vessel, Held lure.
 | Landing net | Elysian dockhand, after you return a spilled tackle box | Medium size gate |
 | Rubber trophy net | Horseshoe Chain club | Large size gate, gentler Slip penalty |
 | Conservation net | Stop the Snag Crew | Best SNAP rate, still releases |
-| Pocket camera | Zippy, Valleybrook | Proof. No camera, no album page |
+| Pocket camera | Opening package, with the rod | Proof. No camera, no album page |
 | Club Polaroid | First club pin | Better proof, night shots |
 | Rowboat | Landing repair arc | Cross cuts; reach the Lost Swedish Pimple |
 | Fish house | Ice pin | Horseshoe Chain winter hub |
